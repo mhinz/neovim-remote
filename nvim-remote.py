@@ -85,21 +85,21 @@ def main():
 
     if args.remote:
         for fname in args.remote:
-            nvim.command('edit {}'.format(fname))
+            nvim.command('edit {}'.format(fname.replace(" ", "\ ")))
 
     if args.remote_silent:
         pass
 
     if args.remote_wait:
         for fname in args.remote_wait:
-            nvim.command('edit {}'.format(fname))
+            nvim.command('edit {}'.format(fname.replace(" ", "\ ")))
 
     if args.remote_wait_silent:
         pass
 
     if args.remote_tab:
         for fname in args.remote_tab:
-            nvim.command('tabedit {}'.format(fname))
+            nvim.command('tabedit {}'.format(fname.replace(" ", "\ ")))
 
     if args.remote_send:
         for keys in args.remote_send:
