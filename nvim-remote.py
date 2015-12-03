@@ -37,7 +37,7 @@ def main():
     parser.add_argument('--remote-wait-silent', help="Same, don't complain if there is no server")
     parser.add_argument('--remote-tab',         help='As --remote but use tab page per file')
     parser.add_argument('--remote-send',        help='Send <keys> to a Vim server and exit')
-    parser.add_argument('--remote-expr',        help='Evaluate <expr> in a Vim server and print result ')
+    parser.add_argument('--remote-expr', action='append', help='Evaluate <expr> in a Vim server and print result ')
     args, unused = parser.parse_known_args()
 
     sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
@@ -54,6 +54,10 @@ def main():
     if args.remote:
         for fname in args.remote:
             nvim.command('edit {}'.format(fname))
+
+    if args.remote_expr:
+        for expr in args.remote_expr:
+            print(nvim.eval(expr))
 
     if unused:
         os.putenv('VIMRUNTIME', '/data/repo/neovim/runtime')
