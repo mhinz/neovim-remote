@@ -25,46 +25,75 @@ THE SOFTWARE.
 import sys
 import os
 import subprocess
+import platform
 import argparse
 
 from neovim import attach
 
+def parse_args():
+    usage  = '{} [arguments]'.format(sys.argv[0])
+    desc   = 'nvim wrapper that provides --remote and friends.'
+    epilog = 'Happy hacking!'
+    parser = argparse.ArgumentParser(usage=usage, description=desc, epilog=epilog)
+
+    parser.add_argument('--remote',
+        action='append',
+        metavar='<file>',
+        help='Edit <files> in a Neovim server.')
+    parser.add_argument('--remote-silent',
+        action='append',
+        metavar='<file>',
+        help='[Not implemented yet]')
+    parser.add_argument('--remote-wait',
+        action='append',
+        metavar='<file>',
+        help='Same as --remote.')
+    parser.add_argument('--remote-wait-silent',
+        action='append',
+        metavar='<file>',
+        help='[Not implemented yet]')
+    parser.add_argument('--remote-tab',
+        action='append',
+        metavar='<file>',
+        help='As --remote, but uses one tab page per file.')
+    parser.add_argument('--remote-send',
+        action='append',
+        metavar='<keys>',
+        help='Send <keys> to Neovim server.')
+    parser.add_argument('--remote-expr',
+        action='append',
+        metavar='<expr>',
+        help='Evaluate <expr> in Neovim server and print result.')
+    parser.add_argument('--terminal',
+        metavar='<termemu>',
+        help='Use the given terminal emulator to start a new server.')
+
+    return parser.parse_known_args()
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--remote', action='append', help='Edit <files> in a Vim server if possible')
-    parser.add_argument('--remote-silent',      help="Same, don't complain if there is no server")
-    parser.add_argument('--remote-wait', action='append', help='As --remote but wait for files to have been edited')
-    parser.add_argument('--remote-wait-silent', help="Same, don't complain if there is no server")
-    parser.add_argument('--remote-tab', action='append', help='As --remote but use tab page per file')
-    parser.add_argument('--remote-send', action='append', help='Send <keys> to a Vim server and exit')
-    parser.add_argument('--remote-expr', action='append', help='Evaluate <expr> in a Vim server and print result')
-    args, unused = parser.parse_known_args()
+    args, unused = parse_args()
 
     sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
     if sockpath is None:
         sockpath = '/tmp/nvimsocket'
 
     try:
-        nvim = attach('socket', path='/tmp/nvimsocket')
+        nvim = attach('socket', path=sockpath)
     except FileNotFoundError:
-        print("""Problem:  Can't find unix socket: /tmp/nvimsocket
-    Solution: Start a new server:  NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim""")
+        print("Can't find unix socket {}. Set NVIM_LISTEN_ADDRESS.".format(sockpath))
         sys.exit(1)
 
     if args.remote:
         for fname in args.remote:
             nvim.command('edit {}'.format(fname))
 
-    # Not implemented yet.
     if args.remote_silent:
         pass
 
-    # Hint: Same as --remote.
     if args.remote_wait:
         for fname in args.remote_wait:
             nvim.command('edit {}'.format(fname))
 
-    # Not implemented yet.
     if args.remote_wait_silent:
         pass
 
