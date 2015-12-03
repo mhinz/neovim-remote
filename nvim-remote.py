@@ -36,7 +36,7 @@ def main():
     parser.add_argument('--remote-wait', action='append', help='As --remote but wait for files to have been edited')
     parser.add_argument('--remote-wait-silent', help="Same, don't complain if there is no server")
     parser.add_argument('--remote-tab', action='append', help='As --remote but use tab page per file')
-    parser.add_argument('--remote-send',        help='Send <keys> to a Vim server and exit')
+    parser.add_argument('--remote-send', action='append', help='Send <keys> to a Vim server and exit')
     parser.add_argument('--remote-expr', action='append', help='Evaluate <expr> in a Vim server and print result')
     args, unused = parser.parse_known_args()
 
@@ -63,6 +63,10 @@ def main():
     if args.remote_tab:
         for fname in args.remote_tab:
             nvim.command('tabedit {}'.format(fname))
+
+    if args.remote_send:
+        for keys in args.remote_send:
+            nvim.input(keys)
 
     if args.remote_expr:
         for expr in args.remote_expr:
