@@ -55,10 +55,18 @@ def main():
         for fname in args.remote:
             nvim.command('edit {}'.format(fname))
 
+    # Not implemented yet.
+    if args.remote_silent:
+        pass
+
     # Hint: Same as --remote.
     if args.remote_wait:
         for fname in args.remote_wait:
             nvim.command('edit {}'.format(fname))
+
+    # Not implemented yet.
+    if args.remote_wait_silent:
+        pass
 
     if args.remote_tab:
         for fname in args.remote_tab:
