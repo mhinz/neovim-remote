@@ -33,11 +33,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--remote', action='append', help='Edit <files> in a Vim server if possible')
     parser.add_argument('--remote-silent',      help="Same, don't complain if there is no server")
-    parser.add_argument('--remote-wait',        help='As --remote but wait for files to have been edited')
+    parser.add_argument('--remote-wait', action='append', help='As --remote but wait for files to have been edited')
     parser.add_argument('--remote-wait-silent', help="Same, don't complain if there is no server")
     parser.add_argument('--remote-tab', action='append', help='As --remote but use tab page per file')
     parser.add_argument('--remote-send',        help='Send <keys> to a Vim server and exit')
-    parser.add_argument('--remote-expr', action='append', help='Evaluate <expr> in a Vim server and print result ')
+    parser.add_argument('--remote-expr', action='append', help='Evaluate <expr> in a Vim server and print result')
     args, unused = parser.parse_known_args()
 
     sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
@@ -53,6 +53,11 @@ def main():
 
     if args.remote:
         for fname in args.remote:
+            nvim.command('edit {}'.format(fname))
+
+    # Hint: Same as --remote.
+    if args.remote_wait:
+        for fname in args.remote_wait:
             nvim.command('edit {}'.format(fname))
 
     if args.remote_tab:
