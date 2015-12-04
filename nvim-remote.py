@@ -25,7 +25,6 @@ THE SOFTWARE.
 import sys
 import os
 import subprocess
-import platform
 import argparse
 
 from neovim import attach
@@ -62,31 +61,31 @@ def parse_args():
     parser.add_argument('--remote',
         action='append',
         metavar='<file>',
-        help='Edit <files> in a Neovim server. [ASYNC]')
+        help='open file in new buffer [ASYNC]')
     parser.add_argument('--remote-wait',
         action='append',
         metavar='<file>',
-        help='As --remote. [SYNC]')
+        help='as --remote [SYNC]')
     parser.add_argument('--remote-silent',
         action='append',
         metavar='<file>',
-        help="As --remote, but don't throw error if no server is found. [ASYNC]")
+        help="as --remote, but don't throw error if no server is found [ASYNC]")
     parser.add_argument('--remote-wait-silent',
         action='append',
         metavar='<file>',
-        help="As --remote, but don't throw error if no server is found. [SYNC]")
+        help="as --remote, but don't throw error if no server is found [SYNC]")
     parser.add_argument('--remote-tab',
         action='append',
         metavar='<file>',
-        help='As --remote, but opens a new tab. [SYNC]')
+        help='open file in new tab [SYNC]')
     parser.add_argument('--remote-send',
         action='append',
         metavar='<keys>',
-        help='Send <keys> to server. [SYNC]')
+        help='send keys to server [SYNC]')
     parser.add_argument('--remote-expr',
         action='append',
         metavar='<expr>',
-        help='Evaluate <expr> and print result. [SYNC]')
+        help='evaluate expression and print result [SYNC]')
 
     return parser.parse_known_args()
 
@@ -122,8 +121,14 @@ def main():
         for expr in args.remote_expr:
             print(n.server.eval(expr))
 
-    if unused:
-        subprocess.Popen(['/data/repo/neovim/build/bin/nvim'] + unused)
+    # If none of the wrapper arguments were given, fall back to normal nvim usage.
+    if all(x is None for x in vars(args).values()):
+        try:
+            # Run interactive shell in case 'nvim' is an alias.
+            subprocess.run([os.environ.get('SHELL'), '-ic', 'nvim ' + ' '.join(unused)])
+        except FileNotFoundError:
+            print("Not in $PATH: nvim")
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()
