@@ -89,23 +89,26 @@ def parse_args():
     parser.add_argument('--servername',
             metavar='<sock>',
             help='path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
-    parser.add_argument('--serverlist',
-            action='store_true',
-            help='simply prints $NVIM_LISTEN_ADDRESS')
 
     return parser.parse_known_args()
+
+
+def run_nvim(args=[]):
+    try:
+        # Run interactive shell in case 'nvim' is an alias.
+        subprocess.run([os.environ.get('SHELL'), '-ic', 'nvim ' + ' '.join(args)])
+    except FileNotFoundError:
+        print("Not in $PATH: nvim")
+        sys.exit(1)
 
 
 def main():
     args, unused = parse_args()
     sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
 
-    if args.serverlist:
-        if sockpath is not None:
-            print(sockpath)
-        sys.exit(0)
-
     if args.servername:
+        if len(list(filter(lambda x: x is not None, vars(args).values()))) == 1:
+            run_nvim()
         sockpath = args.servername
     else:
         if sockpath is None:
@@ -137,12 +140,7 @@ def main():
 
     # If none of the wrapper arguments were given, fall back to normal nvim usage.
     if all(x is None for x in vars(args).values()):
-        try:
-            # Run interactive shell in case 'nvim' is an alias.
-            subprocess.run([os.environ.get('SHELL'), '-ic', 'nvim ' + ' '.join(unused)])
-        except FileNotFoundError:
-            print("Not in $PATH: nvim")
-            sys.exit(1)
+        run_nvim(unused)
 
 if __name__ == '__main__':
     main()
