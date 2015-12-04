@@ -89,17 +89,25 @@ def parse_args():
     parser.add_argument('--servername',
             metavar='<sock>',
             help='path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
+    parser.add_argument('--serverlist',
+            action='store_true',
+            help='simply prints $NVIM_LISTEN_ADDRESS')
 
     return parser.parse_known_args()
 
 
 def main():
     args, unused = parse_args()
+    sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
+
+    if args.serverlist:
+        if sockpath is not None:
+            print(sockpath)
+        sys.exit(0)
 
     if args.servername:
         sockpath = args.servername
     else:
-        sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
         if sockpath is None:
             sockpath = '/tmp/nvimsocket'
 
