@@ -133,7 +133,7 @@ def main():
             n.server.input(keys)
     if args.remote_expr and n.attached():
         for expr in args.remote_expr:
-            print(n.server.eval(expr))
+            print(n.server.eval(expr).decode())
 
     # If none of the wrapper arguments were given, fall back to normal nvim usage.
     if all(x is None for x in vars(args).values()):
