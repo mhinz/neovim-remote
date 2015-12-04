@@ -33,14 +33,27 @@ $ curl -Lo ~/bin/nvim-remote.py https://raw.githubusercontent.com/mhinz/nvim-rem
 $ chmod 700 ~/bin/nvim-remote.py
 ```
 
-Usage
------
+Examples
+---------
 
-Imagine 2 windows running your favourite shell.
-
-Server window: `nvim-remote.py --servername /tmp/nvimsocket`
-
-Client window: `nvim-remote.py --servername /tmp/nvimsocket --remote file1 --remote file2`
+In one window, create the server instance:
+```
+$ nvim-remote.py --servername /tmp/nvimsocket
+```
+In another window do this:
+```shell
+$ # Spares us from using --servername all the time:
+$ export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket
+$ # Open 2 files in the server:
+$ nvim-remote.py --remote file1 --remote file2
+$ # Send keys to the current buffer of the server:
+$ # Enter insert mode, enter 'abc', and go back to normal mode again:
+$ nvim-remote.py --remote-send 'iabc<esc>'
+$ # Evaluate any VimL expression.
+$ # Get the absolute path to the server's current buffer:
+$ nvim-remote.py --remote-expr 'shellescape(expand("%:p"))'
+'/Users/mhi/.dotfiles/vim/vimrc'
+```
 
 **Hint**: Instead of specifying `--servername` all the time, you can also export
 `NVIM_LISTEN_ADDRESS` instead.
