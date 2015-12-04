@@ -15,6 +15,24 @@ starts `nvim` with all other arguments.
 Thus you could make this wrapper a real nvim replacement à la `alias
 nvim=nvim-remote.py`, if you like.
 
+Installation
+------------
+
+Assuming `~/bin` is in your `$PATH`
+
+**1)** Using the git repo:
+```
+$ mkdir -p ~/github
+$ git clone https://github.com/mhinz/nvim-remote.git ~/github/nvim-remote
+$ ln -s ~/github/nvim-remote/nvim-remote.py ~/bin/nvim-remote.py
+```
+
+**2)** Download the script directly:
+```
+$ curl -Lo ~/bin/nvim-remote.py https://raw.githubusercontent.com/mhinz/nvim-remote/master/nvim-remote.py
+$ chmod 700 ~/bin/nvim-remote.py
+```
+
 Usage
 -----
 
