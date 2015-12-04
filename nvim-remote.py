@@ -48,7 +48,7 @@ class Neovim():
             if silent:
                 return False
             else:
-                print("Can't find unix socket {}. Set NVIM_LISTEN_ADDRESS.".format(self.sockpath))
+                print("Can't find unix socket {}. Export $NVIM_LISTEN_ADDRESS or use --servername.".format(self.sockpath))
                 sys.exit(1)
 
 
@@ -59,33 +59,36 @@ def parse_args():
     parser = argparse.ArgumentParser(usage=usage, description=desc, epilog=epilog)
 
     parser.add_argument('--remote',
-        action='append',
-        metavar='<file>',
-        help='open file in new buffer [ASYNC]')
+            action='append',
+            metavar='<file>',
+            help='open file in new buffer [ASYNC]')
     parser.add_argument('--remote-wait',
-        action='append',
-        metavar='<file>',
-        help='as --remote [SYNC]')
+            action='append',
+            metavar='<file>',
+            help='as --remote [SYNC]')
     parser.add_argument('--remote-silent',
-        action='append',
-        metavar='<file>',
-        help="as --remote, but don't throw error if no server is found [ASYNC]")
+            action='append',
+            metavar='<file>',
+            help="as --remote, but don't throw error if no server is found [ASYNC]")
     parser.add_argument('--remote-wait-silent',
-        action='append',
-        metavar='<file>',
-        help="as --remote, but don't throw error if no server is found [SYNC]")
+            action='append',
+            metavar='<file>',
+            help="as --remote, but don't throw error if no server is found [SYNC]")
     parser.add_argument('--remote-tab',
-        action='append',
-        metavar='<file>',
-        help='open file in new tab [SYNC]')
+            action='append',
+            metavar='<file>',
+            help='open file in new tab [SYNC]')
     parser.add_argument('--remote-send',
-        action='append',
-        metavar='<keys>',
-        help='send keys to server [SYNC]')
+            action='append',
+            metavar='<keys>',
+            help='send keys to server [SYNC]')
     parser.add_argument('--remote-expr',
-        action='append',
-        metavar='<expr>',
-        help='evaluate expression and print result [SYNC]')
+            action='append',
+            metavar='<expr>',
+            help='evaluate expression and print result [SYNC]')
+    parser.add_argument('--servername',
+            metavar='<sock>',
+            help='path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
 
     return parser.parse_known_args()
 
@@ -93,9 +96,12 @@ def parse_args():
 def main():
     args, unused = parse_args()
 
-    sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
-    if sockpath is None:
-        sockpath = '/tmp/nvimsocket'
+    if args.servername:
+        sockpath = args.servername
+    else:
+        sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
+        if sockpath is None:
+            sockpath = '/tmp/nvimsocket'
 
     n = Neovim(sockpath)
 
