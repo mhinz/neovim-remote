@@ -107,9 +107,10 @@ def main():
     sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
 
     if args.servername:
-        if len(list(filter(lambda x: x is not None, vars(args).values()))) == 1:
-            run_nvim()
         sockpath = args.servername
+        if len(list(filter(lambda x: x is not None, vars(args).values()))) == 1:
+            os.environ['NVIM_LISTEN_ADDRESS'] = sockpath
+            run_nvim()
     else:
         if sockpath is None:
             sockpath = '/tmp/nvimsocket'
