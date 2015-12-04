@@ -30,6 +30,29 @@ import argparse
 
 from neovim import attach
 
+class Neovim():
+    """Thin wrapper around nvim.attach() for lazy attaching.
+
+    This helps handling the silent and non-silent arguments.
+    """
+    def __init__(self, sockpath):
+        self.sockpath = sockpath
+        self.server = None
+
+    def attached(self, silent=False):
+        if self.server is not None:
+            return True
+        try:
+            self.server = attach('socket', path=self.sockpath)
+            return True
+        except FileNotFoundError:
+            if silent:
+                return False
+            else:
+                print("Can't find unix socket {}. Set NVIM_LISTEN_ADDRESS.".format(self.sockpath))
+                sys.exit(1)
+
+
 def parse_args():
     usage  = '{} [arguments]'.format(sys.argv[0])
     desc   = 'nvim wrapper that provides --remote and friends.'
@@ -39,36 +62,34 @@ def parse_args():
     parser.add_argument('--remote',
         action='append',
         metavar='<file>',
-        help='Edit <files> in a Neovim server.')
-    parser.add_argument('--remote-silent',
-        action='append',
-        metavar='<file>',
-        help='[Not implemented yet]')
+        help='Edit <files> in a Neovim server. [ASYNC]')
     parser.add_argument('--remote-wait',
         action='append',
         metavar='<file>',
-        help='Same as --remote.')
+        help='As --remote. [SYNC]')
+    parser.add_argument('--remote-silent',
+        action='append',
+        metavar='<file>',
+        help="As --remote, but don't throw error if no server is found. [ASYNC]")
     parser.add_argument('--remote-wait-silent',
         action='append',
         metavar='<file>',
-        help='[Not implemented yet]')
+        help="As --remote, but don't throw error if no server is found. [SYNC]")
     parser.add_argument('--remote-tab',
         action='append',
         metavar='<file>',
-        help='As --remote, but uses one tab page per file.')
+        help='As --remote, but opens a new tab. [SYNC]')
     parser.add_argument('--remote-send',
         action='append',
         metavar='<keys>',
-        help='Send <keys> to Neovim server.')
+        help='Send <keys> to server. [SYNC]')
     parser.add_argument('--remote-expr',
         action='append',
         metavar='<expr>',
-        help='Evaluate <expr> in Neovim server and print result.')
-    parser.add_argument('--terminal',
-        metavar='<termemu>',
-        help='Use the given terminal emulator to start a new server.')
+        help='Evaluate <expr> and print result. [SYNC]')
 
     return parser.parse_known_args()
+
 
 def main():
     args, unused = parse_args()
@@ -77,40 +98,31 @@ def main():
     if sockpath is None:
         sockpath = '/tmp/nvimsocket'
 
-    try:
-        nvim = attach('socket', path=sockpath)
-    except FileNotFoundError:
-        print("Can't find unix socket {}. Set NVIM_LISTEN_ADDRESS.".format(sockpath))
-        sys.exit(1)
+    n = Neovim(sockpath)
 
-    if args.remote:
+    if args.remote_silent and n.attached(silent=True):
+        for fname in args.remote_silent:
+            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+    if args.remote_wait_silent and n.attached(silent=True):
+        for fname in args.remote_wait_silent:
+            n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+    if args.remote and n.attached():
         for fname in args.remote:
-            nvim.command('edit {}'.format(fname.replace(" ", "\ ")))
-
-    if args.remote_silent:
-        pass
-
-    if args.remote_wait:
+            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+    if args.remote_wait and n.attached():
         for fname in args.remote_wait:
-            nvim.command('edit {}'.format(fname.replace(" ", "\ ")))
-
-    if args.remote_wait_silent:
-        pass
-
-    if args.remote_tab:
+            n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+    if args.remote_tab and n.attached():
         for fname in args.remote_tab:
-            nvim.command('tabedit {}'.format(fname.replace(" ", "\ ")))
-
-    if args.remote_send:
+            n.server.command('tabedit {}'.format(fname.replace(" ", "\ ")))
+    if args.remote_send and n.attached():
         for keys in args.remote_send:
-            nvim.input(keys)
-
-    if args.remote_expr:
+            n.server.input(keys)
+    if args.remote_expr and n.attached():
         for expr in args.remote_expr:
-            print(nvim.eval(expr))
+            print(n.server.eval(expr))
 
     if unused:
-        os.putenv('VIMRUNTIME', '/data/repo/neovim/runtime')
         subprocess.Popen(['/data/repo/neovim/build/bin/nvim'] + unused)
 
 if __name__ == '__main__':
