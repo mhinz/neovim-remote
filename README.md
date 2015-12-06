@@ -34,7 +34,12 @@ $ ln -s ~/github/nvim-remote/nvim-remote.py ~/bin/nvim-remote.py
 
 **2b)** Download the script directly:
 ```
+$ # Or alternatively:
 $ curl -Lo ~/bin/nvim-remote.py https://raw.githubusercontent.com/mhinz/nvim-remote/master/nvim-remote.py
+```
+
+**3)**
+```
 $ chmod 700 ~/bin/nvim-remote.py
 ```
 
