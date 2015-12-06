@@ -137,7 +137,13 @@ def main():
             n.server.input(keys)
     if args.remote_expr and n.attached():
         for expr in args.remote_expr:
-            print(n.server.eval(expr).decode())
+            result = n.server.eval(expr)
+            if type(result) is bytes:
+                print(result.decode())
+            elif type(result) is list:
+                print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
+            elif type(result) is dict:
+                print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
 
     # If none of the wrapper arguments were given, fall back to normal nvim usage.
     if all(x is None for x in vars(args).values()):
