@@ -95,7 +95,6 @@ optional arguments:
   --remote-send <keys>  send keys to server [SYNC]
   --remote-expr <expr>  evaluate expression and print result [SYNC]
   --servername <sock>   path to unix socket (overrides $NVIM_LISTEN_ADDRESS)
-  --serverlist          simply prints $NVIM_LISTEN_ADDRESS
 
 Happy hacking!
 ```
