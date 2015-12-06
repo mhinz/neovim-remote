@@ -15,10 +15,19 @@ starts `nvim` with all other arguments.
 Thus you could make this wrapper a real nvim replacement à la `alias
 nvim=nvim-remote.py`, if you like.
 
+**Hint:** Technically every nvim instance is a server instance. If you want to
+use an already running nvim process as the server, use `:echo v:servername` to
+get the path to the unix socket used for communication. Afterwards do:
+```
+export NVIM_LISTEN_ADDRESS=/path/to/unix/socket
+```
+
+This way you can omit `--servername` in subsequent calls to nvim-remote.py.
+
 Installation
 ------------
 
-Assuming `~/bin` is in your `$PATH`
+Assuming `~/bin` is in your `$PATH`:
 
 **1)** Install the Neovim host for Python:
 ```
@@ -64,9 +73,6 @@ $ # Get the absolute path to the server's current buffer:
 $ nvim-remote.py --remote-expr 'shellescape(expand("%:p"))'
 '/Users/mhi/.dotfiles/vim/vimrc'
 ```
-
-**Hint**: Instead of specifying `--servername` all the time, you can also export
-`NVIM_LISTEN_ADDRESS` instead.
 
 The help shows all supported arguments:
 ```
