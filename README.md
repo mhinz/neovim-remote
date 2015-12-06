@@ -70,8 +70,10 @@ $ # Enter insert mode, enter 'abc', and go back to normal mode again:
 $ nvim-remote.py --remote-send 'iabc<esc>'
 $ # Evaluate any VimL expression.
 $ # Get the absolute path to the server's current buffer:
-$ nvim-remote.py --remote-expr 'shellescape(expand("%:p"))'
-'/Users/mhi/.dotfiles/vim/vimrc'
+$ nvim-remote.py --remote-expr "join(sort(map(filter(range(bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')), "\""\n"\"")"
+.config/git/config
+vim/vimrc
+zsh/.zprofile
 ```
 
 The help shows all supported arguments:
