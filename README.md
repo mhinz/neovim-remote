@@ -69,7 +69,7 @@ $ # Send keys to the current buffer of the server:
 $ # Enter insert mode, enter 'abc', and go back to normal mode again:
 $ nvim-remote.py --remote-send 'iabc<esc>'
 $ # Evaluate any VimL expression.
-$ # Get the absolute path to the server's current buffer:
+$ # Get all listed buffers:
 $ nvim-remote.py --remote-expr "join(sort(map(filter(range(bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')), "\""\n"\"")"
 .config/git/config
 vim/vimrc
