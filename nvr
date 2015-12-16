@@ -73,6 +73,9 @@ def parse_args():
             epilog          = epilog,
             description     = desc)
 
+    # The following options are similar to their vim equivalents,
+    # but work on the remote instance instead.
+
     parser.add_argument('-o',
             action  = 'append',
             metavar = '<files>',
@@ -81,39 +84,38 @@ def parse_args():
             action  = 'append',
             metavar = '<files>',
             help    = 'open files via :vsplit')
-    parser.add_argument('-p',
-            action  = 'append',
-            metavar = '<files>',
-            help    = 'open files via :tabedit')
+
+    # The following options exactly emulate their vim equivalents.
 
     parser.add_argument('--remote',
             action  = 'append',
-            metavar = '<file>',
-            help    = 'open file in new buffer [ASYNC]')
+            metavar = '<files>',
+            help    = 'open files via :edit')
     parser.add_argument('--remote-wait',
             action  = 'append',
-            metavar = '<file>',
-            help    = 'as --remote [SYNC]')
+            metavar = '<files>',
+            help    = 'as --remote')
     parser.add_argument('--remote-silent',
             action  = 'append',
-            metavar = '<file>',
-            help    = "as --remote, but don't throw error if no server is found [ASYNC]")
+            metavar = '<files>',
+            help    = "as --remote, but don't throw error if no server is found")
     parser.add_argument('--remote-wait-silent',
             action  = 'append',
-            metavar = '<file>',
-            help    = "as --remote, but don't throw error if no server is found [SYNC]")
-    parser.add_argument('--remote-tab',
+            metavar = '<files>',
+            help    = "as --remote, but don't throw error if no server is found")
+    parser.add_argument('--remote-tab', '-p',
             action  = 'append',
-            metavar = '<file>',
-            help    = 'open file in new tab [SYNC]')
+            metavar = '<files>',
+            help    = 'open files via :tabedit')
     parser.add_argument('--remote-send',
             action  = 'append',
             metavar = '<keys>',
-            help    = 'send keys to server [SYNC]')
+            help    = 'send key presses')
     parser.add_argument('--remote-expr',
-            action  = 'append',
-            metavar = '<expr>',
-            help    = 'evaluate expression and print result [SYNC]')
+            action  ='append',
+            nargs   = '+',
+            metavar = '<exprs>',
+            help    = 'evaluate expressions in server and print result')
     parser.add_argument('--servername',
             metavar = '<sock>',
             help    = 'path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
@@ -145,23 +147,6 @@ def main():
 
     n = Neovim(sockpath)
 
-    # The following options are similar to their vim equivalents,
-    # but work on the remote instance instead.
-
-    if args.o and n.attached():
-        for fname in args.o:
-            n.server.command('split {}'.format(fname.replace(" ", "\ ")), async=True)
-
-    if args.O and n.attached():
-        for fname in args.O:
-            n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
-
-    if args.p and n.attached():
-        for fname in args.p:
-            n.server.command('tabedit {}'.format(fname.replace(" ", "\ ")), async=True)
-
-    # The following options exactly emulate their vim equivalents.
-
     if args.remote_silent and n.attached(silent=True):
         for fname in args.remote_silent:
             n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
@@ -187,7 +172,7 @@ def main():
             n.server.input(keys)
 
     if args.remote_expr and n.attached():
-        for expr in args.remote_expr:
+        for expr in args.remote_expr[0]:
             result = n.server.eval(expr)
             if type(result) is bytes:
                 print(result.decode())
@@ -197,6 +182,14 @@ def main():
                 print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
             else:
                 print(result)
+
+    if args.o and n.attached():
+        for fname in args.o:
+            n.server.command('split {}'.format(fname.replace(" ", "\ ")), async=True)
+
+    if args.O and n.attached():
+        for fname in args.O:
+            n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
 
     if unused and n.attached(silent=True):
         for fname in unused:
