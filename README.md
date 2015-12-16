@@ -1,6 +1,13 @@
 neovim-remote
 -------------
 
+- [Intro](#intro)
+- [Installation](#installation)
+- [Examples](#examples)
+- [Demos](#demos)
+
+## Intro
+
 Neovim was rewritten to be more modular than Vim. It comes with a fancy API that
 lead to reduced code size in the core, but also obsoleted some often used
 features.
@@ -23,8 +30,7 @@ Since `$NVIM_LISTEN_ADDRESS` is implicitely set by each nvim instance, you can
 call **nvr** from within Neovim (`:terminal`!) without specifying
 `--servername` either.
 
-Installation
-------------
+## Installation
 
 Assuming `~/bin` is in your `$PATH`:
 
@@ -51,8 +57,7 @@ $ curl -Lo ~/bin/nvr https://raw.githubusercontent.com/mhinz/neovim-remote/maste
 $ chmod 700 ~/bin/nvr
 ```
 
-Examples
----------
+## Examples
 
 In one window, create the server instance:
 ```
@@ -75,41 +80,14 @@ vim/vimrc
 zsh/.zprofile
 ```
 
-The help shows all supported arguments:
-```
-$ nvr -h
-usage: nvr [arguments]
+See `nvr -h` for all options.
 
-Helper tool for nvim that provides --remote and friends.
+## Demos
 
-All unused arguments will be implicitely fed to --remote-silent.
-Thus the following two lines are equivalent:
+(Click the GIFs to watch them fullscreen.)
 
-    $ nvr --remote-silent foo bar quux
-    $ nvr foo bar quux
+Using nvr from a different window (another tmux pane in this case):
+![Demo 1](https://github.com/mhinz/neovim-remote/raw/master/demos/demo1.gif)
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -l                    change to previous window via ":wincmd p"
-  -o <files>            open files via ":split"
-  -O <files>            open files via ":vsplit"
-  --remote <files>      open files via ":edit"
-  --remote-wait <files>
-                        as --remote
-  --remote-silent <files>
-                        as --remote, but don't throw error if no server is
-                        found
-  --remote-wait-silent <files>
-                        as --remote, but don't throw error if no server is
-                        found
-  --remote-tab <files>, -p <files>
-                        open files via ":tabedit"
-  --remote-send <keys>  send key presses
-  --remote-expr <exprs> [<exprs> ...]
-                        evaluate expressions in server and print result
-  --servername <sock>   path to unix socket (overrides $NVIM_LISTEN_ADDRESS)
-  --serverlist          prints socket path to be used
-
-Happy hacking!
-```
-
+Using nvr from within Neovim:
+![Demo 2](https://github.com/mhinz/neovim-remote/raw/master/demos/demo2.gif)
