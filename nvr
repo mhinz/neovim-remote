@@ -186,7 +186,12 @@ def main():
 
     if args.remote_expr and n.attached():
         for expr in args.remote_expr[0]:
-            result = n.server.eval(expr)
+            result = ''
+            try:
+                result = n.server.eval(expr)
+            except:
+                print('Evaluation failed: ' + expr)
+                continue
             if type(result) is bytes:
                 print(result.decode())
             elif type(result) is list:
