@@ -56,7 +56,7 @@ Examples
 
 In one window, create the server instance:
 ```
-$ nvr --servername /tmp/nvimsocket
+$ NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
 ```
 In another window do this:
 ```shell
