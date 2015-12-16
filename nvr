@@ -77,6 +77,14 @@ def parse_args():
             action  = 'append',
             metavar = '<files>',
             help    = 'open files via :split')
+    parser.add_argument('-O',
+            action  = 'append',
+            metavar = '<files>',
+            help    = 'open files via :vsplit')
+    parser.add_argument('-p',
+            action  = 'append',
+            metavar = '<files>',
+            help    = 'open files via :tabedit')
 
     parser.add_argument('--remote',
             action  = 'append',
@@ -143,6 +151,14 @@ def main():
     if args.o and n.attached():
         for fname in args.o:
             n.server.command('split {}'.format(fname.replace(" ", "\ ")), async=True)
+
+    if args.O and n.attached():
+        for fname in args.O:
+            n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
+
+    if args.p and n.attached():
+        for fname in args.p:
+            n.server.command('tabedit {}'.format(fname.replace(" ", "\ ")), async=True)
 
     # The following options exactly emulate their vim equivalents.
 
