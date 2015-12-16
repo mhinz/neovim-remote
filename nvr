@@ -73,6 +73,11 @@ def parse_args():
             epilog          = epilog,
             description     = desc)
 
+    parser.add_argument('-o',
+            action='append',
+            metavar='<files>',
+            help='open files via :split')
+
     parser.add_argument('--remote',
             action='append',
             metavar='<file>',
@@ -131,6 +136,15 @@ def main():
             sockpath = '/tmp/nvimsocket'
 
     n = Neovim(sockpath)
+
+    # The following options are similar to their vim equivalents,
+    # but work on the remote instance instead.
+
+    if args.o and n.attached():
+        for fname in args.o:
+            n.server.command('split {}'.format(fname.replace(" ", "\ ")), async=True)
+
+    # The following options exactly emulate their vim equivalents.
 
     if args.remote_silent and n.attached(silent=True):
         for fname in args.remote_silent:
