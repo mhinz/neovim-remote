@@ -37,7 +37,7 @@ class Neovim():
     """
     def __init__(self, sockpath):
         self.sockpath = sockpath
-        self.server = None
+        self.server   = None
 
     def attached(self, silent=False):
         if self.server is not None:
@@ -74,41 +74,41 @@ def parse_args():
             description     = desc)
 
     parser.add_argument('-o',
-            action='append',
-            metavar='<files>',
-            help='open files via :split')
+            action  = 'append',
+            metavar = '<files>',
+            help    = 'open files via :split')
 
     parser.add_argument('--remote',
-            action='append',
-            metavar='<file>',
-            help='open file in new buffer [ASYNC]')
+            action  = 'append',
+            metavar = '<file>',
+            help    = 'open file in new buffer [ASYNC]')
     parser.add_argument('--remote-wait',
-            action='append',
-            metavar='<file>',
-            help='as --remote [SYNC]')
+            action  = 'append',
+            metavar = '<file>',
+            help    = 'as --remote [SYNC]')
     parser.add_argument('--remote-silent',
-            action='append',
-            metavar='<file>',
-            help="as --remote, but don't throw error if no server is found [ASYNC]")
+            action  = 'append',
+            metavar = '<file>',
+            help    = "as --remote, but don't throw error if no server is found [ASYNC]")
     parser.add_argument('--remote-wait-silent',
-            action='append',
-            metavar='<file>',
-            help="as --remote, but don't throw error if no server is found [SYNC]")
+            action  = 'append',
+            metavar = '<file>',
+            help    = "as --remote, but don't throw error if no server is found [SYNC]")
     parser.add_argument('--remote-tab',
-            action='append',
-            metavar='<file>',
-            help='open file in new tab [SYNC]')
+            action  = 'append',
+            metavar = '<file>',
+            help    = 'open file in new tab [SYNC]')
     parser.add_argument('--remote-send',
-            action='append',
-            metavar='<keys>',
-            help='send keys to server [SYNC]')
+            action  = 'append',
+            metavar = '<keys>',
+            help    = 'send keys to server [SYNC]')
     parser.add_argument('--remote-expr',
-            action='append',
-            metavar='<expr>',
-            help='evaluate expression and print result [SYNC]')
+            action  = 'append',
+            metavar = '<expr>',
+            help    = 'evaluate expression and print result [SYNC]')
     parser.add_argument('--servername',
-            metavar='<sock>',
-            help='path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
+            metavar = '<sock>',
+            help    = 'path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
 
     return parser.parse_known_args()
 
@@ -149,21 +149,27 @@ def main():
     if args.remote_silent and n.attached(silent=True):
         for fname in args.remote_silent:
             n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+
     if args.remote_wait_silent and n.attached(silent=True):
         for fname in args.remote_wait_silent:
             n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+
     if args.remote and n.attached():
         for fname in args.remote:
             n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+
     if args.remote_wait and n.attached():
         for fname in args.remote_wait:
             n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+
     if args.remote_tab and n.attached():
         for fname in args.remote_tab:
             n.server.command('tabedit {}'.format(fname.replace(" ", "\ ")))
+
     if args.remote_send and n.attached():
         for keys in args.remote_send:
             n.server.input(keys)
+
     if args.remote_expr and n.attached():
         for expr in args.remote_expr:
             result = n.server.eval(expr)
