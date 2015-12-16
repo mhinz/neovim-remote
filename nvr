@@ -25,6 +25,7 @@ THE SOFTWARE.
 import sys
 import os
 import subprocess
+import textwrap
 import argparse
 
 from neovim import attach
@@ -53,10 +54,24 @@ class Neovim():
 
 
 def parse_args():
-    usage  = '{} [arguments]'.format(sys.argv[0])
-    desc   = 'Helper tool for nvim that provides --remote and friends.'
-    epilog = 'Happy hacking!'
-    parser = argparse.ArgumentParser(usage=usage, description=desc, epilog=epilog)
+    form_class = argparse.RawDescriptionHelpFormatter
+    usage      = '{} [arguments]'.format(sys.argv[0])
+    epilog     = 'Happy hacking!'
+    desc       = textwrap.dedent("""
+        Helper tool for nvim that provides --remote and friends.
+
+        All unused arguments will be implicitely fed to --remote-silent.
+        Thus the following two lines are equivalent:
+
+            $ nvr --remote-silent foo bar quux
+            $ nvr foo bar quux
+    """)
+
+    parser = argparse.ArgumentParser(
+            formatter_class = form_class,
+            usage           = usage,
+            epilog          = epilog,
+            description     = desc)
 
     parser.add_argument('--remote',
             action='append',
@@ -145,7 +160,9 @@ def main():
             elif type(result) is dict:
                 print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
 
-    print(*map(lambda x: 'Unknown argument: '+x, unused), sep='\n')
+    if unused and n.attached(silent=True):
+        for fname in unused:
+            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
 
 
 if __name__ == '__main__':

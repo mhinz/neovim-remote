@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
-- CHANGELOG.md according to [keepachangelog.com](http://keepachangelog.com).
+- `CHANGELOG.md` according to [keepachangelog.com](http://keepachangelog.com).
 
 ### Changed
-- Renamed "nvim-remote.py" to "nvr" for convenience.
+- Renamed `nvim-remote.py` to `nvr` for convenience.
 - "nvr" is no real wrapper anymore. This is done for implementing more useful
   flags that act slight different than their nvim equivalents in the future.
+- Unused arguments are fed to `--remote-silent`.
 
 ## [1.0] - 2015-12-16
 First release!
