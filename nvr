@@ -159,6 +159,8 @@ def main():
                 print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
             elif type(result) is dict:
                 print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
+            else:
+                print(result)
 
     if unused and n.attached(silent=True):
         for fname in unused:
