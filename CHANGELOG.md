@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Option: `-o`
 - Option: `-O`
 - Option: `-p`
+- Option: `-l`
 
 ### Changed
 - Renamed `nvim-remote.py` to `nvr` for convenience.

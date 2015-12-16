@@ -76,21 +76,24 @@ def parse_args():
     # The following options are similar to their vim equivalents,
     # but work on the remote instance instead.
 
+    parser.add_argument('-l',
+            action  = 'store_true',
+            help    = 'change to previous window via ":wincmd p"')
     parser.add_argument('-o',
             action  = 'append',
             metavar = '<files>',
-            help    = 'open files via :split')
+            help    = 'open files via ":split"')
     parser.add_argument('-O',
             action  = 'append',
             metavar = '<files>',
-            help    = 'open files via :vsplit')
+            help    = 'open files via ":vsplit"')
 
     # The following options exactly emulate their vim equivalents.
 
     parser.add_argument('--remote',
             action  = 'append',
             metavar = '<files>',
-            help    = 'open files via :edit')
+            help    = 'open files via ":edit"')
     parser.add_argument('--remote-wait',
             action  = 'append',
             metavar = '<files>',
@@ -106,7 +109,7 @@ def parse_args():
     parser.add_argument('--remote-tab', '-p',
             action  = 'append',
             metavar = '<files>',
-            help    = 'open files via :tabedit')
+            help    = 'open files via ":tabedit"')
     parser.add_argument('--remote-send',
             action  = 'append',
             metavar = '<keys>',
@@ -153,6 +156,9 @@ def main():
             print(sockpath)
 
     n = Neovim(sockpath)
+
+    if args.l and n.attached(silent=True):
+        n.server.command('wincmd p', async=True)
 
     if args.remote_silent and n.attached(silent=True):
         for fname in args.remote_silent:
