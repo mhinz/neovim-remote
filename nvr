@@ -119,6 +119,9 @@ def parse_args():
     parser.add_argument('--servername',
             metavar = '<sock>',
             help    = 'path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
+    parser.add_argument('--serverlist',
+            action  = 'store_true',
+            help    = 'prints socket path to be used')
 
     return parser.parse_known_args()
 
@@ -144,6 +147,10 @@ def main():
     else:
         if sockpath is None:
             sockpath = '/tmp/nvimsocket'
+
+    if args.serverlist:
+        if sockpath is not None:
+            print(sockpath)
 
     n = Neovim(sockpath)
 

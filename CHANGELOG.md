@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - `CHANGELOG.md` according to [keepachangelog.com](http://keepachangelog.com).
+- Option: `--serverlist`
 
 ### Changed
 - Renamed `nvim-remote.py` to `nvr` for convenience.
