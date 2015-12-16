@@ -54,7 +54,7 @@ class Neovim():
 
 def parse_args():
     usage  = '{} [arguments]'.format(sys.argv[0])
-    desc   = 'nvim wrapper that provides --remote and friends.'
+    desc   = 'Helper tool for nvim that provides --remote and friends.'
     epilog = 'Happy hacking!'
     parser = argparse.ArgumentParser(usage=usage, description=desc, epilog=epilog)
 
