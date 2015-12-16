@@ -82,20 +82,33 @@ usage: nvr [arguments]
 
 Helper tool for nvim that provides --remote and friends.
 
+All unused arguments will be implicitely fed to --remote-silent.
+Thus the following two lines are equivalent:
+
+    $ nvr --remote-silent foo bar quux
+    $ nvr foo bar quux
+
 optional arguments:
   -h, --help            show this help message and exit
-  --remote <file>       open file in new buffer [ASYNC]
-  --remote-wait <file>  as --remote [SYNC]
-  --remote-silent <file>
+  -l                    change to previous window via ":wincmd p"
+  -o <files>            open files via ":split"
+  -O <files>            open files via ":vsplit"
+  --remote <files>      open files via ":edit"
+  --remote-wait <files>
+                        as --remote
+  --remote-silent <files>
                         as --remote, but don't throw error if no server is
-                        found [ASYNC]
-  --remote-wait-silent <file>
+                        found
+  --remote-wait-silent <files>
                         as --remote, but don't throw error if no server is
-                        found [SYNC]
-  --remote-tab <file>   open file in new tab [SYNC]
-  --remote-send <keys>  send keys to server [SYNC]
-  --remote-expr <expr>  evaluate expression and print result [SYNC]
+                        found
+  --remote-tab <files>, -p <files>
+                        open files via ":tabedit"
+  --remote-send <keys>  send key presses
+  --remote-expr <exprs> [<exprs> ...]
+                        evaluate expressions in server and print result
   --servername <sock>   path to unix socket (overrides $NVIM_LISTEN_ADDRESS)
+  --serverlist          prints socket path to be used
 
 Happy hacking!
 ```
