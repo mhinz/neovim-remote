@@ -160,6 +160,10 @@ def main():
     if args.l and n.attached(silent=True):
         n.server.command('wincmd p', async=True)
 
+    if unused and n.attached(silent=True):
+        for fname in unused:
+            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+
     if args.remote_silent and n.attached(silent=True):
         for fname in args.remote_silent:
             n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
@@ -208,11 +212,6 @@ def main():
     if args.O and n.attached():
         for fname in args.O:
             n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
-
-    if unused and n.attached(silent=True):
-        for fname in unused:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
-
 
 if __name__ == '__main__':
     main()
