@@ -8,27 +8,18 @@ neovim-remote
 
 ## Intro
 
-Neovim was rewritten to be more modular than Vim. It comes with a fancy API that
-lead to reduced code size in the core, but also obsoleted some often used
-features.
+**nvr** is a tool that helps controlling nvim processes.
 
-One of those features is the `--remote` family of command-line arguments, which
-is used to communicate with server instances.
+It basically does two things:
 
-But fear no more! The **nvr** helper tool emulates these *missing* arguments.
+1. adds back the `--remote` family of options (see `man vim`)
+1. helps controlling the current nvim from within `:terminal`
 
-**Hint:** Technically every nvim instance is a server instance. If you want to
-use an already running nvim process as the server, use `:echo v:servername` to
-get the path to the unix socket used for communication. Afterwards do:
-```
-export NVIM_LISTEN_ADDRESS=/path/to/unix/socket
-```
+To target a certain nvim process, you either use the `--servername` option or
+set the environment variable `$NVIM_LISTEN_ADDRESS`.
 
-This way you can omit `--servername` in subsequent calls to **nvr**.
-
-Since `$NVIM_LISTEN_ADDRESS` is implicitely set by each nvim instance, you can
-call **nvr** from within Neovim (`:terminal`!) without specifying
-`--servername` either.
+Since `$NVIM_LISTEN_ADDRESS` is implicitely set by each nvim process, you can
+call **nvr** from within Neovim (`:terminal`) without specifying `--servername`.
 
 ## Installation
 
@@ -59,7 +50,7 @@ $ chmod 700 ~/bin/nvr
 
 ## Examples
 
-In one window, create the server instance:
+In one window, create the server process:
 ```
 $ NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
 ```
