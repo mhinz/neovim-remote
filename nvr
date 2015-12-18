@@ -30,6 +30,7 @@ import argparse
 
 from neovim import attach
 
+
 class Neovim():
     """Thin wrapper around nvim.attach() for lazy attaching.
 
@@ -129,24 +130,12 @@ def parse_args():
     return parser.parse_known_args()
 
 
-def run_nvim(args=[]):
-    try:
-        # Run interactive shell in case 'nvim' is an alias.
-        subprocess.run([os.environ.get('SHELL'), '-ic', 'nvim ' + ' '.join(args)])
-    except FileNotFoundError:
-        print("Not in $PATH: nvim")
-        sys.exit(1)
-
-
 def main():
     args, unused = parse_args()
     sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
 
     if args.servername:
         sockpath = args.servername
-        if len(list(filter(lambda x: x is not None, vars(args).values()))) == 1:
-            os.environ['NVIM_LISTEN_ADDRESS'] = sockpath
-            run_nvim()
     else:
         if sockpath is None:
             sockpath = '/tmp/nvimsocket'
@@ -212,6 +201,7 @@ def main():
     if args.O and n.attached():
         for fname in args.O:
             n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
+
 
 if __name__ == '__main__':
     main()
