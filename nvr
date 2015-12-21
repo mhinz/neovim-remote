@@ -146,61 +146,67 @@ def main():
 
     n = Neovim(sockpath)
 
-    if args.l and n.attached(silent=True):
-        n.server.command('wincmd p', async=True)
+    rep_spaces = lambda x: x.replace(" ", "\ ")
 
-    if unused and n.attached(silent=True):
-        for fname in unused:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+    if n.attached(silent=True):
+        command = n.server.command
+        if args.l:
+            command('wincmd p', async=True)
 
-    if args.remote_silent and n.attached(silent=True):
-        for fname in args.remote_silent:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+        if unused:
+            for fname in unused:
+                command('edit {}'.format(rep_spaces(fname)), async=True)
 
-    if args.remote_wait_silent and n.attached(silent=True):
-        for fname in args.remote_wait_silent:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+        if args.remote_silent:
+            for fname in args.remote_silent:
+                command('edit {}'.format(rep_spaces(fname)), async=True)
 
-    if args.remote and n.attached():
-        for fname in args.remote:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+        if args.remote_wait_silent:
+            for fname in args.remote_wait_silent:
+                command('edit {}'.format(rep_spaces(fname)))
 
-    if args.remote_wait and n.attached():
-        for fname in args.remote_wait:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+    if n.attached():
+        command = n.server.command
+        if args.remote:
+            for fname in args.remote:
+                command('edit {}'.format(rep_spaces(fname)), async=True)
 
-    if args.remote_tab and n.attached():
-        for fname in args.remote_tab:
-            n.server.command('tabedit {}'.format(fname.replace(" ", "\ ")))
+        if args.remote_wait:
+            for fname in args.remote_wait:
+                command('edit {}'.format(rep_spaces(fname)))
 
-    if args.remote_send and n.attached():
-        for keys in args.remote_send:
-            n.server.input(keys)
+        if args.remote_tab:
+            for fname in args.remote_tab:
+                command('tabedit {}'.format(rep_spaces(fname)))
 
-    if args.remote_expr and n.attached():
-        for expr in args.remote_expr[0]:
-            result = ''
-            try:
-                result = n.server.eval(expr)
-            except:
-                print('Evaluation failed: ' + expr)
-                continue
-            if type(result) is bytes:
-                print(result.decode())
-            elif type(result) is list:
-                print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
-            elif type(result) is dict:
-                print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
-            else:
-                print(result)
+        if args.remote_send:
+            for keys in args.remote_send:
+                n.server.input(keys)
 
-    if args.o and n.attached():
-        for fname in args.o:
-            n.server.command('split {}'.format(fname.replace(" ", "\ ")), async=True)
+        if args.remote_expr:
+            for expr in args.remote_expr[0]:
+                result = ''
+                try:
+                    result = n.server.eval(expr)
+                except:
+                    print('Evaluation failed: ' + expr)
+                    continue
+                if type(result) is bytes:
+                    print(result.decode())
+                elif type(result) is list:
+                    print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
+                elif type(result) is dict:
+                    print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
+                else:
+                    print(result)
 
-    if args.O and n.attached():
-        for fname in args.O:
-            n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
+        if args.o:
+            for fname in args.o:
+                command('split {}'.format(rep_spaces(fname)), async=True)
+
+        if args.O:
+            for fname in args.O:
+                command('vsplit {}'.format(rep_spaces(fname)), async=True)
 
 
 if __name__ == '__main__':
