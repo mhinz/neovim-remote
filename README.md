@@ -1,5 +1,4 @@
-neovim-remote
--------------
+![Logo](https://github.com/mhinz/neovim-remote/raw/master/pictures/nvr-logo.png)
 
 - [Intro](#intro)
 - [Installation](#installation)
@@ -78,7 +77,7 @@ See `nvr -h` for all options.
 (Click the GIFs to watch them fullscreen.)
 
 Using nvr from a different window (another tmux pane in this case):
-![Demo 1](https://github.com/mhinz/neovim-remote/raw/master/demos/demo1.gif)
+![Demo 1](https://github.com/mhinz/neovim-remote/raw/master/pictures/demo1.gif)
 
 Using nvr from within Neovim:
-![Demo 2](https://github.com/mhinz/neovim-remote/raw/master/demos/demo2.gif)
+![Demo 2](https://github.com/mhinz/neovim-remote/raw/master/pictures/demo2.gif)
