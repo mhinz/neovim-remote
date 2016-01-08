@@ -129,6 +129,8 @@ def parse_args():
 
     return parser.parse_known_args()
 
+def prepare_filename(fname):
+    return os.path.abspath(fname).replace(" ", "\ ")
 
 def main():
     args, unused = parse_args()
@@ -151,27 +153,27 @@ def main():
 
     if unused and n.attached(silent=True):
         for fname in unused:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+            n.server.command('edit {}'.format(prepare_filename(fname)), async=True)
 
     if args.remote_silent and n.attached(silent=True):
         for fname in args.remote_silent:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+            n.server.command('edit {}'.format(prepare_filename(fname)), async=True)
 
     if args.remote_wait_silent and n.attached(silent=True):
         for fname in args.remote_wait_silent:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+            n.server.command('edit {}'.format(prepare_filename(fname)))
 
     if args.remote and n.attached():
         for fname in args.remote:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")), async=True)
+            n.server.command('edit {}'.format(prepare_filename(fname)), async=True)
 
     if args.remote_wait and n.attached():
         for fname in args.remote_wait:
-            n.server.command('edit {}'.format(fname.replace(" ", "\ ")))
+            n.server.command('edit {}'.format(prepare_filename(fname)))
 
     if args.remote_tab and n.attached():
         for fname in args.remote_tab:
-            n.server.command('tabedit {}'.format(fname.replace(" ", "\ ")))
+            n.server.command('tabedit {}'.format(prepare_filename(fname)))
 
     if args.remote_send and n.attached():
         for keys in args.remote_send:
@@ -196,11 +198,11 @@ def main():
 
     if args.o and n.attached():
         for fname in args.o:
-            n.server.command('split {}'.format(fname.replace(" ", "\ ")), async=True)
+            n.server.command('split {}'.format(prepare_filename(fname)), async=True)
 
     if args.O and n.attached():
         for fname in args.O:
-            n.server.command('vsplit {}'.format(fname.replace(" ", "\ ")), async=True)
+            n.server.command('vsplit {}'.format(prepare_filename(fname)), async=True)
 
 
 if __name__ == '__main__':
