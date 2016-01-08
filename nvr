@@ -127,6 +127,10 @@ def parse_args():
             action  = 'store_true',
             help    = 'prints socket path to be used')
 
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+
     return parser.parse_known_args()
 
 def prepare_filename(fname):
