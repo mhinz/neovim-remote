@@ -80,6 +80,10 @@ def parse_args():
     parser.add_argument('-l',
             action  = 'store_true',
             help    = 'change to previous window via ":wincmd p"')
+    parser.add_argument('-c',
+            action  = 'append',
+            metavar = '<cmd>',
+            help    = 'execute single command')
     parser.add_argument('-o',
             action  = 'append',
             metavar = '<files>',
@@ -116,7 +120,7 @@ def parse_args():
             metavar = '<keys>',
             help    = 'send key presses')
     parser.add_argument('--remote-expr',
-            action  ='append',
+            action  = 'append',
             nargs   = '+',
             metavar = '<exprs>',
             help    = 'evaluate expressions in server and print result')
@@ -207,6 +211,10 @@ def main():
     if args.O and n.attached():
         for fname in args.O:
             n.server.command('vsplit {}'.format(prepare_filename(fname)), async=True)
+
+    if args.c and n.attached():
+        for cmd in args.c:
+            n.server.command(cmd)
 
 
 if __name__ == '__main__':

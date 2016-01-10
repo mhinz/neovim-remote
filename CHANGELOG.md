@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Option: `-c` (execute single command)
+
 ## [1.1] - 2015-12-17
 ### Added
 - `CHANGELOG.md` according to [keepachangelog.com](http://keepachangelog.com).
