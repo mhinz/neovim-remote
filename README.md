@@ -2,6 +2,8 @@
 
 - [Intro](#intro)
 - [Installation](#installation)
+- [FAQ](#faq)
+  - [How to open directories?](#how-to-open-directories)
 - [Examples](#examples)
 - [Demos](#demos)
 
@@ -47,6 +49,18 @@ $ curl -Lo ~/bin/nvr https://raw.githubusercontent.com/mhinz/neovim-remote/maste
 $ chmod 700 ~/bin/nvr
 ```
 
+## FAQ
+
+#### How to open directories?
+
+`:e /tmp` opens a directory view via netrw. Netrw works by hooking into certain
+events, `BufEnter` in this case (see `:au FileExplorer` for all of them).
+
+Unfortunately Neovim's API doesn't trigger any autocmds on its own, so simply
+`nvr /tmp` won't work. Meanwhile you can work around it like this:
+
+    $ nvr /tmp -c 'doau BufEnter'
+
 ## Examples
 
 In one window, create the server process:
@@ -74,7 +88,7 @@ See `nvr -h` for all options.
 
 ## Demos
 
-(Click the GIFs to watch them fullscreen.)
+(Click the GIFs to watch them full-size.)
 
 Using nvr from a different window (another tmux pane in this case):
 ![Demo 1](https://github.com/mhinz/neovim-remote/raw/master/pictures/demo1.gif)
