@@ -27,6 +27,7 @@ import os
 import subprocess
 import textwrap
 import argparse
+import re
 
 from neovim import attach
 
@@ -36,21 +37,25 @@ class Neovim():
 
     This helps handling the silent and non-silent arguments.
     """
-    def __init__(self, sockpath):
-        self.sockpath = sockpath
-        self.server   = None
+    def __init__(self, addr):
+        self.addr   = addr
+        self.server = None
 
     def attached(self, silent=False):
         if self.server is not None:
             return True
         try:
-            self.server = attach('socket', path=self.sockpath)
+            if re.match("^(?:\d{1,3}\.){3}\d{1,3}:\d{1,5}$", self.addr):
+                ip, sep, port = self.addr.rpartition(':')
+                self.server = attach("tcp", address=ip, port=int(port))
+            else:
+                self.server = attach('socket', path=self.addr)
             return True
-        except FileNotFoundError:
+        except:
             if silent:
                 return False
             else:
-                print("Can't find unix socket {}. Export $NVIM_LISTEN_ADDRESS or use --servername.".format(self.sockpath))
+                print("Can't connect to {}. Export $NVIM_LISTEN_ADDRESS or use --servername".format(self.addr))
                 sys.exit(1)
 
 
@@ -125,11 +130,11 @@ def parse_args():
             metavar = '<exprs>',
             help    = 'evaluate expressions in server and print result')
     parser.add_argument('--servername',
-            metavar = '<sock>',
-            help    = 'path to unix socket (overrides $NVIM_LISTEN_ADDRESS)')
+            metavar = '<addr>',
+            help    = 'connection addr (overrides $NVIM_LISTEN_ADDRESS)')
     parser.add_argument('--serverlist',
             action  = 'store_true',
-            help    = 'prints socket path to be used')
+            help    = 'prints addr to be used')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -142,19 +147,19 @@ def prepare_filename(fname):
 
 def main():
     args, unused = parse_args()
-    sockpath = os.environ.get('NVIM_LISTEN_ADDRESS')
+    addr = os.environ.get('NVIM_LISTEN_ADDRESS')
 
     if args.servername:
-        sockpath = args.servername
+        addr = args.servername
     else:
-        if sockpath is None:
-            sockpath = '/tmp/nvimsocket'
+        if not addr:
+            addr = '/tmp/nvimsocket'
 
     if args.serverlist:
-        if sockpath is not None:
-            print(sockpath)
+        if not addr:
+            print(addr)
 
-    n = Neovim(sockpath)
+    n = Neovim(addr)
 
     if args.l and n.attached(silent=True):
         n.server.command('wincmd p', async=True)
