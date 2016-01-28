@@ -125,7 +125,7 @@ def parse_args():
             action  = 'store',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Open files via ":tabedit".')
+            help    = 'As --remote, but uses :tabedit.')
     parser.add_argument('--remote-send',
             action  = 'store',
             nargs   = '+',
@@ -152,15 +152,15 @@ def parse_args():
 def prepare_filename(fname):
     return os.path.abspath(fname).replace(" ", "\ ")
 
-def open(n, filenames, async=False):
-    cmd = None
+def open(n, filenames, cmd, async=False):
+    c = None
     if filenames[0][0] == '+':
-        cmd = filenames[0][1:]
+        c = filenames[0][1:]
         filenames = filenames[1:]
     for fname in reversed(filenames):
-        n.server.command('edit {}'.format(prepare_filename(fname)), async=async)
-    if cmd:
-        n.server.command(cmd)
+        n.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=async)
+    if c:
+        n.server.command(c)
 
 def main():
     args, unused = parse_args()
@@ -182,23 +182,22 @@ def main():
         n.server.command('wincmd p', async=True)
 
     if unused and n.attached(silent=True):
-        open(n, unused, async=True)
+        open(n, unused, 'edit', async=True)
 
     if args.remote_silent and n.attached(silent=True):
-        open(n, args.remote_silent, async=True)
+        open(n, args.remote_silent, 'edit', async=True)
 
     if args.remote_wait_silent and n.attached(silent=True):
-        open(n, args.remote_wait_silent)
+        open(n, args.remote_wait_silent, 'edit')
 
     if args.remote and n.attached():
-        open(n, args.remote, async=True)
+        open(n, args.remote, 'edit', async=True)
 
     if args.remote_wait and n.attached():
-        open(n, args.remote_wait)
+        open(n, args.remote_wait, 'edit')
 
     if args.remote_tab and n.attached():
-        for fname in args.remote_tab:
-            n.server.command('tabedit {}'.format(prepare_filename(fname)))
+        open(n, args.remote_tab, 'tabedit')
 
     if args.remote_send and n.attached():
         for keys in args.remote_send:
