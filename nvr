@@ -83,65 +83,65 @@ def parse_args():
 
     parser.add_argument('-l',
             action  = 'store_true',
-            help    = 'change to previous window via ":wincmd p"')
+            help    = 'Change to previous window via ":wincmd p".')
     parser.add_argument('-c',
             action  = 'append',
             metavar = '<cmd>',
-            help    = 'execute single command')
+            help    = 'Execute single command.')
     parser.add_argument('-o',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
-            help    = 'open files via ":split"')
+            metavar = '<file>',
+            help    = 'Open files via ":split".')
     parser.add_argument('-O',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
-            help    = 'open files via ":vsplit"')
+            metavar = '<file>',
+            help    = 'Open files via ":vsplit".')
 
     # The following options exactly emulate their vim equivalents.
 
     parser.add_argument('--remote',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
+            metavar = '<file>',
             help    = 'Open files via ":edit". If the first argument is "+cmd", "cmd" will be executed for the first file. E.g. "--remote +10 file1 file2" will first open file2, then file1, then execute :10.')
     parser.add_argument('--remote-wait',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
-            help    = 'as --remote')
+            metavar = '<file>',
+            help    = 'As --remote.')
     parser.add_argument('--remote-silent',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
-            help    = "as --remote, but don't throw error if no server is found")
+            metavar = '<file>',
+            help    = "As --remote, but don't throw error if no server is found.")
     parser.add_argument('--remote-wait-silent',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
-            help    = "as --remote, but don't throw error if no server is found")
+            metavar = '<file>',
+            help    = "As --remote, but don't throw error if no server is found.")
     parser.add_argument('--remote-tab', '-p',
             action  = 'store',
             nargs   = '+',
-            metavar = '<files>',
-            help    = 'open files via ":tabedit"')
+            metavar = '<file>',
+            help    = 'Open files via ":tabedit".')
     parser.add_argument('--remote-send',
             action  = 'store',
             nargs   = '+',
             metavar = '<keys>',
-            help    = 'send key presses')
+            help    = "Send key presses. E.g. \"-l --remote-send 'iabc<cr><esc>'\".")
     parser.add_argument('--remote-expr',
             action  = 'store',
             nargs   = '+',
-            metavar = '<exprs>',
-            help    = 'evaluate expressions in server and print result')
+            metavar = '<expr>',
+            help    = "Evaluate expression on server and print result in shell. E.g. \"--remote-expr 'v:progpath'\".")
     parser.add_argument('--servername',
             metavar = '<addr>',
-            help    = 'connection addr (overrides $NVIM_LISTEN_ADDRESS)')
+            help    = 'Set the address to be used (overrides $NVIM_LISTEN_ADDRESS).')
     parser.add_argument('--serverlist',
             action  = 'store_true',
-            help    = 'prints addr to be used')
+            help    = 'Print the used address (TCP, Unix domain, or named pipe).')
 
     if len(sys.argv) == 1:
         parser.print_help()
