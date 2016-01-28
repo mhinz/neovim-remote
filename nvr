@@ -89,42 +89,50 @@ def parse_args():
             metavar = '<cmd>',
             help    = 'execute single command')
     parser.add_argument('-o',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
             help    = 'open files via ":split"')
     parser.add_argument('-O',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
             help    = 'open files via ":vsplit"')
 
     # The following options exactly emulate their vim equivalents.
 
     parser.add_argument('--remote',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
-            help    = 'open files via ":edit"')
+            help    = 'Open files via ":edit". If the first argument is "+cmd", "cmd" will be executed for the first file. E.g. "--remote +10 file1 file2" will first open file2, then file1, then execute :10.')
     parser.add_argument('--remote-wait',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
             help    = 'as --remote')
     parser.add_argument('--remote-silent',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
             help    = "as --remote, but don't throw error if no server is found")
     parser.add_argument('--remote-wait-silent',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
             help    = "as --remote, but don't throw error if no server is found")
     parser.add_argument('--remote-tab', '-p',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<files>',
             help    = 'open files via ":tabedit"')
     parser.add_argument('--remote-send',
-            action  = 'append',
+            action  = 'store',
+            nargs   = '+',
             metavar = '<keys>',
             help    = 'send key presses')
     parser.add_argument('--remote-expr',
-            action  = 'append',
+            action  = 'store',
             nargs   = '+',
             metavar = '<exprs>',
             help    = 'evaluate expressions in server and print result')
@@ -143,6 +151,16 @@ def parse_args():
 
 def prepare_filename(fname):
     return os.path.abspath(fname).replace(" ", "\ ")
+
+def open(n, filenames, async=False):
+    cmd = None
+    if filenames[0][0] == '+':
+        cmd = filenames[0][1:]
+        filenames = filenames[1:]
+    for fname in reversed(filenames):
+        n.server.command('edit {}'.format(prepare_filename(fname)), async=async)
+    if cmd:
+        n.server.command(cmd)
 
 def main():
     args, unused = parse_args()
@@ -164,24 +182,19 @@ def main():
         n.server.command('wincmd p', async=True)
 
     if unused and n.attached(silent=True):
-        for fname in unused:
-            n.server.command('edit {}'.format(prepare_filename(fname)), async=True)
+        open(n, unused, async=True)
 
     if args.remote_silent and n.attached(silent=True):
-        for fname in args.remote_silent:
-            n.server.command('edit {}'.format(prepare_filename(fname)), async=True)
+        open(n, args.remote_silent, async=True)
 
     if args.remote_wait_silent and n.attached(silent=True):
-        for fname in args.remote_wait_silent:
-            n.server.command('edit {}'.format(prepare_filename(fname)))
+        open(n, args.remote_wait_silent)
 
     if args.remote and n.attached():
-        for fname in args.remote:
-            n.server.command('edit {}'.format(prepare_filename(fname)), async=True)
+        open(n, args.remote, async=True)
 
     if args.remote_wait and n.attached():
-        for fname in args.remote_wait:
-            n.server.command('edit {}'.format(prepare_filename(fname)))
+        open(n, args.remote_wait)
 
     if args.remote_tab and n.attached():
         for fname in args.remote_tab:
@@ -192,7 +205,7 @@ def main():
             n.server.input(keys)
 
     if args.remote_expr and n.attached():
-        for expr in args.remote_expr[0]:
+        for expr in args.remote_expr:
             result = ''
             try:
                 result = n.server.eval(expr)
