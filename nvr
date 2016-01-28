@@ -126,6 +126,21 @@ def parse_args():
             nargs   = '+',
             metavar = '<file>',
             help    = 'As --remote, but uses :tabedit.')
+    parser.add_argument('--remote-tab-wait',
+            action  = 'store',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = 'As --remote-tab.')
+    parser.add_argument('--remote-tab-silent',
+            action  = 'store',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = "As --remote-tab, but don't throw error if no server is found.")
+    parser.add_argument('--remote-tab-wait-silent',
+            action  = 'store',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = "As --remote-tab, but don't throw error if no server is found.")
     parser.add_argument('--remote-send',
             action  = 'store',
             nargs   = '+',
@@ -186,18 +201,21 @@ def main():
 
     if args.remote_silent and n.attached(silent=True):
         open(n, args.remote_silent, 'edit', async=True)
-
     if args.remote_wait_silent and n.attached(silent=True):
         open(n, args.remote_wait_silent, 'edit')
+    if args.remote_tab_silent and n.attached():
+        open(n, args.remote_tab_silent, 'tabedit', async=True)
+    if args.remote_tab_wait_silent and n.attached():
+        open(n, args.remote_tab_wait_silent, 'tabedit')
 
     if args.remote and n.attached():
         open(n, args.remote, 'edit', async=True)
-
     if args.remote_wait and n.attached():
         open(n, args.remote_wait, 'edit')
-
     if args.remote_tab and n.attached():
-        open(n, args.remote_tab, 'tabedit')
+        open(n, args.remote_tab, 'tabedit', async=True)
+    if args.remote_tab_wait and n.attached():
+        open(n, args.remote_tab_wait, 'tabedit')
 
     if args.remote_send and n.attached():
         for keys in args.remote_send:
