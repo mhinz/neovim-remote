@@ -188,7 +188,7 @@ def main():
             addr = '/tmp/nvimsocket'
 
     if args.serverlist:
-        if not addr:
+        if addr:
             print(addr)
 
     n = Neovim(addr)
