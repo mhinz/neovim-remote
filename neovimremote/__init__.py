@@ -177,7 +177,7 @@ def open(n, filenames, cmd, async=False):
     if c:
         n.server.command(c)
 
-def main():
+def run():
     args, unused = parse_args()
     addr = os.environ.get('NVIM_LISTEN_ADDRESS')
 
@@ -249,7 +249,3 @@ def main():
     if args.c and n.attached():
         for cmd in args.c:
             n.server.command(cmd)
-
-
-if __name__ == '__main__':
-    main()

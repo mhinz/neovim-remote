@@ -24,18 +24,8 @@ call **nvr** from within Neovim (`:terminal`) without specifying `--servername`.
 
 ## Installation
 
-Assuming `~/bin` is in your `$PATH`:
-
-**1)** Install the Python provider for Neovim:
 ```
-$ pip3 install neovim
-```
-
-**2a)** Using the git repo:
-```
-$ mkdir -p ~/github
-$ git clone https://github.com/mhinz/neovim-remote.git ~/github/neovim-remote
-$ ln -s ~/github/neovim-remote/nvr ~/bin/nvr
+$ pip3 install neovim-remote
 ```
 
 **2b)** Download the script directly:
