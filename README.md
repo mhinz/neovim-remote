@@ -28,17 +28,6 @@ call **nvr** from within Neovim (`:terminal`) without specifying `--servername`.
 $ pip3 install neovim-remote
 ```
 
-**2b)** Download the script directly:
-```
-$ # Or alternatively:
-$ curl -Lo ~/bin/nvr https://raw.githubusercontent.com/mhinz/neovim-remote/master/nvr
-```
-
-**3)**
-```
-$ chmod 700 ~/bin/nvr
-```
-
 ## FAQ
 
 #### How to open directories?
