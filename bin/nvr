@@ -105,7 +105,7 @@ def parse_args():
             action  = 'store',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Open files via ":edit". If the first argument is "+cmd", "cmd" will be executed for the first file. E.g. "--remote +10 file1 file2" will first open file2, then file1, then execute :10.')
+            help    = 'Open files via ":edit". If one of the arguments is "+cmd", "cmd" will be executed for the first file. E.g. "--remote +10 file1 file2" will first open file2, then file1, then execute :10.')
     parser.add_argument('--remote-wait',
             action  = 'store',
             nargs   = '+',
@@ -169,10 +169,10 @@ def prepare_filename(fname):
 
 def open(n, filenames, cmd, async=False):
     c = None
-    if filenames[0][0] == '+':
-        c = filenames[0][1:]
-        filenames = filenames[1:]
     for fname in reversed(filenames):
+        if fname.startswith('+'):
+            c = fname[1:]
+            continue
         n.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=async)
     if c:
         n.server.command(c)
