@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/google/home/gbin/prefix/bin/python3.6
 
 """
 Copyright (c) 2015 - present Marco Hinz
@@ -26,9 +26,17 @@ import sys
 import os
 import textwrap
 import argparse
+import subprocess
+
+TMP = '/tmp'
 
 from neovim import attach
 
+def isSocket(addr):
+    return ':' not in addr
+
+def socketName2Path(name):
+    return os.path.join(TMP, name)
 
 class Neovim():
     """Thin wrapper around nvim.attach() for lazy attaching.
@@ -43,11 +51,10 @@ class Neovim():
         if self.server is not None:
             return True
         try:
-            addr = self.addr.split(':')
-            if len(addr) == 1:
-                self.server = attach('socket', path=self.addr)
+            if isSocket(self.addr):
+                self.server = attach('socket', path=socketName2Path(self.addr))
             else:
-                ip, port = addr
+                ip, port = self.addr.split(':')
                 self.server = attach("tcp", address=ip, port=int(port))
             return True
         except:
@@ -185,7 +192,7 @@ def main():
         addr = args.servername
     else:
         if not addr:
-            addr = '/tmp/nvimsocket'
+            addr = os.path.join(TMP, 'nvimsocket')
 
     if args.serverlist:
         if addr:
@@ -199,8 +206,14 @@ def main():
     if unused and n.attached(silent=True):
         open(n, unused, 'edit', async=True)
 
-    if args.remote_silent and n.attached(silent=True):
-        open(n, args.remote_silent, 'edit', async=True)
+    if args.remote_silent:
+        if n.attached(silent=True):
+            open(n, args.remote_silent, 'edit', async=True)
+        else:
+            env = os.environ.copy()
+            env['NVIM_LISTEN_ADDRESS'] = socketName2Path(addr) if isSocket(addr) else addr
+            subprocess.Popen(['nvim', args.remote_silent[0]], env=env).wait()
+
     if args.remote_wait_silent and n.attached(silent=True):
         open(n, args.remote_wait_silent, 'edit')
     if args.remote_tab_silent and n.attached():
@@ -223,7 +236,6 @@ def main():
 
     if args.remote_expr and n.attached():
         for expr in args.remote_expr:
-            result = ''
             try:
                 result = n.server.eval(expr)
             except:
@@ -250,4 +262,5 @@ def main():
         for cmd in args.c:
             n.server.command(cmd)
 
-main()
+if __name__ == '__main__':
+    main()
