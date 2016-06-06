@@ -115,6 +115,8 @@ def parse_args():
 
             $ nvr --remote +3 file1 file2
             $ nvr --remote-send 'iabc<cr><esc>'
+            $ nvr --remote-expr v:progpath
+            $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
     """)
 
     parser = argparse.ArgumentParser(
@@ -176,9 +178,8 @@ def parse_args():
             help    = 'Send key presses.')
     parser.add_argument('--remote-expr',
             action  = 'store',
-            nargs   = '+',
             metavar = '<expr>',
-            help    = "Evaluate expression on server and print result in shell. E.g. \"--remote-expr 'v:progpath'\".")
+            help    = 'Evaluate expression on server and print result in shell.')
 
     parser.add_argument('--servername',
             metavar = '<addr>',
@@ -230,22 +231,20 @@ def main():
     if flags.remote_send and neovim.is_attached():
         neovim.server.input(flags.remote_send)
 
-    # if args.remote_expr and n.attached():
-    #     for expr in args.remote_expr:
-    #         result = ''
-    #         try:
-    #             result = n.server.eval(expr)
-    #         except:
-    #             print('Evaluation failed: ' + expr)
-    #             continue
-    #         if type(result) is bytes:
-    #             print(result.decode())
-    #         elif type(result) is list:
-    #             print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
-    #         elif type(result) is dict:
-    #             print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
-    #         else:
-    #             print(result)
+    if flags.remote_expr and neovim.is_attached():
+        result = ''
+        try:
+            result = neovim.server.eval(flags.remote_expr)
+        except:
+            print('Evaluation failed: ' + flags.remote_expr)
+        if type(result) is bytes:
+            print(result.decode())
+        elif type(result) is list:
+            print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
+        elif type(result) is dict:
+            print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
+        else:
+            print(result)
 
     # if args.o and n.attached():
     #     for fname in args.o:
