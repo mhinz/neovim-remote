@@ -33,48 +33,28 @@ from neovim import attach
 
 class Neovim():
     def __init__(self, address):
-        self.address = address
-        self.server  = None
+        self.address    = address
+        self.server     = None
+        self._msg_shown = False
+
+    def attach(self):
+        try:
+            if ':' in self.address:
+                ip, port = self.address.split(':')
+                self.server = attach('tcp', address=ip, port=int(port))
+            else:
+                self.server = attach('socket', path=self.address)
+        except:
+            pass
 
     def is_attached(self, silent=False):
-        if self.server is not None:
+        if self.server:
             return True
-        try:
-            addr = self.address.split(':')
-            if len(addr) == 1:
-                self.server = attach('socket', path=self.address)
-            else:
-                ip, port = addr
-                self.server = attach("tcp", address=ip, port=int(port))
-        except:
-            if not silent:
-                print(textwrap.dedent("""
-                    [!] Can't connect to: {}
-
-                        If your intention was to communicate with a remote nvim
-                        instance, verify that \":echo v:servername\" in your
-                        instance uses the same address.
-
-                        SOLUTION 1 (from server side):
-
-                            Expose $NVIM_LISTEN_ADDRESS to the environment before
-                            starting nvim, so that v:servername gets set accordingly.
-
-                            $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
-
-                        SOLUTION 2 (from client side):
-
-                            Expose $NVIM_LISTEN_ADDRESS to the environment before
-                            using nvr or use its --servername option. If neither
-                            is given, nvr assumes \"/tmp/nvimsocket\".
-
-                            $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
-                            $ nvr --servername /tmp/foo --remote file1 file2
-
-                    [*] Starting a new instance with this address: {}
-                """.format(self.address, self.address)))
+        else:
+            if not silent and not self._msg_shown:
+                self._show_msg()
+                self._msg_shown = True
             return False
-        return True
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         if self.is_attached(silent):
@@ -111,6 +91,33 @@ class Neovim():
             self.server.command('autocmd VimLeave call rpcnotify({}, "exiting")'.format(self.server.channel_id))
 
         self.server.run_loop(None, notification_cb, setup_cb)
+
+    def _show_msg(self):
+        print(textwrap.dedent("""
+            [!] Can't connect to: {}
+
+                If your intention was to communicate with a remote nvim
+                instance, verify that \":echo v:servername\" in your
+                instance uses the same address.
+
+                SOLUTION 1 (from server side):
+
+                    Expose $NVIM_LISTEN_ADDRESS to the environment before
+                    starting nvim, so that v:servername gets set accordingly.
+
+                    $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
+
+                SOLUTION 2 (from client side):
+
+                    Expose $NVIM_LISTEN_ADDRESS to the environment before
+                    using nvr or use its --servername option. If neither
+                    is given, nvr assumes \"/tmp/nvimsocket\".
+
+                        $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
+                        $ nvr --servername /tmp/foo --remote file1 file2
+
+                [*] Starting a new instance with this address: {}
+            """.format(self.address, self.address)))
 
 
 def parse_args():
@@ -227,6 +234,7 @@ def main():
         print(address)
 
     neovim = Neovim(address)
+    neovim.attach()
 
     if flags.l and neovim.is_attached():
         neovim.server.command('wincmd p')
