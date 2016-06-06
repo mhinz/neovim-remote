@@ -156,14 +156,14 @@ def parse_args():
     parser.add_argument('--remote-wait',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Same as --remote.')
+            help    = 'Same as --remote, but block until remote instance exits.')
     parser.add_argument('--remote-silent',
             nargs   = '+',
             metavar = '<file>',
             help    = "Same as --remote, but don't throw an error if no server is found.")
     parser.add_argument('--remote-wait-silent',
             action  = 'store_true',
-            help    = "Same as --remote-silent.")
+            help    = "Same as --remote-silent, but block until remote instance exits.")
 
     parser.add_argument('--remote-tab', '-p',
             nargs   = '+',
@@ -172,7 +172,7 @@ def parse_args():
     parser.add_argument('--remote-tab-wait',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Same as --remote-tab.')
+            help    = 'Same as --remote-tab, but block until remote instance exits.')
     parser.add_argument('--remote-tab-silent',
             nargs   = '+',
             metavar = '<file>',
@@ -180,7 +180,7 @@ def parse_args():
     parser.add_argument('--remote-tab-wait-silent',
             nargs   = '+',
             metavar = '<file>',
-            help    = "Same as --remote-tab-silent.")
+            help    = "Same as --remote-tab-silent, but block until remote instance exits.")
 
     parser.add_argument('--remote-send',
             metavar = '<keys>',
@@ -194,7 +194,7 @@ def parse_args():
             help    = 'Set the address to be used (overrides $NVIM_LISTEN_ADDRESS).')
     parser.add_argument('--serverlist',
             action  = 'store_true',
-            help    = 'Print the used address (TCP, Unix domain, or named pipe).')
+            help    = 'Print the used address (TCP or Unix domain socket).')
 
     parser.add_argument('-l',
             action  = 'store_true',
