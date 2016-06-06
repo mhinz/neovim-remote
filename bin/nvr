@@ -55,21 +55,21 @@ class Neovim():
                 print(textwrap.dedent("""
                     Can't connect to: {}
 
-                    Verify that \":echo v:servername\" in your nvim instance uses
-                    the same address.
+                    Verify that \":echo v:servername\" in your nvim instance uses the
+                    same address.
 
                     SOLUTION 1 (from server side):
 
-                        Export $NVIM_LISTEN_ADDRESS before starting nvim, so that
-                        v:servername gets set accordingly.
+                        Expose $NVIM_LISTEN_ADDRESS to the environment before starting
+                        nvim, so that v:servername gets set accordingly.
 
                         $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
 
                     SOLUTION 2 (from client side):
 
-                        Export $NVIM_LISTEN_ADDRESS before using nvr or use its
-                        --servername option. If neither is given, nvr assumes
-                        \"/tmp/nvimsocket\".
+                        Expose $NVIM_LISTEN_ADDRESS to the environment before using
+                        nvr or use its --servername option. If neither is given, nvr
+                        assumes \"/tmp/nvimsocket\".
 
                         $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
                         $ nvr --servername /tmp/foo --remote file1 file2
@@ -77,13 +77,11 @@ class Neovim():
             return False
         return True
 
-
     def execute(self, arguments, cmd='edit', silent=False):
         if self.is_attached(silent):
             self.execute_remotely(arguments, cmd)
         else:
             self.execute_locally(arguments, silent)
-
 
     def execute_locally(self, arguments, silent):
         if not arguments and not silent:
@@ -93,14 +91,13 @@ class Neovim():
             env['NVIM_LISTEN_ADDRESS'] = self.address
             subprocess.Popen(['nvim'] + arguments, env=env).wait()
 
-
     def execute_remotely(self, arguments, cmd):
         c = None
         for fname in reversed(arguments):
             if fname.startswith('+'):
                 c = fname[1:]
                 continue
-            self.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=False)
+            self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
         if c:
             self.server.command(c)
 
@@ -117,6 +114,13 @@ def parse_args():
             $ nvr --remote-send 'iabc<cr><esc>'
             $ nvr --remote-expr v:progpath
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
+
+        Any arguments not consumed by flags, will be fed to
+        --remote, so this is equivalent:
+
+            $ nvr file1 file2
+            $ nvr --remote file1 file2
+
     """)
 
     parser = argparse.ArgumentParser(
@@ -124,29 +128,6 @@ def parse_args():
             usage           = usage,
             epilog          = epilog,
             description     = desc)
-
-    # The following options are similar to their vim equivalents,
-    # but work on the remote instance instead.
-
-    parser.add_argument('-l',
-            action  = 'store_true',
-            help    = 'Change to previous window via ":wincmd p".')
-    parser.add_argument('-c',
-            action  = 'append',
-            metavar = '<cmd>',
-            help    = 'Execute single command.')
-    # # parser.add_argument('-o',
-    # #         action  = 'store',
-    # #         nargs   = '+',
-    # #         metavar = '<file>',
-    # #         help    = 'Open files via ":split".')
-    # parser.add_argument('-O',
-    #         action  = 'store',
-    #         nargs   = '+',
-    #         metavar = '<file>',
-    #         help    = 'Open files via ":vsplit".')
-
-    # The following options exactly emulate their vim equivalents.
 
     parser.add_argument('--remote',
             action  = 'store_true',
@@ -188,6 +169,24 @@ def parse_args():
             action  = 'store_true',
             help    = 'Print the used address (TCP, Unix domain, or named pipe).')
 
+    parser.add_argument('-l',
+            action  = 'store_true',
+            help    = 'Change to previous window via ":wincmd p".')
+    parser.add_argument('-c',
+            action  = 'append',
+            metavar = '<cmd>',
+            help    = 'Execute a command.')
+    parser.add_argument('-o',
+            action  = 'store',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = 'Open files via ":split".')
+    parser.add_argument('-O',
+            action  = 'store',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = 'Open files via ":vsplit".')
+
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(0)
@@ -203,6 +202,10 @@ def main():
     flags, arguments = parse_args()
     address = os.environ.get('NVIM_LISTEN_ADDRESS')
 
+    """
+    Process flags.
+    """
+
     if flags.servername:
         address = flags.servername
     elif not address:
@@ -212,12 +215,6 @@ def main():
             print(address)
 
     neovim = Neovim(address)
-
-    # if args.l and n.attached(silent=True):
-    #     n.server.command('wincmd p', async=True)
-
-    # if unused and n.attached(silent=True):
-    #     open(n, unused, 'edit', async=True)
 
     if flags.remote or flags.remote_wait:
         neovim.execute(arguments, 'edit', False)
@@ -246,19 +243,32 @@ def main():
         else:
             print(result)
 
-    # if args.o and n.attached():
-    #     for fname in args.o:
-    #         n.server.command('split {}'.format(prepare_filename(fname)), async=True)
+    """
+    The following flags are supposed to be used from :terminal.
+    """
 
-    # if args.O and n.attached():
-    #     for fname in args.O:
-    #         n.server.command('vsplit {}'.format(prepare_filename(fname)), async=True)
+    if flags.l and neovim.is_attached():
+        neovim.server.command('wincmd p')
 
-    # if args.c and n.attached():
-    #     for cmd in args.c:
-    #         n.server.command(cmd)
+    if flags.c and neovim.is_attached():
+        for cmd in flags.c:
+            neovim.server.command(cmd)
+
+    if flags.o and neovim.is_attached():
+        for fname in flags.o:
+            neovim.server.command('split {}'.format(prepare_filename(fname)))
+    if flags.O and neovim.is_attached():
+        for fname in flags.O:
+            neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
+
+    """
+    All arguments not consumed by any flag, will be fed to --remote.
+    """
+
+    if arguments and neovim.is_attached():
+        neovim.execute(arguments, 'edit', False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
