@@ -32,10 +32,6 @@ from neovim import attach
 
 
 class Neovim():
-    """Thin wrapper around nvim.attach() for lazy attaching.
-
-    This helps handling the silent and non-silent arguments.
-    """
     def __init__(self, address):
         self.address = address
         self.server  = None
@@ -53,27 +49,30 @@ class Neovim():
         except:
             if not silent:
                 print(textwrap.dedent("""
-                    Can't connect to: {}
+                    [!] Can't connect to: {}
 
-                    Verify that \":echo v:servername\" in your nvim instance uses the
-                    same address.
+                        If your intention was to communicate with a remote nvim
+                        instance, verify that \":echo v:servername\" in your
+                        instance uses the same address.
 
-                    SOLUTION 1 (from server side):
+                        SOLUTION 1 (from server side):
 
-                        Expose $NVIM_LISTEN_ADDRESS to the environment before starting
-                        nvim, so that v:servername gets set accordingly.
+                            Expose $NVIM_LISTEN_ADDRESS to the environment before
+                            starting nvim, so that v:servername gets set accordingly.
 
-                        $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
+                            $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
 
-                    SOLUTION 2 (from client side):
+                        SOLUTION 2 (from client side):
 
-                        Expose $NVIM_LISTEN_ADDRESS to the environment before using
-                        nvr or use its --servername option. If neither is given, nvr
-                        assumes \"/tmp/nvimsocket\".
+                            Expose $NVIM_LISTEN_ADDRESS to the environment before
+                            using nvr or use its --servername option. If neither
+                            is given, nvr assumes \"/tmp/nvimsocket\".
 
-                        $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
-                        $ nvr --servername /tmp/foo --remote file1 file2
-                """.format(self.address)))
+                            $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
+                            $ nvr --servername /tmp/foo --remote file1 file2
+
+                    [*] Starting a new instance with this address: {}
+                """.format(self.address, self.address)))
             return False
         return True
 
@@ -130,35 +129,42 @@ def parse_args():
             description     = desc)
 
     parser.add_argument('--remote',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = 'Edit files in a remote instance. If no server is found, throw an error and run nvim locally instead.')
     parser.add_argument('--remote-wait',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = 'Same as --remote.')
     parser.add_argument('--remote-silent',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = "Same as --remote, but don't throw an error if no server is found.")
     parser.add_argument('--remote-wait-silent',
             action  = 'store_true',
             help    = "Same as --remote-silent.")
 
     parser.add_argument('--remote-tab', '-p',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = 'Tabedit files in a remote instance. If no server is found, throw an error and run nvim locally instead.')
     parser.add_argument('--remote-tab-wait',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = 'Same as --remote-tab.')
     parser.add_argument('--remote-tab-silent',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = "Same as --remote-tab, but don't throw an error if no server is found.")
-    parser.add_argument('--remote-tab-wait-silent', action  = 'store_true', help    = "Same as --remote-tab-silent.")
+    parser.add_argument('--remote-tab-wait-silent',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = "Same as --remote-tab-silent.")
 
     parser.add_argument('--remote-send',
-            action  = 'store',
             metavar = '<keys>',
             help    = 'Send key presses.')
     parser.add_argument('--remote-expr',
-            action  = 'store',
             metavar = '<expr>',
             help    = 'Evaluate expression on server and print result in shell.')
 
@@ -177,12 +183,10 @@ def parse_args():
             metavar = '<cmd>',
             help    = 'Execute a command.')
     parser.add_argument('-o',
-            action  = 'store',
             nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":split".')
     parser.add_argument('-O',
-            action  = 'store',
             nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":vsplit".')
@@ -212,18 +216,27 @@ def main():
         address = '/tmp/nvimsocket'
 
     if flags.serverlist:
-            print(address)
+        print(address)
 
     neovim = Neovim(address)
 
-    if flags.remote or flags.remote_wait:
-        neovim.execute(arguments, 'edit', False)
-    elif flags.remote_silent or flags.remote_wait_silent:
-        neovim.execute(arguments, 'edit', True)
-    elif flags.remote_tab or flags.remote_tab_wait:
-        neovim.execute(arguments, 'tabedit', False)
-    elif flags.remote_tab_silent or flags.remote_tab_wait_silent:
-        neovim.execute(arguments, 'tabedit', True)
+    if flags.remote:
+        neovim.execute(flags.remote, 'edit')
+    if flags.remote_wait:
+        neovim.execute(flags.remote_wait, 'edit')
+    if flags.remote_silent:
+        neovim.execute(flags.remote_silent, 'edit', silent=True)
+    if flags.remote_wait_silent:
+        neovim.execute(flags.remote_wait_silent, 'edit', silent=True)
+
+    if flags.remote_tab:
+        neovim.execute(flags.remote_tab, 'tabedit')
+    if flags.remote_tab_wait:
+        neovim.execute(flags.remote_tab_wait, 'tabedit')
+    if flags.remote_tab_silent:
+        neovim.execute(flags.remote_tab_silent, 'tabedit', silent=True)
+    if flags.remote_tab_wait_silent:
+        neovim.execute(flags.remote_tab_wait_silent, 'tabedit', silent=True)
 
     if flags.remote_send and neovim.is_attached():
         neovim.server.input(flags.remote_send)
@@ -265,8 +278,8 @@ def main():
     All arguments not consumed by any flag, will be fed to --remote.
     """
 
-    if arguments and neovim.is_attached():
-        neovim.execute(arguments, 'edit', False)
+    if arguments:
+        neovim.execute(arguments, 'edit')
 
 
 if __name__ == '__main__':
