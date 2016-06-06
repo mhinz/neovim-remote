@@ -6,13 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Option: `-c` (execute single command)
+- Option: `-c` (execute single command).
 - Option: `--remote-tab-{wait,silent,wait-silent}`.
+- Option: `-wait` family actually waits now.
 
 ### Changed
 
-- Option: `--remote{,-silent,-wait,-wait-silent}` take `+{cmd}`
-- Allow `+cmd` to be anywhere in the arguments.
+- Option: `--remote{,-silent,-wait,-wait-silent}` take `+{cmd}` anywhere in
+  arguments.
 
 ## [1.1] - 2015-12-17
 

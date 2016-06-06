@@ -76,13 +76,13 @@ class Neovim():
             return False
         return True
 
-    def execute(self, arguments, cmd='edit', silent=False):
+    def execute(self, arguments, cmd='edit', silent=False, wait=False):
         if self.is_attached(silent):
-            self.execute_remotely(arguments, cmd)
+            self._execute_remotely(arguments, cmd, wait)
         else:
-            self.execute_locally(arguments, silent)
+            self._execute_locally(arguments, silent)
 
-    def execute_locally(self, arguments, silent):
+    def _execute_locally(self, arguments, silent):
         if not arguments and not silent:
             print('No arguments were given!')
         else:
@@ -90,7 +90,7 @@ class Neovim():
             env['NVIM_LISTEN_ADDRESS'] = self.address
             subprocess.Popen(['nvim'] + arguments, env=env).wait()
 
-    def execute_remotely(self, arguments, cmd):
+    def _execute_remotely(self, arguments, cmd, wait):
         c = None
         for fname in reversed(arguments):
             if fname.startswith('+'):
@@ -99,6 +99,18 @@ class Neovim():
             self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
         if c:
             self.server.command(c)
+        if wait:
+            self._wait_until_exiting()
+
+    def _wait_until_exiting(self):
+        def notification_cb(name, _args):
+            if name == 'exiting':
+                self.server.stop_loop()
+
+        def setup_cb():
+            self.server.command('autocmd VimLeave call rpcnotify({}, "exiting")'.format(self.server.channel_id))
+
+        self.server.run_loop(None, notification_cb, setup_cb)
 
 
 def parse_args():
@@ -220,15 +232,24 @@ def main():
         neovim.server.command('wincmd p')
 
     # Arguments not consumed by flags, are fed to --remote.
-    if   arguments:                    neovim.execute(arguments, 'edit')
-    elif flags.remote:                 neovim.execute(flags.remote, 'edit')
-    elif flags.remote_wait:            neovim.execute(flags.remote_wait, 'edit')
-    elif flags.remote_silent:          neovim.execute(flags.remote_silent, 'edit', silent=True)
-    elif flags.remote_wait_silent:     neovim.execute(flags.remote_wait_silent, 'edit', silent=True)
-    elif flags.remote_tab:             neovim.execute(flags.remote_tab, 'tabedit')
-    elif flags.remote_tab_wait:        neovim.execute(flags.remote_tab_wait, 'tabedit')
-    elif flags.remote_tab_silent:      neovim.execute(flags.remote_tab_silent, 'tabedit', silent=True)
-    elif flags.remote_tab_wait_silent: neovim.execute(flags.remote_tab_wait_silent, 'tabedit', silent=True)
+    if arguments:
+        neovim.execute(arguments, 'edit')
+    elif flags.remote:
+        neovim.execute(flags.remote, 'edit')
+    elif flags.remote_wait:
+        neovim.execute(flags.remote_wait, 'edit', wait=True)
+    elif flags.remote_silent:
+        neovim.execute(flags.remote_silent, 'edit', silent=True)
+    elif flags.remote_wait_silent:
+        neovim.execute(flags.remote_wait_silent, 'edit', silent=True, wait=True)
+    elif flags.remote_tab:
+        neovim.execute(flags.remote_tab, 'tabedit')
+    elif flags.remote_tab_wait:
+        neovim.execute(flags.remote_tab_wait, 'tabedit', wait=True)
+    elif flags.remote_tab_silent:
+        neovim.execute(flags.remote_tab_silent, 'tabedit', silent=True)
+    elif flags.remote_tab_wait_silent:
+        neovim.execute(flags.remote_tab_wait_silent, 'tabedit', silent=True, wait=True)
 
     if flags.remote_send and neovim.is_attached():
         neovim.server.input(flags.remote_send)
