@@ -206,10 +206,6 @@ def main():
     flags, arguments = parse_args()
     address = os.environ.get('NVIM_LISTEN_ADDRESS')
 
-    """
-    Process flags.
-    """
-
     if flags.servername:
         address = flags.servername
     elif not address:
@@ -220,23 +216,19 @@ def main():
 
     neovim = Neovim(address)
 
-    if flags.remote:
-        neovim.execute(flags.remote, 'edit')
-    if flags.remote_wait:
-        neovim.execute(flags.remote_wait, 'edit')
-    if flags.remote_silent:
-        neovim.execute(flags.remote_silent, 'edit', silent=True)
-    if flags.remote_wait_silent:
-        neovim.execute(flags.remote_wait_silent, 'edit', silent=True)
+    if flags.l and neovim.is_attached():
+        neovim.server.command('wincmd p')
 
-    if flags.remote_tab:
-        neovim.execute(flags.remote_tab, 'tabedit')
-    if flags.remote_tab_wait:
-        neovim.execute(flags.remote_tab_wait, 'tabedit')
-    if flags.remote_tab_silent:
-        neovim.execute(flags.remote_tab_silent, 'tabedit', silent=True)
-    if flags.remote_tab_wait_silent:
-        neovim.execute(flags.remote_tab_wait_silent, 'tabedit', silent=True)
+    # Arguments not consumed by flags, are fed to --remote.
+    if   arguments:                    neovim.execute(arguments, 'edit')
+    elif flags.remote:                 neovim.execute(flags.remote, 'edit')
+    elif flags.remote_wait:            neovim.execute(flags.remote_wait, 'edit')
+    elif flags.remote_silent:          neovim.execute(flags.remote_silent, 'edit', silent=True)
+    elif flags.remote_wait_silent:     neovim.execute(flags.remote_wait_silent, 'edit', silent=True)
+    elif flags.remote_tab:             neovim.execute(flags.remote_tab, 'tabedit')
+    elif flags.remote_tab_wait:        neovim.execute(flags.remote_tab_wait, 'tabedit')
+    elif flags.remote_tab_silent:      neovim.execute(flags.remote_tab_silent, 'tabedit', silent=True)
+    elif flags.remote_tab_wait_silent: neovim.execute(flags.remote_tab_wait_silent, 'tabedit', silent=True)
 
     if flags.remote_send and neovim.is_attached():
         neovim.server.input(flags.remote_send)
@@ -256,17 +248,6 @@ def main():
         else:
             print(result)
 
-    """
-    The following flags are supposed to be used from :terminal.
-    """
-
-    if flags.l and neovim.is_attached():
-        neovim.server.command('wincmd p')
-
-    if flags.c and neovim.is_attached():
-        for cmd in flags.c:
-            neovim.server.command(cmd)
-
     if flags.o and neovim.is_attached():
         for fname in flags.o:
             neovim.server.command('split {}'.format(prepare_filename(fname)))
@@ -274,12 +255,9 @@ def main():
         for fname in flags.O:
             neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
-    """
-    All arguments not consumed by any flag, will be fed to --remote.
-    """
-
-    if arguments:
-        neovim.execute(arguments, 'edit')
+    if flags.c and neovim.is_attached():
+        for cmd in flags.c:
+            neovim.server.command(cmd)
 
 
 if __name__ == '__main__':
