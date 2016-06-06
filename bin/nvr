@@ -46,7 +46,7 @@ class Neovim():
         try:
             addr = self.address.split(':')
             if len(addr) == 1:
-                self.server = attach('socket', path=addr)
+                self.server = attach('socket', path=self.address)
             else:
                 ip, port = addr
                 self.server = attach("tcp", address=ip, port=int(port))
@@ -100,9 +100,9 @@ class Neovim():
             if fname.startswith('+'):
                 c = fname[1:]
                 continue
-            n.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=False)
+            self.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=False)
         if c:
-            n.server.command(c)
+            self.server.command(c)
 
 
 def parse_args():
@@ -110,13 +110,11 @@ def parse_args():
     usage      = '{} [arguments]'.format(sys.argv[0])
     epilog     = 'Happy hacking!'
     desc       = textwrap.dedent("""
-        Helper tool for nvim that provides --remote and friends.
+        Script that allows remote control of nvim processes.
+        If no process is found, a new one will be started.
 
-        All unused arguments will be implicitely fed to --remote-silent.
-        Thus the following two lines are equivalent:
-
-            $ nvr --remote-silent foo bar quux
-            $ nvr foo bar quux
+            $ nvr --remote +3 file1 file2
+            $ nvr --remote-send 'iabc<cr><esc>'
     """)
 
     parser = argparse.ArgumentParser(
@@ -174,9 +172,8 @@ def parse_args():
 
     parser.add_argument('--remote-send',
             action  = 'store',
-            nargs   = '+',
             metavar = '<keys>',
-            help    = "Send key presses. E.g. \"-l --remote-send 'iabc<cr><esc>'\".")
+            help    = 'Send key presses.')
     parser.add_argument('--remote-expr',
             action  = 'store',
             nargs   = '+',
@@ -207,9 +204,8 @@ def main():
 
     if flags.servername:
         address = flags.servername
-    else:
-        if not address:
-            address = '/tmp/nvimsocket'
+    elif not address:
+        address = '/tmp/nvimsocket'
 
     if flags.serverlist:
             print(address)
@@ -231,9 +227,8 @@ def main():
     elif flags.remote_tab_silent or flags.remote_tab_wait_silent:
         neovim.execute(arguments, 'tabedit', True)
 
-    # if args.remote_send and n.attached():
-    #     for keys in args.remote_send:
-    #         n.server.input(keys)
+    if flags.remote_send and neovim.is_attached():
+        neovim.server.input(flags.remote_send)
 
     # if args.remote_expr and n.attached():
     #     for expr in args.remote_expr:
