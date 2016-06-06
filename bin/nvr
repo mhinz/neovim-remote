@@ -132,6 +132,8 @@ def parse_args():
             $ nvr --remote-send 'iabc<cr><esc>'
             $ nvr --remote-expr v:progpath
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
+            $ nvr --servername /tmp/foo --remote file
+            $ nvr --servername 127.0.0.1:6789 --remote file
 
         Any arguments not consumed by flags, will be fed to
         --remote, so this is equivalent:
