@@ -26,6 +26,7 @@ import sys
 import os
 import textwrap
 import argparse
+import subprocess
 
 from neovim import attach
 
@@ -35,27 +36,73 @@ class Neovim():
 
     This helps handling the silent and non-silent arguments.
     """
-    def __init__(self, addr):
-        self.addr   = addr
-        self.server = None
+    def __init__(self, address):
+        self.address = address
+        self.server  = None
 
-    def attached(self, silent=False):
+    def is_attached(self, silent=False):
         if self.server is not None:
             return True
         try:
-            addr = self.addr.split(':')
+            addr = self.address.split(':')
             if len(addr) == 1:
-                self.server = attach('socket', path=self.addr)
+                self.server = attach('socket', path=addr)
             else:
                 ip, port = addr
                 self.server = attach("tcp", address=ip, port=int(port))
-            return True
         except:
-            if silent:
-                return False
-            else:
-                print("Can't connect to {}. Export $NVIM_LISTEN_ADDRESS or use --servername".format(self.addr))
-                sys.exit(1)
+            if not silent:
+                print(textwrap.dedent("""
+                    Can't connect to: {}
+
+                    Verify that \":echo v:servername\" in your nvim instance uses
+                    the same address.
+
+                    SOLUTION 1 (from server side):
+
+                        Export $NVIM_LISTEN_ADDRESS before starting nvim, so that
+                        v:servername gets set accordingly.
+
+                        $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
+
+                    SOLUTION 2 (from client side):
+
+                        Export $NVIM_LISTEN_ADDRESS before using nvr or use its
+                        --servername option. If neither is given, nvr assumes
+                        \"/tmp/nvimsocket\".
+
+                        $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
+                        $ nvr --servername /tmp/foo --remote file1 file2
+                """.format(self.address)))
+            return False
+        return True
+
+
+    def execute(self, arguments, cmd='edit', silent=False):
+        if self.is_attached(silent):
+            self.execute_remotely(arguments, cmd)
+        else:
+            self.execute_locally(arguments, silent)
+
+
+    def execute_locally(self, arguments, silent):
+        if not arguments and not silent:
+            print('No arguments were given!')
+        else:
+            env = os.environ.copy()
+            env['NVIM_LISTEN_ADDRESS'] = self.address
+            subprocess.Popen(['nvim'] + arguments, env=env).wait()
+
+
+    def execute_remotely(self, arguments, cmd):
+        c = None
+        for fname in reversed(arguments):
+            if fname.startswith('+'):
+                c = fname[1:]
+                continue
+            n.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=False)
+        if c:
+            n.server.command(c)
 
 
 def parse_args():
@@ -88,59 +135,43 @@ def parse_args():
             action  = 'append',
             metavar = '<cmd>',
             help    = 'Execute single command.')
-    parser.add_argument('-o',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'Open files via ":split".')
-    parser.add_argument('-O',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'Open files via ":vsplit".')
+    # # parser.add_argument('-o',
+    # #         action  = 'store',
+    # #         nargs   = '+',
+    # #         metavar = '<file>',
+    # #         help    = 'Open files via ":split".')
+    # parser.add_argument('-O',
+    #         action  = 'store',
+    #         nargs   = '+',
+    #         metavar = '<file>',
+    #         help    = 'Open files via ":vsplit".')
 
     # The following options exactly emulate their vim equivalents.
 
     parser.add_argument('--remote',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'Open files via ":edit". If one of the arguments is "+cmd", "cmd" will be executed for the first file. E.g. "--remote +10 file1 file2" will first open file2, then file1, then execute :10.')
+            action  = 'store_true',
+            help    = 'Edit files in a remote instance. If no server is found, throw an error and run nvim locally instead.')
     parser.add_argument('--remote-wait',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'As --remote.')
+            action  = 'store_true',
+            help    = 'Same as --remote.')
     parser.add_argument('--remote-silent',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = "As --remote, but don't throw error if no server is found.")
+            action  = 'store_true',
+            help    = "Same as --remote, but don't throw an error if no server is found.")
     parser.add_argument('--remote-wait-silent',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = "As --remote, but don't throw error if no server is found.")
+            action  = 'store_true',
+            help    = "Same as --remote-silent.")
+
     parser.add_argument('--remote-tab', '-p',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'As --remote, but uses :tabedit.')
+            action  = 'store_true',
+            help    = 'Tabedit files in a remote instance. If no server is found, throw an error and run nvim locally instead.')
     parser.add_argument('--remote-tab-wait',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'As --remote-tab.')
+            action  = 'store_true',
+            help    = 'Same as --remote-tab.')
     parser.add_argument('--remote-tab-silent',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = "As --remote-tab, but don't throw error if no server is found.")
-    parser.add_argument('--remote-tab-wait-silent',
-            action  = 'store',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = "As --remote-tab, but don't throw error if no server is found.")
+            action  = 'store_true',
+            help    = "Same as --remote-tab, but don't throw an error if no server is found.")
+    parser.add_argument('--remote-tab-wait-silent', action  = 'store_true', help    = "Same as --remote-tab-silent.")
+
     parser.add_argument('--remote-send',
             action  = 'store',
             nargs   = '+',
@@ -151,6 +182,7 @@ def parse_args():
             nargs   = '+',
             metavar = '<expr>',
             help    = "Evaluate expression on server and print result in shell. E.g. \"--remote-expr 'v:progpath'\".")
+
     parser.add_argument('--servername',
             metavar = '<addr>',
             help    = 'Set the address to be used (overrides $NVIM_LISTEN_ADDRESS).')
@@ -164,90 +196,75 @@ def parse_args():
 
     return parser.parse_known_args()
 
+
 def prepare_filename(fname):
     return os.path.abspath(fname).replace(" ", "\ ")
 
-def open(n, filenames, cmd, async=False):
-    c = None
-    for fname in reversed(filenames):
-        if fname.startswith('+'):
-            c = fname[1:]
-            continue
-        n.server.command('{} {}'.format(cmd, prepare_filename(fname)), async=async)
-    if c:
-        n.server.command(c)
 
 def main():
-    args, unused = parse_args()
-    addr = os.environ.get('NVIM_LISTEN_ADDRESS')
+    flags, arguments = parse_args()
+    address = os.environ.get('NVIM_LISTEN_ADDRESS')
 
-    if args.servername:
-        addr = args.servername
+    if flags.servername:
+        address = flags.servername
     else:
-        if not addr:
-            addr = '/tmp/nvimsocket'
+        if not address:
+            address = '/tmp/nvimsocket'
 
-    if args.serverlist:
-        if addr:
-            print(addr)
+    if flags.serverlist:
+            print(address)
 
-    n = Neovim(addr)
+    neovim = Neovim(address)
 
-    if args.l and n.attached(silent=True):
-        n.server.command('wincmd p', async=True)
+    # if args.l and n.attached(silent=True):
+    #     n.server.command('wincmd p', async=True)
 
-    if unused and n.attached(silent=True):
-        open(n, unused, 'edit', async=True)
+    # if unused and n.attached(silent=True):
+    #     open(n, unused, 'edit', async=True)
 
-    if args.remote_silent and n.attached(silent=True):
-        open(n, args.remote_silent, 'edit', async=True)
-    if args.remote_wait_silent and n.attached(silent=True):
-        open(n, args.remote_wait_silent, 'edit')
-    if args.remote_tab_silent and n.attached():
-        open(n, args.remote_tab_silent, 'tabedit', async=True)
-    if args.remote_tab_wait_silent and n.attached():
-        open(n, args.remote_tab_wait_silent, 'tabedit')
+    if flags.remote or flags.remote_wait:
+        neovim.execute(arguments, 'edit', False)
+    elif flags.remote_silent or flags.remote_wait_silent:
+        neovim.execute(arguments, 'edit', True)
+    elif flags.remote_tab or flags.remote_tab_wait:
+        neovim.execute(arguments, 'tabedit', False)
+    elif flags.remote_tab_silent or flags.remote_tab_wait_silent:
+        neovim.execute(arguments, 'tabedit', True)
 
-    if args.remote and n.attached():
-        open(n, args.remote, 'edit', async=True)
-    if args.remote_wait and n.attached():
-        open(n, args.remote_wait, 'edit')
-    if args.remote_tab and n.attached():
-        open(n, args.remote_tab, 'tabedit', async=True)
-    if args.remote_tab_wait and n.attached():
-        open(n, args.remote_tab_wait, 'tabedit')
+    # if args.remote_send and n.attached():
+    #     for keys in args.remote_send:
+    #         n.server.input(keys)
 
-    if args.remote_send and n.attached():
-        for keys in args.remote_send:
-            n.server.input(keys)
+    # if args.remote_expr and n.attached():
+    #     for expr in args.remote_expr:
+    #         result = ''
+    #         try:
+    #             result = n.server.eval(expr)
+    #         except:
+    #             print('Evaluation failed: ' + expr)
+    #             continue
+    #         if type(result) is bytes:
+    #             print(result.decode())
+    #         elif type(result) is list:
+    #             print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
+    #         elif type(result) is dict:
+    #             print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
+    #         else:
+    #             print(result)
 
-    if args.remote_expr and n.attached():
-        for expr in args.remote_expr:
-            result = ''
-            try:
-                result = n.server.eval(expr)
-            except:
-                print('Evaluation failed: ' + expr)
-                continue
-            if type(result) is bytes:
-                print(result.decode())
-            elif type(result) is list:
-                print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
-            elif type(result) is dict:
-                print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
-            else:
-                print(result)
+    # if args.o and n.attached():
+    #     for fname in args.o:
+    #         n.server.command('split {}'.format(prepare_filename(fname)), async=True)
 
-    if args.o and n.attached():
-        for fname in args.o:
-            n.server.command('split {}'.format(prepare_filename(fname)), async=True)
+    # if args.O and n.attached():
+    #     for fname in args.O:
+    #         n.server.command('vsplit {}'.format(prepare_filename(fname)), async=True)
 
-    if args.O and n.attached():
-        for fname in args.O:
-            n.server.command('vsplit {}'.format(prepare_filename(fname)), async=True)
+    # if args.c and n.attached():
+    #     for cmd in args.c:
+    #         n.server.command(cmd)
 
-    if args.c and n.attached():
-        for cmd in args.c:
-            n.server.command(cmd)
 
-main()
+if __name__ == "__main__":
+    main()
+
