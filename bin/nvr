@@ -116,7 +116,7 @@ class Neovim():
                         $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
                         $ nvr --servername /tmp/foo --remote file1 file2
 
-                [*] Starting a new instance with this address: {}
+            [*] Starting a new instance with this address: {}
             """.format(self.address, self.address)))
 
 
