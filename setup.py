@@ -16,7 +16,7 @@ setup(
     install_requires = ['neovim'],
     scripts          = ['bin/nvr'],
     packages         = [],
-    version          = '1.1.3',
+    version          = '1.2',
     license          = 'MIT',
     keywords         = 'neovim nvim nvr remote helper',
     classifiers      = [

@@ -4,14 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2] - 2016-06-07
+
 ### Added
 
+- Available on PyPI (`pip3 install neovim-remote`) as source distribution and
+  [wheel](http://pythonwheels.com).
 - Option: `-c` (execute single command).
 - Option: `--remote-tab-{wait,silent,wait-silent}`.
-- Option: `-wait` family actually waits now.
+- Support for TCP sockets.
 
 ### Changed
 
+- `nvr` is a single file now. Take a look at it via `nvim $(which nvr)`.
+- Option: `-wait` family actually waits now.
 - Option: `--remote{,-silent,-wait,-wait-silent}` take `+{cmd}` anywhere in
   arguments.
 
@@ -39,6 +45,7 @@ All notable changes to this project will be documented in this file.
 
 First release!
 
-[Unreleased]: https://github.com/mhinz/neovim-remote/compare/v1.1...HEAD
+[Unreleased]: https://github.com/mhinz/neovim-remote/compare/v1.2...HEAD
+[1.2]: https://github.com/mhinz/neovim-remote/compare/v1.1...v1.2
 [1.1]: https://github.com/mhinz/neovim-remote/compare/v1.0...v1.1
 [1.0]: https://github.com/mhinz/neovim-remote/compare/37d851b...v1.0
