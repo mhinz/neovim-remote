@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- `nvr` is a single file now. Take a look at it via `nvim $(which nvr)`.
+- `nvr` is a single file now.
 - Option: `-wait` family actually waits now.
 - Option: `--remote{,-silent,-wait,-wait-silent}` take `+{cmd}` anywhere in
   arguments.
