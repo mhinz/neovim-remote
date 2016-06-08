@@ -93,19 +93,19 @@ class Neovim():
         self.server.run_loop(None, notification_cb, setup_cb)
 
     def _show_msg(self):
+        a = self.address
         print(textwrap.dedent("""
             [!] Can't connect to: {}
 
-                If your intention was to communicate with a remote nvim
-                instance, verify that \":echo v:servername\" in your
-                instance uses the same address.
+                This script and the nvim process have to use the same address.
+                Use `:echo v:servername` in nvim to verify that.
 
                 SOLUTION 1 (from server side):
 
                     Expose $NVIM_LISTEN_ADDRESS to the environment before
                     starting nvim, so that v:servername gets set accordingly.
 
-                    $ NVIM_LISTEN_ADDRESS=/tmp/foo nvim
+                    $ NVIM_LISTEN_ADDRESS={} nvim
 
                 SOLUTION 2 (from client side):
 
@@ -113,11 +113,13 @@ class Neovim():
                     using nvr or use its --servername option. If neither
                     is given, nvr assumes \"/tmp/nvimsocket\".
 
-                        $ NVIM_LISTEN_ADDRESS=/tmp/foo nvr --remote file1 file2
-                        $ nvr --servername /tmp/foo --remote file1 file2
+                    $ NVIM_LISTEN_ADDRESS={} nvr --remote file1 file2
+                    $ nvr --servername {} --remote file1 file2
 
-            [*] Starting a new instance with this address: {}
-            """.format(self.address, self.address)))
+                Use any of the -silent options to suppress this message.
+
+            [*] Starting new nvim process with address: {}
+            """.format(a, a, a, a, a)))
 
 
 def parse_args():
