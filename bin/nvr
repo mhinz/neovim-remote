@@ -243,6 +243,11 @@ def main():
     if flags.l and neovim.is_attached():
         neovim.server.command('wincmd p')
 
+    try:
+        arguments.remove('--')
+    except ValueError:
+        pass
+
     # Arguments not consumed by flags, are fed to --remote.
     if arguments:
         neovim.execute(arguments, 'edit')
