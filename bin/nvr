@@ -72,25 +72,52 @@ class Neovim():
 
     def _execute_remotely(self, arguments, cmd, wait):
         c = None
+        in_term = os.environ.get('NVIM_TERMINAL')
         for fname in reversed(arguments):
             if fname.startswith('+'):
                 c = fname[1:]
                 continue
             self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
+            if wait and in_term:
+                self.server.command('augroup nvr')
+                self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(self.server.channel_id))
+                self.server.command('augroup END')
         if c:
             self.server.command(c)
         if wait:
-            self._wait_until_exiting()
+            bufcount        = len(arguments) - (1 if c else 0)
+            notification_cb = self._make_notification_cb(in_term, bufcount)
+            setup_cb        = self._make_setup_cb(in_term)
+            self.server.run_loop(None, notification_cb, setup_cb)
 
-    def _wait_until_exiting(self):
-        def notification_cb(name, _args):
-            if name == 'exiting':
-                self.server.stop_loop()
+    def _make_setup_cb(self, in_term):
+        if in_term:
+            def setup_cb():
+                pass
+        else:
+            def setup_cb():
+                self.server.command('augroup nvr')
+                self.server.command('autocmd!')
+                self.server.command('autocmd VimLeave call rpcnotify({}, "VimLeave")'.format(self.server.channel_id))
+                self.server.command('augroup END')
+        return setup_cb
 
-        def setup_cb():
-            self.server.command('autocmd VimLeave call rpcnotify({}, "exiting")'.format(self.server.channel_id))
-
-        self.server.run_loop(None, notification_cb, setup_cb)
+    def _make_notification_cb(self, in_term, bufcount):
+        if in_term:
+            def notification_cb(msg, _args):
+                nonlocal bufcount
+                if msg == 'BufDelete':
+                    bufcount -= 1
+                    if bufcount == 0:
+                        self.server.stop_loop()
+                        self.server.command('augroup nvr')
+                        self.server.command('autocmd!')
+                        self.server.command('augroup END')
+        else:
+            def notification_cb(msg, _args):
+                if msg == 'VimLeave':
+                    self.server.stop_loop()
+        return notification_cb
 
     def _show_msg(self):
         a = self.address

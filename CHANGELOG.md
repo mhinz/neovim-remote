@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Now it's possible to use `nvr --remote-wait` from within `:terminal`, without
+  blocking until the nvim process ends, as long as `$NVIM_TERMINAL` is set. In
+  that case, nvr will wait until the buffers opened via `--remote-wait` (or one
+  of the other wait flags) get deleted before returning.
+
 ## [1.2] - 2016-06-07
 
 ### Added
