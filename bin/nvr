@@ -88,7 +88,13 @@ class Neovim():
             bufcount        = len(arguments) - (1 if c else 0)
             notification_cb = self._make_notification_cb(in_term, bufcount)
             setup_cb        = self._make_setup_cb(in_term)
-            self.server.run_loop(None, notification_cb, setup_cb)
+
+            def err_cb(error):
+                print(error, file=sys.stderr)
+                self.server.stop_loop()
+                sys.exit(1)
+
+            self.server.run_loop(None, notification_cb, setup_cb, err_cb)
 
     def _make_setup_cb(self, in_term):
         if in_term:
