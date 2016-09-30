@@ -261,17 +261,16 @@ def prepare_filename(fname):
 def scan_tmp_for_addy(default='/tmp/nvimsocket'):
     """Check nvim's usual mktemp dir location, stat for socket named '0'
     """
-    if os.name is not "posix":
+    if os.name != "posix":
         return default
-    tdir = '/tmp'
-    cands = [cand for cand in os.listdir(tdir)
-                        if cand.startswith('nvim')
-                            and os.path.isdir(os.path.join(tdir, cand))
-                            and os.path.exists(os.path.join(tdir, cand, '0'))
+    else:
+        cands = [_dir for _dir in os.listdir('/tmp')
+                        if _dir.startswith('nvim')
+                            and os.path.isdir(os.path.join('/tmp', _dir))
+                            and os.path.exists(os.path.join('/tmp', _dir, '0'))
                             and os.path.stat.S_ISSOCK( os.stat(
-                                os.path.join(tdir, cand, '0')).st_mode )
-            ]
-    return os.path.abspath( os.path.join(tdir, cands[0], '0')
+                                os.path.join('/tmp', _dir, '0')).st_mode ) ]
+        return os.path.abspath( os.path.join('/tmp', cands[0], '0')
                                             ) if len(cands) == 1 else default
 
 
