@@ -229,7 +229,8 @@ def parse_args():
             help    = 'Set the address to be used (overrides $NVIM_LISTEN_ADDRESS).')
     parser.add_argument('--serverlist',
             action  = 'store_true',
-            help    = 'Print the used address (TCP or Unix domain socket).')
+            help    = '''Print the address to be used (TCP or Unix domain socket). Opposed to Vim there is no central
+            instance that knows about all running servers.''')
 
     parser.add_argument('-l',
             action  = 'store_true',
