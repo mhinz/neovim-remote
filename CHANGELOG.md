@@ -2,14 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.3] - 2016-10-06
 
-### Added
-
-- Now it's possible to use `nvr --remote-wait` from within `:terminal`, without
-  blocking until the nvim process ends, as long as `$NVIM_TERMINAL` is set. In
-  that case, nvr will wait until the buffers opened via `--remote-wait` (or one
-  of the other wait flags) get deleted before returning.
+- Many small fixes, code cleanups, and documentation improvements.
+- The `--*wait*` family now works everywhere. It doesn't matter if nvr is run
+  from the shell or from within :terminal. E.g. `nvr --remote-wait file1 file2`
+  will block exactly until these two buffers got deleted (BufDelete). Or until
+  nvim quits, of course.
 
 ## [1.2] - 2016-06-07
 
@@ -52,7 +51,7 @@ All notable changes to this project will be documented in this file.
 
 First release!
 
-[Unreleased]: https://github.com/mhinz/neovim-remote/compare/v1.2...HEAD
+[1.3]: https://github.com/mhinz/neovim-remote/compare/v1.2...v1.3.0
 [1.2]: https://github.com/mhinz/neovim-remote/compare/v1.1...v1.2
 [1.1]: https://github.com/mhinz/neovim-remote/compare/v1.0...v1.1
 [1.0]: https://github.com/mhinz/neovim-remote/compare/37d851b...v1.0
