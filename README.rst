@@ -34,12 +34,6 @@ Installation
 
     $ pip3 install neovim-remote
 
-Although you can install it via ``pip3``, you can't search for it. The
-`bug tracker of
-PyPI <https://bitbucket.org/pypa/pypi/issues?status=new&status=open>`__
-is full of issues about packages not appearing and the developers don't
-seem to care much.
-
 FAQ
 ---
 
