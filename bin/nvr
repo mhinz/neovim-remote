@@ -132,18 +132,22 @@ def parse_args():
     usage      = '{} [arguments]'.format(sys.argv[0])
     epilog     = 'Happy hacking!'
     desc       = textwrap.dedent("""
-        Script that allows remote control of nvim processes.
-        If no process is found, a new one will be started.
+        This script allows remote control of nvim processes. If no process is found,
+        a new one will be started.
 
-            $ nvr --remote +3 file1 file2
             $ nvr --remote-send 'iabc<cr><esc>'
             $ nvr --remote-expr v:progpath
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
             $ nvr --servername /tmp/foo --remote file
             $ nvr --servername 127.0.0.1:6789 --remote file
 
-        Any arguments not consumed by flags, will be fed to
-        --remote, so this is equivalent:
+        All --remote flags take optional commands. Except: --remote-expr, --remote-send.
+
+            $ nvr +10 file
+            $ nvr +'echomsg "foo" | echomsg "bar"' file
+            $ nvr --remote-tab-wait +'set bufhidden=delete' file
+
+        Any arguments not consumed by flags, will be fed to --remote. Equivalent:
 
             $ nvr file1 file2
             $ nvr --remote file1 file2
