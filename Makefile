@@ -3,7 +3,7 @@ default: install
 install:
 	python3 setup.py install
 
-upload:
+upload: clean
 	python3 setup.py sdist bdist_wheel
 	twine upload dist/*
 
