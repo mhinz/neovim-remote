@@ -1,8 +1,6 @@
 .. figure:: https://github.com/mhinz/neovim-remote/raw/master/pictures/nvr-logo.png
    :alt: Logo
 
-   Logo
-
 -  `Intro <#intro>`__
 -  `Installation <#installation>`__
 -  `FAQ <#faq>`__
