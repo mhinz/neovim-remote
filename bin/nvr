@@ -95,8 +95,10 @@ class Neovim():
             self.server.command(c)
         if wait:
             bufcount = len(arguments) - (1 if c else 0)
+            exitfail = False
             def notification_cb(msg, _args):
                 nonlocal bufcount
+                nonlocal exitfail
                 if msg == 'BufDelete':
                     bufcount -= 1
                     if bufcount == 0:
@@ -104,8 +106,10 @@ class Neovim():
             def err_cb(error):
                 print(error, file=sys.stderr)
                 self.server.stop_loop()
-                sys.exit(1)
+                exitfail = True
             self.server.run_loop(None, notification_cb, None, err_cb)
+            if exitfail:
+                sys.exit(1)
 
     def _show_msg(self):
         a = self.address
