@@ -56,6 +56,13 @@ class Neovim():
                 self._msg_shown = True
             return False
 
+    def read_stdin_into_buffer(self, cmd):
+        self.server.command(cmd)
+        for line in sys.stdin:
+            self.server.command("call append('$', '{}')".
+                    format(line.rstrip().replace("'", "''")))
+        self.server.command('silent 1delete _')
+
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         if self.is_attached(silent):
             self._execute_remotely(arguments, cmd, wait)
@@ -298,10 +305,16 @@ def main():
 
     if flags.o and neovim.is_attached():
         for fname in flags.o:
-            neovim.server.command('split {}'.format(prepare_filename(fname)))
+            if fname == '-':
+                neovim.read_stdin_into_buffer('new')
+            else:
+                neovim.server.command('split {}'.format(prepare_filename(fname)))
     if flags.O and neovim.is_attached():
         for fname in flags.O:
-            neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
+            if fname == '-':
+                neovim.read_stdin_into_buffer('vnew')
+            else:
+                neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
     if flags.c and neovim.is_attached():
         for cmd in flags.c:
