@@ -61,7 +61,7 @@ class Neovim():
         for line in sys.stdin:
             self.server.command("call append('$', '{}')".
                     format(line.rstrip().replace("'", "''")))
-        self.server.command('silent 1delete _')
+        self.server.command('silent 1delete _ | set nomodified')
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         if self.is_attached(silent):
@@ -83,7 +83,10 @@ class Neovim():
             if fname.startswith('+'):
                 c = fname[1:]
                 continue
-            self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
+            if fname == '-':
+                self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
+            else:
+                self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
             if wait:
                 self.server.command('augroup nvr')
                 self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(self.server.channel_id))
