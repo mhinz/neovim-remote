@@ -90,26 +90,29 @@ class Neovim():
             if wait:
                 self.server.command('augroup nvr')
                 self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(self.server.channel_id))
+                self.server.command('autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({}, "VimLeave", v:exiting) | endif'.format(self.server.channel_id))
                 self.server.command('augroup END')
         if c:
             self.server.command(c)
         if wait:
             bufcount = len(arguments) - (1 if c else 0)
-            exitfail = False
-            def notification_cb(msg, _args):
+            exitcode = 0
+            def notification_cb(msg, args):
                 nonlocal bufcount
-                nonlocal exitfail
+                nonlocal exitcode
                 if msg == 'BufDelete':
                     bufcount -= 1
                     if bufcount == 0:
                         self.server.stop_loop()
+                elif msg == 'VimLeave':
+                    self.server.stop_loop()
+                    exitcode = args[0]
             def err_cb(error):
                 print(error, file=sys.stderr)
                 self.server.stop_loop()
-                exitfail = True
+                exitcode = 1
             self.server.run_loop(None, notification_cb, None, err_cb)
-            if exitfail:
-                sys.exit(1)
+            sys.exit(exitcode)
 
     def _show_msg(self):
         a = self.address
