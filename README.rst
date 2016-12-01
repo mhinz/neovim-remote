@@ -35,8 +35,7 @@ Installation
 FAQ
 ---
 
-How to open directories?
-^^^^^^^^^^^^^^^^^^^^^^^^
+**How to open directories?**
 
 ``:e /tmp`` opens a directory view via netrw. Netrw works by hooking
 into certain events, ``BufEnter`` in this case (see ``:au FileExplorer``
@@ -49,6 +48,15 @@ this:
 ::
 
     $ nvr /tmp -c 'doau BufEnter'
+
+**Exit code?**
+
+If you use a `recent enough Neovim
+<https://github.com/neovim/neovim/commit/d2e8c76dc22460ddfde80477dd93aab3d5866506>`__,
+nvr will use the same exit code as the linked nvim.
+
+E.g. ``nvr --remote-wait <file>`` and then ``:cquit`` in the linked nvim will
+make nvr return with 1.
 
 Examples
 --------
