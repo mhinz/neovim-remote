@@ -83,30 +83,38 @@ class Neovim():
             if fname.startswith('+'):
                 c = fname[1:]
                 continue
+
             if fname == '-':
                 self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
             else:
                 self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
+
             if wait:
                 bvars = self.server.current.buffer.vars
                 chanid = self.server.channel_id
+
                 self.server.command('augroup nvr')
                 self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(chanid))
                 self.server.command('autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({}, "Exit", v:exiting) | endif'.format(chanid))
                 self.server.command('augroup END')
+
                 if 'nvr' in bvars:
                     if chanid not in bvars['nvr']:
                         bvars['nvr'] = [chanid] + bvars['nvr']
                 else:
                     bvars['nvr'] = [chanid]
+
         if c:
             self.server.command(c)
+
         if wait:
             bufcount = len(arguments) - (1 if c else 0)
             exitcode = 0
+
             def notification_cb(msg, args):
                 nonlocal bufcount
                 nonlocal exitcode
+
                 if msg == 'BufDelete':
                     bufcount -= 1
                     if bufcount == 0:
@@ -114,10 +122,12 @@ class Neovim():
                 elif msg == 'Exit':
                     self.server.stop_loop()
                     exitcode = args[0]
+
             def err_cb(error):
                 print(error, file=sys.stderr)
                 self.server.stop_loop()
                 exitcode = 1
+
             self.server.run_loop(None, notification_cb, None, err_cb)
             sys.exit(exitcode)
 
