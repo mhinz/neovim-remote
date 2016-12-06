@@ -34,25 +34,28 @@ Installation
 Usage
 -----
 
-In one window, create the server process:
+Start a nvim process (which acts as a server) in one shell:
 
 ::
 
     $ NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
 
-In another window do this:
+And do this in another shell:
 
 .. code:: shell
 
     $ # Spares us from using --servername all the time:
     $ export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket
-    $ # Open 2 files in the server:
+    $ # This is optional, since nvr assumes /tmp/nvimsocket by default.
+
+    $ # Open two files:
     $ nvr --remote file1 file2
-    $ # Send keys to the current buffer of the server:
-    $ # Enter insert mode, enter 'abc', and go back to normal mode again:
+
+    $ # Send keys to the current buffer:
     $ nvr --remote-send 'iabc<esc>'
-    $ # Evaluate any VimL expression.
-    $ # Get all listed buffers:
+    $ # Enter insert mode, insert 'abc', and go back to normal mode again.
+
+    $ # Evaluate any VimL expression, e.g. get all listed buffers:
     $ nvr --remote-expr "join(sort(map(filter(range(bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')), "\""\n"\"")"
     .config/git/config
     vim/vimrc
