@@ -80,6 +80,11 @@ this:
 
     $ nvr /tmp -c 'doautocmd BufEnter'
 
+**Reading from stdin?**
+
+Yes! E.g. ``echo "foo\nbar" | nvr -o -`` and ``cat file | nvr --remote -`` work
+just as you would expect them to work.
+
 **Exit code?**
 
 If you use a `recent enough Neovim
