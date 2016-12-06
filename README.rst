@@ -4,7 +4,6 @@
 -  `Intro <#intro>`__
 -  `Installation <#installation>`__
 -  `FAQ <#faq>`__
--  `How to open directories? <#how-to-open-directories>`__
 -  `Examples <#examples>`__
 -  `Demos <#demos>`__
 
@@ -47,7 +46,7 @@ this:
 
 ::
 
-    $ nvr /tmp -c 'doau BufEnter'
+    $ nvr /tmp -c 'doautocmd BufEnter'
 
 **Exit code?**
 
@@ -74,7 +73,7 @@ In another window do this:
     $ # Spares us from using --servername all the time:
     $ export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket
     $ # Open 2 files in the server:
-    $ nvr --remote file1 --remote file2
+    $ nvr --remote file1 file2
     $ # Send keys to the current buffer of the server:
     $ # Enter insert mode, enter 'abc', and go back to normal mode again:
     $ nvr --remote-send 'iabc<esc>'
@@ -92,10 +91,10 @@ Demos
 
 (Click the GIFs to watch them full-size.)
 
-Using nvr from a different window (another tmux pane in this case):
+Using nvr from another shell:
 |Demo 1|
 
-Using nvr from within Neovim: |Demo 2|
+Using nvr from within `:terminal`: |Demo 2|
 
 .. |Demo 1| image:: https://github.com/mhinz/neovim-remote/raw/master/pictures/demo1.gif
 .. |Demo 2| image:: https://github.com/mhinz/neovim-remote/raw/master/pictures/demo2.gif
