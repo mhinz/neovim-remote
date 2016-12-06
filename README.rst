@@ -57,6 +57,24 @@ nvr will use the same exit code as the linked nvim.
 E.g. ``nvr --remote-wait <file>`` and then ``:cquit`` in the linked nvim will
 make nvr return with 1.
 
+**Talking to nvr from Neovim?**
+
+Imagine ``nvr --remote-wait file``. The buffer that represents "file" in Neovim
+now has a local variable ``b:nvr``. It's a list of channels for each connected
+nvr process.
+
+If we wanted to create a command that disconnects all nvr processes with exit
+code 1:
+
+::
+
+    command! Cquit
+        \  if exists('b:nvr')
+        \|   for chanid in b:nvr
+        \|     silent! call rpcnotify(chanid, 'Exit', 1)
+        \|   endfor
+        \| endif
+
 Examples
 --------
 
@@ -89,10 +107,9 @@ See ``nvr -h`` for all options.
 Demos
 -----
 
-(Click the GIFs to watch them full-size.)
+*(Click on the GIFs to watch them full-size.)*
 
-Using nvr from another shell:
-|Demo 1|
+Using nvr from another shell: |Demo 1|
 
 Using nvr from within `:terminal`: |Demo 2|
 
