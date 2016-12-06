@@ -3,8 +3,8 @@
 
 -  `Intro <#intro>`__
 -  `Installation <#installation>`__
+-  `Usage <#usage>`__
 -  `FAQ <#faq>`__
--  `Examples <#examples>`__
 -  `Demos <#demos>`__
 
 Intro
@@ -30,6 +30,35 @@ Installation
 ::
 
     $ pip3 install neovim-remote
+
+Usage
+-----
+
+In one window, create the server process:
+
+::
+
+    $ NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
+
+In another window do this:
+
+.. code:: shell
+
+    $ # Spares us from using --servername all the time:
+    $ export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket
+    $ # Open 2 files in the server:
+    $ nvr --remote file1 file2
+    $ # Send keys to the current buffer of the server:
+    $ # Enter insert mode, enter 'abc', and go back to normal mode again:
+    $ nvr --remote-send 'iabc<esc>'
+    $ # Evaluate any VimL expression.
+    $ # Get all listed buffers:
+    $ nvr --remote-expr "join(sort(map(filter(range(bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')), "\""\n"\"")"
+    .config/git/config
+    vim/vimrc
+    zsh/.zprofile
+
+See ``nvr -h`` for all options.
 
 FAQ
 ---
@@ -74,35 +103,6 @@ code 1:
         \|     silent! call rpcnotify(chanid, 'Exit', 1)
         \|   endfor
         \| endif
-
-Examples
---------
-
-In one window, create the server process:
-
-::
-
-    $ NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
-
-In another window do this:
-
-.. code:: shell
-
-    $ # Spares us from using --servername all the time:
-    $ export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket
-    $ # Open 2 files in the server:
-    $ nvr --remote file1 file2
-    $ # Send keys to the current buffer of the server:
-    $ # Enter insert mode, enter 'abc', and go back to normal mode again:
-    $ nvr --remote-send 'iabc<esc>'
-    $ # Evaluate any VimL expression.
-    $ # Get all listed buffers:
-    $ nvr --remote-expr "join(sort(map(filter(range(bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')), "\""\n"\"")"
-    .config/git/config
-    vim/vimrc
-    zsh/.zprofile
-
-See ``nvr -h`` for all options.
 
 Demos
 -----
