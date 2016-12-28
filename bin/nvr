@@ -352,11 +352,14 @@ def main():
             neovim.server.command(cmd)
 
     if flags.q and neovim.is_attached():
+        neovim.server.command("silent execute 'lcd' fnameescape('{}')".
+                format(os.environ['PWD'].replace("'", "''")))
         neovim.server.command('call setqflist([])')
         with open(flags.q, 'r') as f:
             for line in f.readlines():
                 neovim.server.command("caddexpr '{}'".
                         format(line.rstrip().replace("'", "''").replace('|', '\|')))
+        neovim.server.command('silent lcd -')
         neovim.server.command('cfirst')
 
 
