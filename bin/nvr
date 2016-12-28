@@ -257,6 +257,10 @@ def parse_args():
             nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":vsplit".')
+    parser.add_argument('-q',
+            metavar = '<errorfile>',
+            help    = 'Read errorfile into quickfix list and display first error.')
+
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -346,6 +350,13 @@ def main():
     if flags.c and neovim.is_attached():
         for cmd in flags.c:
             neovim.server.command(cmd)
+
+    if flags.q and neovim.is_attached():
+        with open(flags.q, 'r') as f:
+            neovim.server.command('call setqflist([])')
+            for line in f.readlines():
+                neovim.server.command("caddexpr '{}'".
+                        format(line.rstrip().replace("'", "''").replace('|', '\|')))
 
 
 if __name__ == '__main__':
