@@ -352,11 +352,12 @@ def main():
             neovim.server.command(cmd)
 
     if flags.q and neovim.is_attached():
+        neovim.server.command('call setqflist([])')
         with open(flags.q, 'r') as f:
-            neovim.server.command('call setqflist([])')
             for line in f.readlines():
                 neovim.server.command("caddexpr '{}'".
                         format(line.rstrip().replace("'", "''").replace('|', '\|')))
+        neovim.server.command('cfirst')
 
 
 if __name__ == '__main__':
