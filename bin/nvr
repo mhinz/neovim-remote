@@ -257,6 +257,9 @@ def parse_args():
             nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":vsplit".')
+    parser.add_argument('-t',
+            metavar = '<tag>',
+            help    = 'Jump to file and position of given tag.')
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
@@ -350,6 +353,13 @@ def main():
     if flags.c and neovim.is_attached():
         for cmd in flags.c:
             neovim.server.command(cmd)
+
+    if flags.t and neovim.is_attached():
+        try:
+            neovim.server.command("tag {}".format(flags.t))
+        except neovim.server.error as e:
+            print(e)
+            sys.exit(1)
 
     if flags.q and neovim.is_attached():
         neovim.server.command("silent execute 'lcd' fnameescape('{}')".
