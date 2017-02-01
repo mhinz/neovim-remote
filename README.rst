@@ -29,7 +29,18 @@ Installation
 
 ::
 
+    $ pip3 install neovim-remote
+
+On most systems this will be good enough.
+
+If you get a "permission denied" error, don't use ``sudo`` to force it! Use
+this instead:
+
+::
+
     $ pip3 install --user neovim-remote
+
+..and make sure that ``~/.local/bin`` is in $PATH.
 
 Usage
 -----
