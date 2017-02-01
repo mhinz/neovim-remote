@@ -29,7 +29,7 @@ Installation
 
 ::
 
-    $ pip3 install neovim-remote
+    $ pip3 install --user neovim-remote
 
 Usage
 -----
