@@ -245,10 +245,14 @@ def parse_args():
     parser.add_argument('-l',
             action  = 'store_true',
             help    = 'Change to previous window via ":wincmd p".')
+    parser.add_argument('-cc',
+            action  = 'append',
+            metavar = '<cmd>',
+            help    = 'Execute a command before every other option.')
     parser.add_argument('-c',
             action  = 'append',
             metavar = '<cmd>',
-            help    = 'Execute a command.')
+            help    = 'Execute a command after every other option.')
     parser.add_argument('-o',
             nargs   = '+',
             metavar = '<file>',
@@ -290,6 +294,10 @@ def main():
 
     neovim = Neovim(address)
     neovim.attach()
+
+    if flags.cc and neovim.is_attached():
+        for cmd in flags.cc:
+            neovim.server.command(cmd)
 
     if flags.l and neovim.is_attached():
         neovim.server.command('wincmd p')
@@ -350,10 +358,6 @@ def main():
             else:
                 neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
-    if flags.c and neovim.is_attached():
-        for cmd in flags.c:
-            neovim.server.command(cmd)
-
     if flags.t and neovim.is_attached():
         try:
             neovim.server.command("tag {}".format(flags.t))
@@ -371,6 +375,10 @@ def main():
                         format(line.rstrip().replace("'", "''").replace('|', '\|')))
         neovim.server.command('silent lcd -')
         neovim.server.command('cfirst')
+
+    if flags.c and neovim.is_attached():
+        for cmd in flags.c:
+            neovim.server.command(cmd)
 
 
 if __name__ == '__main__':
