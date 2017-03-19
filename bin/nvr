@@ -207,7 +207,8 @@ def parse_args():
             metavar = '<file>',
             help    = "Same as --remote, but don't throw an error if no server is found.")
     parser.add_argument('--remote-wait-silent',
-            action  = 'store_true',
+            nargs   = '+',
+            metavar = '<file>',
             help    = "Same as --remote-silent, but block until remote instance exits.")
 
     parser.add_argument('--remote-tab', '-p',
