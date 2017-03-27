@@ -136,28 +136,30 @@ class Neovim():
         print(textwrap.dedent("""
             [!] Can't connect to: {}
 
-                This script and the nvim process have to use the same address.
-                Use `:echo v:servername` in nvim to verify that.
+                The server (nvim) and client (nvr) have to use the same address.
 
-                SOLUTION 1 (from server side):
+                Server:
 
                     Expose $NVIM_LISTEN_ADDRESS to the environment before
-                    starting nvim, so that v:servername gets set accordingly.
+                    starting nvim:
 
                     $ NVIM_LISTEN_ADDRESS={} nvim
 
-                SOLUTION 2 (from client side):
+                    Use `:echo v:servername` to verify the address.
+
+                Client:
 
                     Expose $NVIM_LISTEN_ADDRESS to the environment before
                     using nvr or use its --servername option. If neither
                     is given, nvr assumes \"/tmp/nvimsocket\".
 
-                    $ NVIM_LISTEN_ADDRESS={} nvr --remote file1 file2
-                    $ nvr --servername {} --remote file1 file2
+                    $ NVIM_LISTEN_ADDRESS={} nvr file1 file2
+                    $ nvr --servername {} file1 file2
+                    $ nvr --servername 127.0.0.1:6789 file1 file2
 
-                Use any of the -silent options to suppress this message.
+                Use any of the --remote*silent options to suppress this message.
 
-            [*] Starting new nvim process with address: {}
+            [*] Starting new nvim instance with address: {}
             """.format(a, a, a, a, a)))
 
 
@@ -166,14 +168,16 @@ def parse_args():
     usage      = '{} [arguments]'.format(sys.argv[0])
     epilog     = 'Happy hacking!'
     desc       = textwrap.dedent("""
-        This script allows remote control of nvim processes. If no process is found,
-        a new one will be started.
+        Remote control Neovim instances.
 
             $ nvr --remote-send 'iabc<cr><esc>'
-            $ nvr --remote-expr v:progpath
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
-            $ nvr --servername /tmp/foo --remote file
-            $ nvr --servername 127.0.0.1:6789 --remote file
+
+        Any arguments not consumed by options will be fed to --remote. If no remote
+        instance is found, a new one will be started.
+
+            $ nvr --remote file1 file2
+            $ nvr file1 file2
 
         All --remote flags take optional commands. Except: --remote-expr, --remote-send.
 
@@ -181,10 +185,9 @@ def parse_args():
             $ nvr +'echomsg "foo" | echomsg "bar"' file
             $ nvr --remote-tab-wait +'set bufhidden=delete' file
 
-        Any arguments not consumed by flags, will be fed to --remote. Equivalent:
+        Open files in a new window from within :terminal
 
-            $ nvr file1 file2
-            $ nvr --remote file1 file2
+            $ nvr -cc split file1 file2
 
     """)
 
@@ -197,51 +200,50 @@ def parse_args():
     parser.add_argument('--remote',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Edit files in a remote instance. If no server is found, throw an error and run nvim locally instead.')
+            help    = 'Use :edit to open files in a remote instance. If no remote instance is found, throw an error and run nvim locally instead.')
     parser.add_argument('--remote-wait',
             nargs   = '*',
             metavar = '<file>',
-            help    = 'Same as --remote, but block until remote instance exits.')
+            help    = 'Like --remote, but block until all buffers opened by this option get deleted or remote instance exits.')
     parser.add_argument('--remote-silent',
             nargs   = '+',
             metavar = '<file>',
-            help    = "Same as --remote, but don't throw an error if no server is found.")
+            help    = 'Like --remote, but throw no error if remote instance is not found.')
     parser.add_argument('--remote-wait-silent',
             nargs   = '*',
             metavar = '<file>',
-            help    = "Same as --remote-silent, but block until remote instance exits.")
+            help    = 'Combines --remote-wait and --remote-silent.')
 
     parser.add_argument('--remote-tab', '-p',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Tabedit files in a remote instance. If no server is found, throw an error and run nvim locally instead.')
+            help    = 'Like --remote, but use :tabedit.')
     parser.add_argument('--remote-tab-wait',
             nargs   = '+',
             metavar = '<file>',
-            help    = 'Same as --remote-tab, but block until remote instance exits.')
+            help    = 'Like --remote-wait, but use :tabedit.')
     parser.add_argument('--remote-tab-silent',
             nargs   = '+',
             metavar = '<file>',
-            help    = "Same as --remote-tab, but don't throw an error if no server is found.")
+            help    = 'Like --remote-silent, but use :tabedit.')
     parser.add_argument('--remote-tab-wait-silent',
             nargs   = '+',
             metavar = '<file>',
-            help    = "Same as --remote-tab-silent, but block until remote instance exits.")
+            help    = 'Like --remote-wait-silent, but use :tabedit.')
 
     parser.add_argument('--remote-send',
             metavar = '<keys>',
             help    = 'Send key presses.')
     parser.add_argument('--remote-expr',
             metavar = '<expr>',
-            help    = 'Evaluate expression on server and print result in shell.')
+            help    = 'Evaluate expression on remote instance and print result in shell.')
 
     parser.add_argument('--servername',
             metavar = '<addr>',
             help    = 'Set the address to be used. This overrides the default "/tmp/nvimsocket" and $NVIM_LISTEN_ADDRESS.')
     parser.add_argument('--serverlist',
             action  = 'store_true',
-            help    = '''Print the address to be used (TCP or Unix domain socket). Opposed to Vim there is no central
-            instance that knows about all running servers.''')
+            help    = 'Print the address to be used (TCP or Unix domain socket). Opposed to Vim there is no central instance that knows about all running nvim instances.')
 
     parser.add_argument('-l',
             action  = 'store_true',
