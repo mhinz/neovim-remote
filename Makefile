@@ -8,6 +8,6 @@ upload: clean
 	twine upload dist/*
 
 clean:
-	rm -r build dist neovim_remote.egg-info
+	rm -rf build dist neovim_remote.egg-info
 
 .PHONY: install upload
