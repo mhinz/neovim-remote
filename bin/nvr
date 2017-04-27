@@ -27,6 +27,7 @@ import os
 import textwrap
 import argparse
 import subprocess
+import psutil
 
 from neovim import attach
 
@@ -243,7 +244,7 @@ def parse_args():
             help    = 'Set the address to be used. This overrides the default "/tmp/nvimsocket" and $NVIM_LISTEN_ADDRESS.')
     parser.add_argument('--serverlist',
             action  = 'store_true',
-            help    = 'Print the address to be used (TCP or Unix domain socket). Opposed to Vim there is no central instance that knows about all running nvim instances.')
+            help    = 'Print the TCPv4 and Unix domain socket addresses of all nvim processes.')
 
     parser.add_argument('-l',
             action  = 'store_true',
@@ -283,6 +284,20 @@ def prepare_filename(fname):
     return os.path.abspath(fname).replace(" ", "\ ")
 
 
+def print_sockaddrs():
+    sockaddrs = []
+
+    for proc in psutil.process_iter():
+        if proc.name() == 'nvim':
+            for conn in proc.connections('inet4'):
+                sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+            for conn in proc.connections('unix'):
+                sockaddrs.insert(0, conn.laddr)
+
+    for addr in sorted(sockaddrs):
+        print(addr)
+
+
 def main():
     flags, arguments = parse_args()
     address = os.environ.get('NVIM_LISTEN_ADDRESS')
@@ -293,7 +308,7 @@ def main():
         address = '/tmp/nvimsocket'
 
     if flags.serverlist:
-        print(address)
+        print_sockaddrs()
 
     neovim = Neovim(address)
     neovim.attach()
