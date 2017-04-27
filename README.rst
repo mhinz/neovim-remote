@@ -1,5 +1,21 @@
 .. figure:: https://github.com/mhinz/neovim-remote/raw/master/pictures/nvr-logo.png
+   :width: 60%
    :alt: Logo
+
+.. image:: https://img.shields.io/pypi/v/neovim-remote.svg
+   :target: https://pypi.python.org/pypi/neovim-remote
+
+.. image:: https://img.shields.io/pypi/pyversions/neovim-remote.svg
+   :target: https://pypi.python.org/pypi/neovim-remote
+
+.. image:: https://img.shields.io/pypi/l/neovim-remote.svg
+   :target: https://pypi.python.org/pypi/neovim-remote
+
+|
+|
+
+.. image:: https://img.shields.io/pypi/wheel/neovim-remote.svg
+   :target: https://pypi.python.org/pypi/neovim-remote
 
 -  `Intro <#intro>`__
 -  `Installation <#installation>`__
