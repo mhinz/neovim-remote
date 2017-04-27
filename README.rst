@@ -1,6 +1,5 @@
-.. figure:: https://github.com/mhinz/neovim-remote/raw/master/pictures/nvr-logo.png
-   :width: 60%
-   :alt: Logo
+neovim-remote: support for --remote and friends
+===============================================
 
 .. image:: https://img.shields.io/pypi/v/neovim-remote.svg
    :target: https://pypi.python.org/pypi/neovim-remote
@@ -11,12 +10,9 @@
 .. image:: https://img.shields.io/pypi/l/neovim-remote.svg
    :target: https://pypi.python.org/pypi/neovim-remote
 
-|
-|
-
 .. image:: https://img.shields.io/pypi/wheel/neovim-remote.svg
    :target: https://pypi.python.org/pypi/neovim-remote
-
+|
 -  `Intro <#intro>`__
 -  `Installation <#installation>`__
 -  `Usage <#usage>`__
@@ -148,6 +144,6 @@ Using nvr from another shell: |Demo 1|
 
 Using nvr from within `:terminal`: |Demo 2|
 
-.. |Demo 1| image:: https://github.com/mhinz/neovim-remote/raw/master/pictures/demo1.gif
-.. |Demo 2| image:: https://github.com/mhinz/neovim-remote/raw/master/pictures/demo2.gif
+.. |Demo 1| image:: https://github.com/mhinz/neovim-remote/raw/master/images/demo1.gif
+.. |Demo 2| image:: https://github.com/mhinz/neovim-remote/raw/master/images/demo2.gif
 
