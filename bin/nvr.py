@@ -164,9 +164,9 @@ class Neovim():
             """.format(a, a, a, a, a)))
 
 
-def parse_args():
+def parse_args(argv):
     form_class = argparse.RawDescriptionHelpFormatter
-    usage      = '{} [arguments]'.format(sys.argv[0])
+    usage      = '{} [arguments]'.format(argv[0])
     epilog     = 'Happy hacking!'
     desc       = textwrap.dedent("""
         Remote control Neovim instances.
@@ -273,11 +273,11 @@ def parse_args():
             help    = 'Read errorfile into quickfix list and display first error.')
 
 
-    if len(sys.argv) == 1:
+    if len(argv) == 1:
         parser.print_help()
         sys.exit(0)
 
-    return parser.parse_known_args()
+    return parser.parse_known_args(argv[1:])
 
 
 def prepare_filename(fname):
@@ -298,8 +298,8 @@ def print_sockaddrs():
         print(addr)
 
 
-def main():
-    flags, arguments = parse_args()
+def main(argv = sys.argv):
+    flags, arguments = parse_args(argv)
     address = os.environ.get('NVIM_LISTEN_ADDRESS')
 
     if flags.servername:
