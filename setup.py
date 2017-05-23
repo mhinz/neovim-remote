@@ -14,8 +14,10 @@ setup(
     description      = 'Control Neovim instances using "nvr" commandline tool',
     long_description = long_description,
     install_requires = ['neovim', 'psutil'],
-    scripts          = ['bin/nvr'],
-    packages         = [],
+    entry_points     = {
+        'console_scripts': ['nvr = bin.nvr:main']
+    },
+    packages         = ['bin'],
     version          = '1.6.0',
     license          = 'MIT',
     keywords         = 'neovim nvim nvr remote helper',
