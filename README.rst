@@ -1,5 +1,11 @@
-neovim-remote: support for --remote and friends
-===============================================
+neovim-remote
+=============
+
+.. image:: https://travis-ci.org/mhinz/neovim-remote.svg?branch=master
+   :target: https://travis-ci.org/mhinz/neovim-remote
+
+.. image:: https://img.shields.io/pypi/wheel/neovim-remote.svg
+   :target: https://pypi.python.org/pypi/neovim-remote
 
 .. image:: https://img.shields.io/pypi/v/neovim-remote.svg
    :target: https://pypi.python.org/pypi/neovim-remote
@@ -8,9 +14,6 @@ neovim-remote: support for --remote and friends
    :target: https://pypi.python.org/pypi/neovim-remote
 
 .. image:: https://img.shields.io/pypi/l/neovim-remote.svg
-   :target: https://pypi.python.org/pypi/neovim-remote
-
-.. image:: https://img.shields.io/pypi/wheel/neovim-remote.svg
    :target: https://pypi.python.org/pypi/neovim-remote
 |
 -  `Intro <#intro>`__
