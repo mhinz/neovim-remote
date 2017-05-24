@@ -298,9 +298,9 @@ def print_sockaddrs():
         print(addr)
 
 
-def main(argv = sys.argv):
+def main(argv=sys.argv, env=os.environ):
     flags, arguments = parse_args(argv)
-    address = os.environ.get('NVIM_LISTEN_ADDRESS')
+    address = env.get('NVIM_LISTEN_ADDRESS')
 
     if flags.servername:
         address = flags.servername
