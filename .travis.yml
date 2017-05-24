@@ -1,0 +1,20 @@
+dist: trusty
+sudo: false
+
+language: python
+
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+install:
+  - pip3 install .
+  - wget https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+  - tar zxf nvim-linux64.tar.gz
+
+before_script:
+  - export PATH=$PWD/nvim-linux64/bin:$PATH
+
+script:
+  - pytest -v
