@@ -15,9 +15,9 @@ setup(
     long_description = long_description,
     install_requires = ['neovim', 'psutil'],
     entry_points     = {
-        'console_scripts': ['nvr = bin.nvr:main']
+        'console_scripts': ['nvr = nvr.nvr:main']
     },
-    packages         = ['bin'],
+    packages         = ['nvr'],
     version          = '1.6.0',
     license          = 'MIT',
     keywords         = 'neovim nvim nvr remote helper',
