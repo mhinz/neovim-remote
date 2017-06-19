@@ -199,7 +199,7 @@ def parse_args(argv):
             description     = desc)
 
     parser.add_argument('--remote',
-            nargs   = '+',
+            nargs   = '*',
             metavar = '<file>',
             help    = 'Use :edit to open files in a remote instance. If no remote instance is found, throw an error and run nvim locally instead.')
     parser.add_argument('--remote-wait',
@@ -207,7 +207,7 @@ def parse_args(argv):
             metavar = '<file>',
             help    = 'Like --remote, but block until all buffers opened by this option get deleted or remote instance exits.')
     parser.add_argument('--remote-silent',
-            nargs   = '+',
+            nargs   = '*',
             metavar = '<file>',
             help    = 'Like --remote, but throw no error if remote instance is not found.')
     parser.add_argument('--remote-wait-silent',
@@ -216,19 +216,19 @@ def parse_args(argv):
             help    = 'Combines --remote-wait and --remote-silent.')
 
     parser.add_argument('--remote-tab', '-p',
-            nargs   = '+',
+            nargs   = '*',
             metavar = '<file>',
             help    = 'Like --remote, but use :tabedit.')
     parser.add_argument('--remote-tab-wait',
-            nargs   = '+',
+            nargs   = '*',
             metavar = '<file>',
             help    = 'Like --remote-wait, but use :tabedit.')
     parser.add_argument('--remote-tab-silent',
-            nargs   = '+',
+            nargs   = '*',
             metavar = '<file>',
             help    = 'Like --remote-silent, but use :tabedit.')
     parser.add_argument('--remote-tab-wait-silent',
-            nargs   = '+',
+            nargs   = '*',
             metavar = '<file>',
             help    = 'Like --remote-wait-silent, but use :tabedit.')
 
@@ -271,7 +271,6 @@ def parse_args(argv):
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
-
 
     if len(argv) == 1:
         parser.print_help()
@@ -325,25 +324,24 @@ def main(argv=sys.argv, env=os.environ):
     except ValueError:
         pass
 
-    # Arguments not consumed by flags, are fed to --remote.
-    if arguments:
+    if flags.remote is not None:
+        neovim.execute(flags.remote + arguments, 'edit')
+    elif flags.remote_wait is not None:
+        neovim.execute(flags.remote_wait + arguments, 'edit', wait=True)
+    elif flags.remote_silent is not None:
+        neovim.execute(flags.remote_silent + arguments, 'edit', silent=True)
+    elif flags.remote_wait_silent is not None:
+        neovim.execute(flags.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
+    elif flags.remote_tab is not None:
+        neovim.execute(flags.remote_tab + arguments, 'tabedit')
+    elif flags.remote_tab_wait is not None:
+        neovim.execute(flags.remote_tab_wait + arguments, 'tabedit', wait=True)
+    elif flags.remote_tab_silent is not None:
+        neovim.execute(flags.remote_tab_silent + arguments, 'tabedit', silent=True)
+    elif flags.remote_tab_wait_silent is not None:
+        neovim.execute(flags.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
+    elif arguments:
         neovim.execute(arguments, 'edit')
-    elif flags.remote:
-        neovim.execute(flags.remote, 'edit')
-    elif flags.remote_wait:
-        neovim.execute(flags.remote_wait, 'edit', wait=True)
-    elif flags.remote_silent:
-        neovim.execute(flags.remote_silent, 'edit', silent=True)
-    elif flags.remote_wait_silent:
-        neovim.execute(flags.remote_wait_silent, 'edit', silent=True, wait=True)
-    elif flags.remote_tab:
-        neovim.execute(flags.remote_tab, 'tabedit')
-    elif flags.remote_tab_wait:
-        neovim.execute(flags.remote_tab_wait, 'tabedit', wait=True)
-    elif flags.remote_tab_silent:
-        neovim.execute(flags.remote_tab_silent, 'tabedit', silent=True)
-    elif flags.remote_tab_wait_silent:
-        neovim.execute(flags.remote_tab_wait_silent, 'tabedit', silent=True, wait=True)
 
     if flags.remote_send and neovim.is_attached():
         neovim.server.input(flags.remote_send)
