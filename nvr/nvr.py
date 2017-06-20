@@ -67,10 +67,11 @@ class Neovim():
 
             pid = os.fork()
             if pid == 0:
-                time.sleep(1)
-                self.attach()
-                if self.server:
-                    return True
+                for i in range(10):
+                    self.attach()
+                    if self.server:
+                        return True
+                    time.sleep(0.2)
             else:
                 os.environ['NVIM_LISTEN_ADDRESS'] = self.address
                 os.execvpe('nvim', ['nvim'], os.environ)
