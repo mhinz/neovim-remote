@@ -24,11 +24,13 @@ THE SOFTWARE.
 
 import sys
 import os
+import stat
 import time
 import textwrap
 import argparse
 import subprocess
 import psutil
+import tempfile
 
 from neovim import attach
 
@@ -53,9 +55,16 @@ class Neovim():
         if self.server:
             return True
         else:
+            address = self.address
+            if not ':' in address:
+                if os.path.exists(address) and not stat.S_ISSOCK(os.stat(address).st_mode):
+                    with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
+                        self.address = f.name
+
             if not silent and not self._msg_shown:
-                self._show_msg()
+                self._show_msg(address)
                 self._msg_shown = True
+
             pid = os.fork()
             if pid == 0:
                 time.sleep(1)
@@ -63,9 +72,9 @@ class Neovim():
                 if self.server:
                     return True
             else:
-                env = {'NVIM_LISTEN_ADDRESS': self.address}
-                env.update(os.environ)
-                os.execvpe('nvim', ['nvim'], env)
+                os.environ['NVIM_LISTEN_ADDRESS'] = self.address
+                os.execvpe('nvim', ['nvim'], os.environ)
+
             return False
 
     def read_stdin_into_buffer(self, cmd):
@@ -133,8 +142,8 @@ class Neovim():
             self.server.run_loop(None, notification_cb, None, err_cb)
             sys.exit(exitcode)
 
-    def _show_msg(self):
-        a = self.address
+    def _show_msg(self, old_address):
+        o = old_address
         print(textwrap.dedent("""
             [!] Can't connect to: {}
 
@@ -162,7 +171,7 @@ class Neovim():
                 Use any of the --remote*silent options to suppress this message.
 
             [*] Starting new nvim instance with address: {}
-            """.format(a, a, a, a, a)))
+            """.format(o, o, o, o, self.address)))
 
 
 def parse_args(argv):
