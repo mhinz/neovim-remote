@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import sys
 import os
+import time
 import textwrap
 import argparse
 import subprocess
@@ -55,6 +56,16 @@ class Neovim():
             if not silent and not self._msg_shown:
                 self._show_msg()
                 self._msg_shown = True
+            pid = os.fork()
+            if pid == 0:
+                time.sleep(1)
+                self.attach()
+                if self.server:
+                    return True
+            else:
+                env = {'NVIM_LISTEN_ADDRESS': self.address}
+                env.update(os.environ)
+                os.execvpe('nvim', ['nvim'], env)
             return False
 
     def read_stdin_into_buffer(self, cmd):
@@ -65,21 +76,11 @@ class Neovim():
         self.server.command('silent 1delete _ | set nomodified')
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
-        if self.is_attached(silent):
-            self._execute_remotely(arguments, cmd, wait)
-        else:
-            self._execute_locally(arguments, silent)
+        if not self.is_attached(silent):
+            return
 
-    def _execute_locally(self, arguments, silent):
-        if not arguments and not silent:
-            print('No arguments were given!')
-        else:
-            env = os.environ.copy()
-            env['NVIM_LISTEN_ADDRESS'] = self.address
-            subprocess.Popen(['nvim'] + arguments, env=env).wait()
-
-    def _execute_remotely(self, arguments, cmd, wait):
         c = None
+
         for fname in reversed(arguments):
             if fname.startswith('+'):
                 c = fname[1:]
@@ -201,7 +202,7 @@ def parse_args(argv):
     parser.add_argument('--remote',
             nargs   = '*',
             metavar = '<file>',
-            help    = 'Use :edit to open files in a remote instance. If no remote instance is found, throw an error and run nvim locally instead.')
+            help    = 'Use :edit to open files in a remote instance. If no remote instance is found, throw an error and start a new one.')
     parser.add_argument('--remote-wait',
             nargs   = '*',
             metavar = '<file>',
