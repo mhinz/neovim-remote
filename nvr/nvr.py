@@ -173,7 +173,7 @@ class Neovim():
                     $ nvr --servername {} file1 file2
                     $ nvr --servername 127.0.0.1:6789 file1 file2
 
-                Use any of the --remote*silent options to suppress this message.
+                (Use any of the --remote*silent options to suppress this message.)
 
             [*] Starting new nvim process with address {}
             """.format(o, o, o, o, self.address)))
@@ -186,25 +186,30 @@ def parse_args(argv):
     desc       = textwrap.dedent("""
         Remote control Neovim processes.
 
+        If no process is found, a new one will be started.
+
             $ nvr --remote-send 'iabc<cr><esc>'
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
 
-        Any arguments not consumed by options will be fed to --remote.
-        If no process is found, a new one will be started.
+        Any arguments not consumed by options will be fed to --remote:
 
             $ nvr --remote file1 file2
             $ nvr file1 file2
 
-        All --remote flags take optional commands. Except: --remote-expr, --remote-send.
+        All --remote options take optional commands.
+        Exception: --remote-expr, --remote-send.
 
             $ nvr +10 file
             $ nvr +'echomsg "foo" | echomsg "bar"' file
             $ nvr --remote-tab-wait +'set bufhidden=delete' file
 
-        Open files in a new window from within :terminal
+        Open files in a new window from a terminal buffer:
 
             $ nvr -cc split file1 file2
 
+        Use nvr from git to edit commit messages:
+
+            $ git config --global core.editor 'nvr --remote-wait-silent'
     """)
 
     parser = argparse.ArgumentParser(
