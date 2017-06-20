@@ -318,25 +318,25 @@ def print_sockaddrs():
 
 
 def main(argv=sys.argv, env=os.environ):
-    flags, arguments = parse_args(argv)
+    options, arguments = parse_args(argv)
     address = env.get('NVIM_LISTEN_ADDRESS')
 
-    if flags.servername:
-        address = flags.servername
+    if options.servername:
+        address = options.servername
     elif not address:
         address = '/tmp/nvimsocket'
 
-    if flags.serverlist:
+    if options.serverlist:
         print_sockaddrs()
 
     neovim = Neovim(address)
     neovim.attach()
 
-    if flags.cc and neovim.is_attached():
-        for cmd in flags.cc:
+    if options.cc and neovim.is_attached():
+        for cmd in options.cc:
             neovim.server.command(cmd)
 
-    if flags.l and neovim.is_attached():
+    if options.l and neovim.is_attached():
         neovim.server.command('wincmd p')
 
     try:
@@ -344,34 +344,34 @@ def main(argv=sys.argv, env=os.environ):
     except ValueError:
         pass
 
-    if flags.remote is not None:
-        neovim.execute(flags.remote + arguments, 'edit')
-    elif flags.remote_wait is not None:
-        neovim.execute(flags.remote_wait + arguments, 'edit', wait=True)
-    elif flags.remote_silent is not None:
-        neovim.execute(flags.remote_silent + arguments, 'edit', silent=True)
-    elif flags.remote_wait_silent is not None:
-        neovim.execute(flags.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
-    elif flags.remote_tab is not None:
-        neovim.execute(flags.remote_tab + arguments, 'tabedit')
-    elif flags.remote_tab_wait is not None:
-        neovim.execute(flags.remote_tab_wait + arguments, 'tabedit', wait=True)
-    elif flags.remote_tab_silent is not None:
-        neovim.execute(flags.remote_tab_silent + arguments, 'tabedit', silent=True)
-    elif flags.remote_tab_wait_silent is not None:
-        neovim.execute(flags.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
+    if options.remote is not None:
+        neovim.execute(options.remote + arguments, 'edit')
+    elif options.remote_wait is not None:
+        neovim.execute(options.remote_wait + arguments, 'edit', wait=True)
+    elif options.remote_silent is not None:
+        neovim.execute(options.remote_silent + arguments, 'edit', silent=True)
+    elif options.remote_wait_silent is not None:
+        neovim.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
+    elif options.remote_tab is not None:
+        neovim.execute(options.remote_tab + arguments, 'tabedit')
+    elif options.remote_tab_wait is not None:
+        neovim.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
+    elif options.remote_tab_silent is not None:
+        neovim.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
+    elif options.remote_tab_wait_silent is not None:
+        neovim.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
     elif arguments:
         neovim.execute(arguments, 'edit')
 
-    if flags.remote_send and neovim.is_attached():
-        neovim.server.input(flags.remote_send)
+    if options.remote_send and neovim.is_attached():
+        neovim.server.input(options.remote_send)
 
-    if flags.remote_expr and neovim.is_attached():
+    if options.remote_expr and neovim.is_attached():
         result = ''
         try:
-            result = neovim.server.eval(flags.remote_expr)
+            result = neovim.server.eval(options.remote_expr)
         except:
-            print('Evaluation failed: ' + flags.remote_expr)
+            print('Evaluation failed: ' + options.remote_expr)
         if type(result) is bytes:
             print(result.decode())
         elif type(result) is list:
@@ -381,39 +381,39 @@ def main(argv=sys.argv, env=os.environ):
         else:
             print(result)
 
-    if flags.o and neovim.is_attached():
-        for fname in flags.o:
+    if options.o and neovim.is_attached():
+        for fname in options.o:
             if fname == '-':
                 neovim.read_stdin_into_buffer('new')
             else:
                 neovim.server.command('split {}'.format(prepare_filename(fname)))
-    if flags.O and neovim.is_attached():
-        for fname in flags.O:
+    if options.O and neovim.is_attached():
+        for fname in options.O:
             if fname == '-':
                 neovim.read_stdin_into_buffer('vnew')
             else:
                 neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
-    if flags.t and neovim.is_attached():
+    if options.t and neovim.is_attached():
         try:
-            neovim.server.command("tag {}".format(flags.t))
+            neovim.server.command("tag {}".format(options.t))
         except neovim.server.error as e:
             print(e)
             sys.exit(1)
 
-    if flags.q and neovim.is_attached():
+    if options.q and neovim.is_attached():
         neovim.server.command("silent execute 'lcd' fnameescape('{}')".
                 format(os.environ['PWD'].replace("'", "''")))
         neovim.server.command('call setqflist([])')
-        with open(flags.q, 'r') as f:
+        with open(options.q, 'r') as f:
             for line in f.readlines():
                 neovim.server.command("caddexpr '{}'".
                         format(line.rstrip().replace("'", "''").replace('|', '\|')))
         neovim.server.command('silent lcd -')
         neovim.server.command('cfirst')
 
-    if flags.c and neovim.is_attached():
-        for cmd in flags.c:
+    if options.c and neovim.is_attached():
+        for cmd in options.c:
             neovim.server.command(cmd)
 
 
