@@ -11,7 +11,7 @@ setup(
     author           = 'Marco Hinz',
     author_email     = 'mh.codebro@gmail.com',
     url              = 'https://github.com/mhinz/neovim-remote',
-    description      = 'Control Neovim instances using "nvr" commandline tool',
+    description      = 'Control nvim processes using "nvr" commandline tool',
     long_description = long_description,
     install_requires = ['neovim', 'psutil'],
     entry_points     = {

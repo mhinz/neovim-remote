@@ -77,7 +77,7 @@ class Neovim():
                 try:
                     os.execvpe('nvim', ['nvim'], os.environ)
                 except FileNotFoundError:
-                    print("[!] Can't start new nvim instance: 'nvim' is not in $PATH.")
+                    print("[!] Can't start new nvim process: 'nvim' is not in $PATH.")
                     sys.exit(1)
 
             return False
@@ -175,7 +175,7 @@ class Neovim():
 
                 Use any of the --remote*silent options to suppress this message.
 
-            [*] Starting new nvim instance with address: {}
+            [*] Starting new nvim process with address {}
             """.format(o, o, o, o, self.address)))
 
 
@@ -184,13 +184,13 @@ def parse_args(argv):
     usage      = '{} [arguments]'.format(argv[0])
     epilog     = 'Happy hacking!'
     desc       = textwrap.dedent("""
-        Remote control Neovim instances.
+        Remote control Neovim processes.
 
             $ nvr --remote-send 'iabc<cr><esc>'
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
 
-        Any arguments not consumed by options will be fed to --remote. If no remote
-        instance is found, a new one will be started.
+        Any arguments not consumed by options will be fed to --remote.
+        If no process is found, a new one will be started.
 
             $ nvr --remote file1 file2
             $ nvr file1 file2
@@ -216,15 +216,15 @@ def parse_args(argv):
     parser.add_argument('--remote',
             nargs   = '*',
             metavar = '<file>',
-            help    = 'Use :edit to open files in a remote instance. If no remote instance is found, throw an error and start a new one.')
+            help    = 'Use :edit to open files. If no process is found, throw an error and start a new one.')
     parser.add_argument('--remote-wait',
             nargs   = '*',
             metavar = '<file>',
-            help    = 'Like --remote, but block until all buffers opened by this option get deleted or remote instance exits.')
+            help    = 'Like --remote, but block until all buffers opened by this option get deleted or the process exits.')
     parser.add_argument('--remote-silent',
             nargs   = '*',
             metavar = '<file>',
-            help    = 'Like --remote, but throw no error if remote instance is not found.')
+            help    = 'Like --remote, but throw no error if no process is found.')
     parser.add_argument('--remote-wait-silent',
             nargs   = '*',
             metavar = '<file>',
@@ -252,7 +252,7 @@ def parse_args(argv):
             help    = 'Send key presses.')
     parser.add_argument('--remote-expr',
             metavar = '<expr>',
-            help    = 'Evaluate expression on remote instance and print result in shell.')
+            help    = 'Evaluate expression and print result in shell.')
 
     parser.add_argument('--servername',
             metavar = '<addr>',
