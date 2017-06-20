@@ -74,7 +74,11 @@ class Neovim():
                     time.sleep(0.2)
             else:
                 os.environ['NVIM_LISTEN_ADDRESS'] = self.address
-                os.execvpe('nvim', ['nvim'], os.environ)
+                try:
+                    os.execvpe('nvim', ['nvim'], os.environ)
+                except FileNotFoundError:
+                    print("[!] Can't start new nvim instance: 'nvim' is not in $PATH.")
+                    sys.exit(1)
 
             return False
 
