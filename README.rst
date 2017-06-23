@@ -21,6 +21,7 @@ neovim-remote
 -  `Usage <#usage>`__
 -  `FAQ <#faq>`__
 -  `Demos <#demos>`__
+-  `Use case <#use-case>`__
 
 Intro
 -----
@@ -145,8 +146,34 @@ Demos
 
 Using nvr from another shell: |Demo 1|
 
-Using nvr from within `:terminal`: |Demo 2|
+Using nvr from within ``:terminal``: |Demo 2|
 
 .. |Demo 1| image:: https://github.com/mhinz/neovim-remote/raw/master/images/demo1.gif
 .. |Demo 2| image:: https://github.com/mhinz/neovim-remote/raw/master/images/demo2.gif
+
+Use case
+--------
+
+Imagine Neovim is set as your default editor: ``EDITOR=nvim``.
+
+Now run ``git commit``. In a regular shell, a new nvim process starts. In a
+terminal buffer (``:terminal``), a new nvim process starts as well. Now you
+have one nvim nested within another. You don't want that. Put this in your
+vimrc:
+
+.. code:: vim
+
+    if has('nvim')
+      let $VISUAL = 'nvr -cc split --remote-wait'
+    endif
+
+That way, you get a new window for entering the commit message instead of a
+nested nvim process.
+
+Alternatively, you can make git always using nvr. In a regular shell, nvr will
+create a new nvim process. In a terminal buffer, nvr will open a new buffer.
+
+::
+
+    $ git config --global core.editor 'nvr --remote-wait-silent'
 
