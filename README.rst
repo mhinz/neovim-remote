@@ -20,8 +20,8 @@ neovim-remote
 -  `Use case <#use-case>`__
 -  `Installation <#installation>`__
 -  `Usage <#usage>`__
--  `FAQ <#faq>`__
 -  `Demos <#demos>`__
+-  `FAQ <#faq>`__
 
 Intro
 -----
