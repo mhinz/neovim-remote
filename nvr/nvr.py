@@ -173,7 +173,7 @@ class Neovim():
                     $ nvr --servername {} file1 file2
                     $ nvr --servername 127.0.0.1:6789 file1 file2
 
-                (Use any of the --remote*silent options to suppress this message.)
+                (Use any of the --remote*silent options or -s to suppress this message.)
 
             [*] Starting new nvim process with address {}
             """.format(o, o, o, o, self.address)))
@@ -291,6 +291,9 @@ def parse_args(argv):
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
+    parser.add_argument('-s',
+            action  = 'store_true',
+            help    = 'Silence "no server found" message.')
 
     if len(argv) == 1:
         parser.print_help()
@@ -332,11 +335,11 @@ def main(argv=sys.argv, env=os.environ):
     neovim = Neovim(address)
     neovim.attach()
 
-    if options.cc and neovim.is_attached():
+    if options.cc and neovim.is_attached(options.s):
         for cmd in options.cc:
             neovim.server.command(cmd)
 
-    if options.l and neovim.is_attached():
+    if options.l and neovim.is_attached(options.s):
         neovim.server.command('wincmd p')
 
     try:
@@ -363,10 +366,10 @@ def main(argv=sys.argv, env=os.environ):
     elif arguments:
         neovim.execute(arguments, 'edit')
 
-    if options.remote_send and neovim.is_attached():
+    if options.remote_send and neovim.is_attached(options.s):
         neovim.server.input(options.remote_send)
 
-    if options.remote_expr and neovim.is_attached():
+    if options.remote_expr and neovim.is_attached(options.s):
         result = ''
         try:
             result = neovim.server.eval(options.remote_expr)
@@ -381,27 +384,27 @@ def main(argv=sys.argv, env=os.environ):
         else:
             print(result)
 
-    if options.o and neovim.is_attached():
+    if options.o and neovim.is_attached(options.s):
         for fname in options.o:
             if fname == '-':
                 neovim.read_stdin_into_buffer('new')
             else:
                 neovim.server.command('split {}'.format(prepare_filename(fname)))
-    if options.O and neovim.is_attached():
+    if options.O and neovim.is_attached(options.s):
         for fname in options.O:
             if fname == '-':
                 neovim.read_stdin_into_buffer('vnew')
             else:
                 neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
-    if options.t and neovim.is_attached():
+    if options.t and neovim.is_attached(options.s):
         try:
             neovim.server.command("tag {}".format(options.t))
         except neovim.server.error as e:
             print(e)
             sys.exit(1)
 
-    if options.q and neovim.is_attached():
+    if options.q and neovim.is_attached(options.s):
         neovim.server.command("silent execute 'lcd' fnameescape('{}')".
                 format(os.environ['PWD'].replace("'", "''")))
         neovim.server.command('call setqflist([])')
@@ -412,7 +415,7 @@ def main(argv=sys.argv, env=os.environ):
         neovim.server.command('silent lcd -')
         neovim.server.command('cfirst')
 
-    if options.c and neovim.is_attached():
+    if options.c and neovim.is_attached(options.s):
         for cmd in options.c:
             neovim.server.command(cmd)
 
