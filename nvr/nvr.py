@@ -266,9 +266,6 @@ def parse_args(argv):
             action  = 'store_true',
             help    = 'Print the TCPv4 and Unix domain socket addresses of all nvim processes.')
 
-    parser.add_argument('-l',
-            action  = 'store_true',
-            help    = 'Change to previous window via ":wincmd p".')
     parser.add_argument('-cc',
             action  = 'append',
             metavar = '<cmd>',
@@ -277,6 +274,9 @@ def parse_args(argv):
             action  = 'append',
             metavar = '<cmd>',
             help    = 'Execute a command after every other option.')
+    parser.add_argument('-l',
+            action  = 'store_true',
+            help    = 'Change to previous window via ":wincmd p".')
     parser.add_argument('-o',
             nargs   = '+',
             metavar = '<file>',
@@ -285,15 +285,15 @@ def parse_args(argv):
             nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":vsplit".')
-    parser.add_argument('-t',
-            metavar = '<tag>',
-            help    = 'Jump to file and position of given tag.')
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
     parser.add_argument('-s',
             action  = 'store_true',
             help    = 'Silence "no server found" message.')
+    parser.add_argument('-t',
+            metavar = '<tag>',
+            help    = 'Jump to file and position of given tag.')
 
     if len(argv) == 1:
         parser.print_help()
