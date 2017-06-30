@@ -314,7 +314,8 @@ def print_sockaddrs():
             for conn in proc.connections('inet4'):
                 sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
             for conn in proc.connections('unix'):
-                sockaddrs.insert(0, conn.laddr)
+                if conn.laddr:
+                    sockaddrs.insert(0, conn.laddr)
 
     for addr in sorted(sockaddrs):
         print(addr)
