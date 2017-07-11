@@ -123,29 +123,7 @@ class Neovim():
         if c:
             self.server.command(c)
 
-        if wait:
-            bufcount = len(arguments) - (1 if c else 0)
-            exitcode = 0
-
-            def notification_cb(msg, args):
-                nonlocal bufcount
-                nonlocal exitcode
-
-                if msg == 'BufDelete':
-                    bufcount -= 1
-                    if bufcount == 0:
-                        self.server.stop_loop()
-                elif msg == 'Exit':
-                    self.server.stop_loop()
-                    exitcode = args[0]
-
-            def err_cb(error):
-                print(error, file=sys.stderr)
-                self.server.stop_loop()
-                exitcode = 1
-
-            self.server.run_loop(None, notification_cb, None, err_cb)
-            sys.exit(exitcode)
+        return len(arguments) - (1 if c else 0)
 
     def _show_msg(self, old_address):
         o = old_address
@@ -351,19 +329,19 @@ def main(argv=sys.argv, env=os.environ):
     if options.remote is not None:
         neovim.execute(options.remote + arguments, 'edit')
     elif options.remote_wait is not None:
-        neovim.execute(options.remote_wait + arguments, 'edit', wait=True)
+        nfiles = neovim.execute(options.remote_wait + arguments, 'edit', wait=True)
     elif options.remote_silent is not None:
         neovim.execute(options.remote_silent + arguments, 'edit', silent=True)
     elif options.remote_wait_silent is not None:
-        neovim.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
+        nfiles = neovim.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
     elif options.remote_tab is not None:
         neovim.execute(options.remote_tab + arguments, 'tabedit')
     elif options.remote_tab_wait is not None:
-        neovim.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
+        nfiles = neovim.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
     elif options.remote_tab_silent is not None:
         neovim.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
     elif options.remote_tab_wait_silent is not None:
-        neovim.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
+        nfiles = neovim.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
     elif arguments:
         neovim.execute(arguments, 'edit')
 
@@ -419,6 +397,29 @@ def main(argv=sys.argv, env=os.environ):
     if options.c and neovim.is_attached(options.s):
         for cmd in options.c:
             neovim.server.command(cmd)
+
+    if 'nfiles' in locals():
+        exitcode = 0
+
+        def notification_cb(msg, args):
+            nonlocal nfiles
+            nonlocal exitcode
+
+            if msg == 'BufDelete':
+                nfiles -= 1
+                if nfiles == 0:
+                    neovim.server.stop_loop()
+            elif msg == 'Exit':
+                neovim.server.stop_loop()
+                exitcode = args[0]
+
+        def err_cb(error):
+            print(error, file=sys.stderr)
+            neovim.server.stop_loop()
+            exitcode = 1
+
+        neovim.server.run_loop(None, notification_cb, None, err_cb)
+        sys.exit(exitcode)
 
 
 if __name__ == '__main__':
