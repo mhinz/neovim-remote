@@ -75,9 +75,11 @@ class Neovim():
             else:
                 os.environ['NVIM_LISTEN_ADDRESS'] = self.address
                 try:
-                    os.execvpe('nvim', ['nvim'], os.environ)
+                    args = os.environ.get('NVR_CMD')
+                    args = args.split(' ') if args else ['nvim']
+                    os.execvpe(args[0], args, os.environ)
                 except FileNotFoundError:
-                    print("[!] Can't start new nvim process: 'nvim' is not in $PATH.")
+                    print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
                     sys.exit(1)
 
             return False
@@ -151,7 +153,9 @@ class Neovim():
                     $ nvr --servername {} file1 file2
                     $ nvr --servername 127.0.0.1:6789 file1 file2
 
-                (Use any of the --remote*silent options or -s to suppress this message.)
+                nvr is now starting a server on its own by running $NVR_CMD or 'nvim'.
+
+                Use -s to suppress this message.
 
             [*] Starting new nvim process with address {}
             """.format(o, o, o, o, self.address)))
