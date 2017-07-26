@@ -36,9 +36,10 @@ from neovim import attach
 
 
 class Neovim():
-    def __init__(self, address):
+    def __init__(self, address, silent=False):
         self.address    = address
         self.server     = None
+        self.silent     = silent  # -s
         self._msg_shown = False
 
     def attach(self):
@@ -52,6 +53,8 @@ class Neovim():
             pass
 
     def is_attached(self, silent=False):
+        silent |= self.silent
+
         if self.server:
             return True
         else:
@@ -315,14 +318,14 @@ def main(argv=sys.argv, env=os.environ):
     if options.serverlist:
         print_sockaddrs()
 
-    neovim = Neovim(address)
+    neovim = Neovim(address, options.s)
     neovim.attach()
 
-    if options.cc and neovim.is_attached(options.s):
+    if options.cc and neovim.is_attached():
         for cmd in options.cc:
             neovim.server.command(cmd)
 
-    if options.l and neovim.is_attached(options.s):
+    if options.l and neovim.is_attached():
         neovim.server.command('wincmd p')
 
     try:
@@ -349,10 +352,10 @@ def main(argv=sys.argv, env=os.environ):
     elif arguments:
         neovim.execute(arguments, 'edit')
 
-    if options.remote_send and neovim.is_attached(options.s):
+    if options.remote_send and neovim.is_attached():
         neovim.server.input(options.remote_send)
 
-    if options.remote_expr and neovim.is_attached(options.s):
+    if options.remote_expr and neovim.is_attached():
         result = ''
         try:
             result = neovim.server.eval(options.remote_expr)
@@ -367,27 +370,27 @@ def main(argv=sys.argv, env=os.environ):
         else:
             print(result)
 
-    if options.o and neovim.is_attached(options.s):
+    if options.o and neovim.is_attached():
         for fname in options.o:
             if fname == '-':
                 neovim.read_stdin_into_buffer('new')
             else:
                 neovim.server.command('split {}'.format(prepare_filename(fname)))
-    if options.O and neovim.is_attached(options.s):
+    if options.O and neovim.is_attached():
         for fname in options.O:
             if fname == '-':
                 neovim.read_stdin_into_buffer('vnew')
             else:
                 neovim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
-    if options.t and neovim.is_attached(options.s):
+    if options.t and neovim.is_attached():
         try:
             neovim.server.command("tag {}".format(options.t))
         except neovim.server.error as e:
             print(e)
             sys.exit(1)
 
-    if options.q and neovim.is_attached(options.s):
+    if options.q and neovim.is_attached():
         neovim.server.command("silent execute 'lcd' fnameescape('{}')".
                 format(os.environ['PWD'].replace("'", "''")))
         neovim.server.command('call setqflist([])')
@@ -398,7 +401,7 @@ def main(argv=sys.argv, env=os.environ):
         neovim.server.command('silent lcd -')
         neovim.server.command('cfirst')
 
-    if options.c and neovim.is_attached(options.s):
+    if options.c and neovim.is_attached():
         for cmd in options.c:
             neovim.server.command(cmd)
 
