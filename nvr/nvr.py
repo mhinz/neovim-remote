@@ -220,7 +220,7 @@ def parse_args(argv):
             metavar = '<file>',
             help    = 'Combines --remote-wait and --remote-silent.')
 
-    parser.add_argument('--remote-tab', '-p',
+    parser.add_argument('--remote-tab',
             nargs   = '*',
             metavar = '<file>',
             help    = 'Like --remote, but use :tabedit.')
@@ -270,6 +270,10 @@ def parse_args(argv):
             nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":vsplit".')
+    parser.add_argument('-p',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Open files via ":tabedit".')
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
