@@ -98,11 +98,14 @@ class Neovim():
         if not self.is_attached(silent):
             return
 
-        c = None
+        c = []
 
         for fname in reversed(arguments):
             if fname.startswith('+'):
-                c = fname[1:]
+                if fname[1:]:
+                    c.insert(0, fname[1:])
+                else:
+                    c.insert(0, '$')
                 continue
 
             if fname == '-':
@@ -125,10 +128,10 @@ class Neovim():
                 else:
                     bvars['nvr'] = [chanid]
 
-        if c:
-            self.server.command(c)
+        for cmd in c:
+            self.server.command(cmd)
 
-        return len(arguments) - (1 if c else 0)
+        return len(arguments) - len(c)
 
     def _show_msg(self, old_address):
         o = old_address
