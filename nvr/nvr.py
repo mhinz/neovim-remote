@@ -99,16 +99,9 @@ class Neovim():
         if not self.is_attached(silent):
             return
 
-        c = []
+        cmds, files = split_cmds_from_files(arguments)
 
-        for fname in reversed(arguments):
-            if fname.startswith('+'):
-                if fname[1:]:
-                    c.insert(0, fname[1:])
-                else:
-                    c.insert(0, '$')
-                continue
-
+        for fname in files:
             if fname == '-':
                 self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
             else:
@@ -129,10 +122,10 @@ class Neovim():
                 else:
                     bvars['nvr'] = [chanid]
 
-        for cmd in c:
-            self.server.command(cmd)
+        for cmd in cmds:
+            self.server.command(cmd if cmd else '$')
 
-        return len(arguments) - len(c)
+        return len(files)
 
     def _show_msg(self, old_address):
         o = old_address
@@ -293,6 +286,13 @@ def parse_args(argv):
         sys.exit(0)
 
     return parser.parse_known_args(argv[1:])
+
+
+def split_cmds_from_files(args):
+    for i, arg in enumerate(args):
+        if arg[0] != '+':
+            return [x[1:] for x in reversed(args[:i])], list(reversed(args[i:]))
+    return [], []
 
 
 def prepare_filename(fname):
