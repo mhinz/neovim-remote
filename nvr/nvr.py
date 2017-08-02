@@ -49,7 +49,7 @@ class Neovim():
                 self.server = attach('tcp', address=ip, port=int(port))
             else:
                 self.server = attach('socket', path=self.address)
-        except:
+        except FileNotFoundError:
             pass
 
     def is_attached(self, silent=False):
