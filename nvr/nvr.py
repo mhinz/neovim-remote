@@ -81,6 +81,7 @@ class Neovim():
                 try:
                     args = os.environ.get('NVR_CMD')
                     args = args.split(' ') if args else ['nvim']
+                    os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
                     os.execvpe(args[0], args, os.environ)
                 except FileNotFoundError:
                     print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
