@@ -100,10 +100,6 @@ class Neovim():
         if not self.is_attached(silent):
             return
 
-        modified = self.server.current.buffer.options['modified']
-        if modified:
-            self.server.current.buffer.options['modified'] = False
-
         cmds, files = split_cmds_from_files(arguments)
 
         for fname in files:
@@ -129,9 +125,6 @@ class Neovim():
 
         for cmd in cmds:
             self.server.command(cmd if cmd else '$')
-
-        if modified:
-            self.server.current.buffer.options['modified'] = True
 
         return len(files)
 
