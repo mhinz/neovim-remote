@@ -44,6 +44,9 @@ Since ``$NVIM_LISTEN_ADDRESS`` is implicitely set by each nvim process,
 you can call **nvr** from within Neovim (``:terminal``) without
 specifying ``--servername``.
 
+*NOTE: This tool relies on the Unix forking model, and thus Windows is not
+supported.*
+
 Use case
 --------
 
