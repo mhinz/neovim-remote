@@ -46,8 +46,11 @@ class Neovim():
     def attach(self):
         try:
             if ':' in self.address:
-                ip, port = self.address.split(':')
-                self.server = neovim.attach('tcp', address=ip, port=int(port))
+                ip, port = self.address.split(':', 1)
+                if port.isdigit():
+                    self.server = neovim.attach('tcp', address=ip, port=int(port))
+                else:
+                    self.server = neovim.attach('socket', path=self.address)
             else:
                 self.server = neovim.attach('socket', path=self.address)
         except OSError:
