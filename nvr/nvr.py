@@ -27,6 +27,7 @@ import neovim
 import os
 import psutil
 import re
+import socket
 import stat
 import subprocess
 import sys
@@ -61,8 +62,11 @@ class Neovim():
             return True
 
         address = self.address
-        if get_address_type(address) == 'socket':
-            if os.path.exists(address) and not stat.S_ISSOCK(os.stat(address).st_mode):
+        if get_address_type(address) == 'socket' and os.path.exists(address):
+            try:
+                sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                sock.connect(address)
+            except:
                 with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
                     self.address = f.name
 
