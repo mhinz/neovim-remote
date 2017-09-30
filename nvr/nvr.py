@@ -45,12 +45,9 @@ class Neovim():
 
     def attach(self):
         try:
-            if ':' in self.address:
+            if get_address_type(self.address) == 'tcp':
                 ip, port = self.address.split(':', 1)
-                if port.isdigit():
-                    self.server = neovim.attach('tcp', address=ip, port=int(port))
-                else:
-                    self.server = neovim.attach('socket', path=self.address)
+                self.server = neovim.attach('tcp', address=ip, port=int(port))
             else:
                 self.server = neovim.attach('socket', path=self.address)
         except OSError:
@@ -64,7 +61,7 @@ class Neovim():
             return True
         else:
             address = self.address
-            if not ':' in address:
+            if get_address_type(address) == 'socket':
                 if os.path.exists(address) and not stat.S_ISSOCK(os.stat(address).st_mode):
                     with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
                         self.address = f.name
@@ -322,6 +319,16 @@ def print_sockaddrs():
 
     for addr in sorted(sockaddrs):
         print(addr)
+
+
+def get_address_type(address):
+    try:
+        ip, port = address.split(':', 1)
+        if port.isdigit():
+            return 'tcp'
+        raise ValueError
+    except ValueError:
+        return 'socket'
 
 
 def main(argv=sys.argv, env=os.environ):
