@@ -59,36 +59,36 @@ class Neovim():
 
         if self.server:
             return True
+
+        address = self.address
+        if get_address_type(address) == 'socket':
+            if os.path.exists(address) and not stat.S_ISSOCK(os.stat(address).st_mode):
+                with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
+                    self.address = f.name
+
+        if not silent and not self._msg_shown:
+            self._show_msg(address)
+            self._msg_shown = True
+
+        pid = os.fork()
+        if pid == 0:
+            for i in range(10):
+                self.attach()
+                if self.server:
+                    return True
+                time.sleep(0.2)
         else:
-            address = self.address
-            if get_address_type(address) == 'socket':
-                if os.path.exists(address) and not stat.S_ISSOCK(os.stat(address).st_mode):
-                    with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
-                        self.address = f.name
+            os.environ['NVIM_LISTEN_ADDRESS'] = self.address
+            try:
+                args = os.environ.get('NVR_CMD')
+                args = args.split(' ') if args else ['nvim']
+                os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
+                os.execvpe(args[0], args, os.environ)
+            except FileNotFoundError:
+                print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
+                sys.exit(1)
 
-            if not silent and not self._msg_shown:
-                self._show_msg(address)
-                self._msg_shown = True
-
-            pid = os.fork()
-            if pid == 0:
-                for i in range(10):
-                    self.attach()
-                    if self.server:
-                        return True
-                    time.sleep(0.2)
-            else:
-                os.environ['NVIM_LISTEN_ADDRESS'] = self.address
-                try:
-                    args = os.environ.get('NVR_CMD')
-                    args = args.split(' ') if args else ['nvim']
-                    os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
-                    os.execvpe(args[0], args, os.environ)
-                except FileNotFoundError:
-                    print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
-                    sys.exit(1)
-
-            return False
+        return False
 
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
