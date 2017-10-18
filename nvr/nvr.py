@@ -292,10 +292,6 @@ def parse_args(argv):
             metavar = '<tag>',
             help    = 'Jump to file and position of given tag.')
 
-    if len(argv) == 1:
-        parser.print_help()
-        sys.exit(0)
-
     return parser.parse_known_args(argv[1:])
 
 
@@ -337,6 +333,10 @@ def get_address_type(address):
 
 def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
+
+    if all(not x for x in vars(options).values()):
+        options.remote_silent = []
+
     address = env.get('NVIM_LISTEN_ADDRESS')
 
     if options.servername:
