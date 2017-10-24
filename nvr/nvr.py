@@ -389,7 +389,11 @@ def main(argv=sys.argv, env=os.environ):
         try:
             result = nvim.server.eval(options.remote_expr)
         except:
-            print('Evaluation failed: ' + options.remote_expr)
+            print(textwrap.dedent("""
+                No valid expression: {}
+                Test it in Neovim: :echo eval('...')
+                If you want to execute a command, use -c or -cc instead.
+            """).format(options.remote_expr))
         if type(result) is bytes:
             print(result.decode())
         elif type(result) is list:
