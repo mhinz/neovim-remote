@@ -4,14 +4,22 @@
 
     $ pip3 install neovim-remote
 
-On most systems this will be good enough.
+On most systems this will install to `/usr/local/bin`, which is usually in $PATH
+already. You're done.
 
-If you get a "permission denied" error, don't use `sudo` to force it! Use
-this instead:
+If you get a _permission denied_ error, e.g. because it tried to install to
+`/usr/bin`, **do not** use `sudo` to force it!
+
+Use this instead:
 
     $ pip3 install --user neovim-remote
 
-..and make sure that `~/.local/bin` is in $PATH.
+This will install to `~/.local/bin` (Linux) or `~/Library/Python/3.x/bin`
+(macOS) which needs to be added to $PATH.
+
+This will give you the correct location:
+
+    $ python3 -c 'import site; print(site.USER_BASE)'
 
 #### From repo
 
