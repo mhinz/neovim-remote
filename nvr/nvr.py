@@ -334,6 +334,12 @@ def get_address_type(address):
 def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
 
+    # `options` contains all options and their associated arguments.
+    # `arguments` contains all remaining arguments.
+
+    # If no option is given, set options.remote_silent to [] instead of None.
+    # This way, all remaining arguments will be handled as if they were given
+    # to --remote-silent.
     if all(not x for x in vars(options).values()):
         options.remote_silent = []
 
@@ -366,8 +372,6 @@ def main(argv=sys.argv, env=os.environ):
         nvim.execute(options.remote + arguments, 'edit')
     elif options.remote_wait is not None:
         nfiles = nvim.execute(options.remote_wait + arguments, 'edit', wait=True)
-    elif options.remote_silent is not None:
-        nvim.execute(options.remote_silent + arguments, 'edit', silent=True)
     elif options.remote_wait_silent is not None:
         nfiles = nvim.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
     elif options.remote_tab is not None:
@@ -378,8 +382,9 @@ def main(argv=sys.argv, env=os.environ):
         nvim.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
     elif options.remote_tab_wait_silent is not None:
         nfiles = nvim.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
-    elif arguments:
-        nvim.execute(arguments, 'edit')
+    elif options.remote_silent is not None:
+        # This must be the last remote option being checked.
+        nvim.execute(options.remote_silent + arguments, 'edit', silent=True)
 
     if options.remote_send and nvim.is_attached():
         nvim.server.input(options.remote_send)
