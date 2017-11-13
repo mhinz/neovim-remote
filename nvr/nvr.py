@@ -279,7 +279,7 @@ def parse_args(argv):
             metavar = '<file>',
             help    = 'Open files via ":vsplit".')
     parser.add_argument('-p',
-            nargs   = '*',
+            nargs   = '+',
             metavar = '<file>',
             help    = 'Open files via ":tabedit".')
     parser.add_argument('-q',
@@ -415,6 +415,13 @@ def main(argv=sys.argv, env=os.environ):
                 nvim.read_stdin_into_buffer('vnew')
             else:
                 nvim.server.command('vsplit {}'.format(prepare_filename(fname)))
+
+    if options.p and nvim.is_attached():
+        for fname in options.p:
+            if fname == '-':
+                nvim.read_stdin_into_buffer('tabnew')
+            else:
+                nvim.server.command('tabedit {}'.format(prepare_filename(fname)))
 
     if options.t and nvim.is_attached():
         try:
