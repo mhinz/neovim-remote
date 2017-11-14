@@ -337,10 +337,18 @@ def main(argv=sys.argv, env=os.environ):
     # `options` contains all options and their associated arguments.
     # `arguments` contains all remaining arguments.
 
-    # If no option is given, set options.remote_silent to [] instead of None.
-    # This way, all remaining arguments will be handled as if they were given
-    # to --remote-silent.
-    if all(not x for x in vars(options).values()):
+    # If no remote option is given, set options.remote_silent to [] instead of
+    # None. This way, all remaining arguments will be handled as if they were
+    # given to --remote-silent.
+    if (
+            options.remote                 is None and
+            options.remote_wait            is None and
+            options.remote_wait_silent     is None and
+            options.remote_tab             is None and
+            options.remote_tab_silent      is None and
+            options.remote_tab_wait        is None and
+            options.remote_tab_wait_silent is None
+        ):
         options.remote_silent = []
 
     address = env.get('NVIM_LISTEN_ADDRESS')
