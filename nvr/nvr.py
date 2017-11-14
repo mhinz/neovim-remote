@@ -184,9 +184,9 @@ def parse_args(argv):
             $ nvr --remote-send 'iabc<cr><esc>'
             $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
 
-        Any arguments not consumed by options will be fed to --remote:
+        Any arguments not consumed by options will be fed to --remote-silent:
 
-            $ nvr --remote file1 file2
+            $ nvr --remote-silent file1 file2
             $ nvr file1 file2
 
         All --remote options take optional commands.
