@@ -360,6 +360,7 @@ def main(argv=sys.argv, env=os.environ):
 
     if options.serverlist:
         print_sockaddrs()
+        return
 
     nvim = Neovim(address, options.s)
     nvim.attach()
