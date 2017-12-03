@@ -61,17 +61,9 @@ class Neovim():
         if self.server:
             return True
 
-        address = self.address
-        if get_address_type(address) == 'socket' and os.path.exists(address):
-            try:
-                sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                sock.connect(address)
-            except:
-                with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
-                    self.address = f.name
 
         if not silent and not self._msg_shown:
-            self._show_msg(address)
+            self._show_msg(self.address)
             self._msg_shown = True
 
         return False
@@ -168,6 +160,23 @@ class Neovim():
 
             [*] Starting new nvim process with address {}
             """.format(o, o, o, o, self.address)))
+
+
+def sanitize_address(address, env):
+    if not address:
+        address = env.get('NVIM_LISTEN_ADDRESS')
+        if not address:
+            address = '/tmp/nvimsocket'
+
+    if get_address_type(address) == 'socket' and os.path.exists(address):
+        try:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(address)
+        except:
+            with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
+                address = f.name
+
+    return address
 
 
 def parse_args(argv):
@@ -362,6 +371,8 @@ def main(argv=sys.argv, env=os.environ):
     if options.serverlist:
         print_sockaddrs()
         return
+
+    address = sanitize_address(options.servername, env)
 
     nvim = Neovim(address, options.s)
     nvim.attach()
