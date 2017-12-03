@@ -41,7 +41,7 @@ class Neovim():
     def __init__(self, address, silent=False):
         self.address    = address
         self.server     = None
-        self.silent     = silent  # -s
+        self.silent     = silent
         self._msg_shown = False
 
     def attach(self):
@@ -54,19 +54,6 @@ class Neovim():
         except OSError:
             # Ignore invalid addresses.
             pass
-
-    def is_attached(self, silent=False):
-        silent |= self.silent
-
-        if self.server:
-            return True
-
-
-        if not silent and not self._msg_shown:
-            self._show_msg(self.address)
-            self._msg_shown = True
-
-        return False
 
     def start_new_process(self):
         pid = os.fork()
@@ -128,46 +115,8 @@ class Neovim():
 
         return len(files)
 
-    def _show_msg(self, old_address):
-        o = old_address
-        print(textwrap.dedent("""
-            [!] Can't connect to: {}
 
-                The server (nvim) and client (nvr) have to use the same address.
-
-                Server:
-
-                    Expose $NVIM_LISTEN_ADDRESS to the environment before
-                    starting nvim:
-
-                    $ NVIM_LISTEN_ADDRESS={} nvim
-
-                    Use `:echo v:servername` to verify the address.
-
-                Client:
-
-                    Expose $NVIM_LISTEN_ADDRESS to the environment before
-                    using nvr or use its --servername option. If neither
-                    is given, nvr assumes \"/tmp/nvimsocket\".
-
-                    $ NVIM_LISTEN_ADDRESS={} nvr file1 file2
-                    $ nvr --servername {} file1 file2
-                    $ nvr --servername 127.0.0.1:6789 file1 file2
-
-                nvr is now starting a server on its own by running $NVR_CMD or 'nvim'.
-
-                Use -s to suppress this message.
-
-            [*] Starting new nvim process with address {}
-            """.format(o, o, o, o, self.address)))
-
-
-def sanitize_address(address, env):
-    if not address:
-        address = env.get('NVIM_LISTEN_ADDRESS')
-        if not address:
-            address = '/tmp/nvimsocket'
-
+def sanitize_address(address):
     if get_address_type(address) == 'socket' and os.path.exists(address):
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -305,6 +254,39 @@ def parse_args(argv):
     return parser.parse_known_args(argv[1:])
 
 
+def show_message(old_address, new_address):
+    print(textwrap.dedent("""
+        [!] Can't connect to: {}
+
+            The server (nvim) and client (nvr) have to use the same address.
+
+            Server:
+
+                Expose $NVIM_LISTEN_ADDRESS to the environment before
+                starting nvim:
+
+                $ NVIM_LISTEN_ADDRESS={} nvim
+
+                Use `:echo v:servername` to verify the address.
+
+            Client:
+
+                Expose $NVIM_LISTEN_ADDRESS to the environment before
+                using nvr or use its --servername option. If neither
+                is given, nvr assumes \"/tmp/nvimsocket\".
+
+                $ NVIM_LISTEN_ADDRESS={} nvr file1 file2
+                $ nvr --servername {} file1 file2
+                $ nvr --servername 127.0.0.1:6789 file1 file2
+
+            nvr is now starting a server on its own by running $NVR_CMD or 'nvim'.
+
+            Use -s to suppress this message.
+
+        [*] Starting new nvim process with address {}
+        """.format(old_address, old_address, old_address, old_address, new_address)))
+
+
 def split_cmds_from_files(args):
     for i, arg in enumerate(args):
         if arg[0] != '+':
@@ -344,40 +326,20 @@ def get_address_type(address):
 def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
 
-    # `options` contains all options and their associated arguments.
-    # `arguments` contains all remaining arguments.
-
-    # If no remote option is given, set options.remote_silent to [] instead of
-    # None. This way, all remaining arguments will be handled as if they were
-    # given to --remote-silent.
-    if (
-            options.remote                 is None and
-            options.remote_wait            is None and
-            options.remote_wait_silent     is None and
-            options.remote_tab             is None and
-            options.remote_tab_silent      is None and
-            options.remote_tab_wait        is None and
-            options.remote_tab_wait_silent is None
-        ):
-        options.remote_silent = []
-
-    address = env.get('NVIM_LISTEN_ADDRESS')
-
-    if options.servername:
-        address = options.servername
-    elif not address:
-        address = '/tmp/nvimsocket'
-
     if options.serverlist:
         print_sockaddrs()
         return
 
-    address = sanitize_address(options.servername, env)
+    address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
 
     nvim = Neovim(address, options.s)
     nvim.attach()
 
-    if not nvim.is_attached():
+    if not nvim.server:
+        nvim.address = sanitize_address(address)
+        silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
+        if not silent:
+            show_message(address, nvim.address)
         if options.nostart:
             sys.exit(1)
         else:
@@ -399,6 +361,8 @@ def main(argv=sys.argv, env=os.environ):
         nvim.execute(options.remote + arguments, 'edit')
     elif options.remote_wait is not None:
         nfiles = nvim.execute(options.remote_wait + arguments, 'edit', wait=True)
+    elif options.remote_silent is not None:
+        nvim.execute(options.remote_silent + arguments, 'edit', silent=True)
     elif options.remote_wait_silent is not None:
         nfiles = nvim.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
     elif options.remote_tab is not None:
@@ -409,9 +373,9 @@ def main(argv=sys.argv, env=os.environ):
         nvim.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
     elif options.remote_tab_wait_silent is not None:
         nfiles = nvim.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
-    elif options.remote_silent is not None:
-        # This must be the last remote option being checked.
-        nvim.execute(options.remote_silent + arguments, 'edit', silent=True)
+    elif arguments:
+        # Act like --remote-silent.
+        nvim.execute(arguments, 'edit', silent=True)
 
     if options.remote_send:
         nvim.server.input(options.remote_send)
