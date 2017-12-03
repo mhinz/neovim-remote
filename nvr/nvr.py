@@ -37,7 +37,7 @@ import time
 import traceback
 
 
-class Neovim():
+class Nvr():
     def __init__(self, address, silent=False):
         self.address    = address
         self.server     = None
@@ -332,25 +332,25 @@ def main(argv=sys.argv, env=os.environ):
 
     address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
 
-    nvim = Neovim(address, options.s)
-    nvim.attach()
+    nvr = Nvr(address, options.s)
+    nvr.attach()
 
-    if not nvim.server:
-        nvim.address = sanitize_address(address)
+    if not nvr.server:
+        nvr.address = sanitize_address(address)
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
         if not silent:
-            show_message(address, nvim.address)
+            show_message(address, nvr.address)
         if options.nostart:
             sys.exit(1)
         else:
-            nvim.start_new_process()
+            nvr.start_new_process()
 
     if options.cc:
         for cmd in options.cc:
-            nvim.server.command(cmd)
+            nvr.server.command(cmd)
 
     if options.l:
-        nvim.server.command('wincmd p')
+        nvr.server.command('wincmd p')
 
     try:
         arguments.remove('--')
@@ -358,32 +358,32 @@ def main(argv=sys.argv, env=os.environ):
         pass
 
     if options.remote is not None:
-        nvim.execute(options.remote + arguments, 'edit')
+        nvr.execute(options.remote + arguments, 'edit')
     elif options.remote_wait is not None:
-        nfiles = nvim.execute(options.remote_wait + arguments, 'edit', wait=True)
+        nfiles = nvr.execute(options.remote_wait + arguments, 'edit', wait=True)
     elif options.remote_silent is not None:
-        nvim.execute(options.remote_silent + arguments, 'edit', silent=True)
+        nvr.execute(options.remote_silent + arguments, 'edit', silent=True)
     elif options.remote_wait_silent is not None:
-        nfiles = nvim.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
+        nfiles = nvr.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
     elif options.remote_tab is not None:
-        nvim.execute(options.remote_tab + arguments, 'tabedit')
+        nvr.execute(options.remote_tab + arguments, 'tabedit')
     elif options.remote_tab_wait is not None:
-        nfiles = nvim.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
+        nfiles = nvr.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
     elif options.remote_tab_silent is not None:
-        nvim.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
+        nvr.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
     elif options.remote_tab_wait_silent is not None:
-        nfiles = nvim.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
+        nfiles = nvr.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
     elif arguments:
         # Act like --remote-silent.
-        nvim.execute(arguments, 'edit', silent=True)
+        nvr.execute(arguments, 'edit', silent=True)
 
     if options.remote_send:
-        nvim.server.input(options.remote_send)
+        nvr.server.input(options.remote_send)
 
     if options.remote_expr:
         result = ''
         try:
-            result = nvim.server.eval(options.remote_expr)
+            result = nvr.server.eval(options.remote_expr)
         except:
             print(textwrap.dedent("""
                 No valid expression: {}
@@ -402,44 +402,44 @@ def main(argv=sys.argv, env=os.environ):
     if options.o:
         for fname in options.o:
             if fname == '-':
-                nvim.read_stdin_into_buffer('new')
+                nvr.read_stdin_into_buffer('new')
             else:
-                nvim.server.command('split {}'.format(prepare_filename(fname)))
+                nvr.server.command('split {}'.format(prepare_filename(fname)))
     if options.O:
         for fname in options.O:
             if fname == '-':
-                nvim.read_stdin_into_buffer('vnew')
+                nvr.read_stdin_into_buffer('vnew')
             else:
-                nvim.server.command('vsplit {}'.format(prepare_filename(fname)))
+                nvr.server.command('vsplit {}'.format(prepare_filename(fname)))
 
     if options.p:
         for fname in options.p:
             if fname == '-':
-                nvim.read_stdin_into_buffer('tabnew')
+                nvr.read_stdin_into_buffer('tabnew')
             else:
-                nvim.server.command('tabedit {}'.format(prepare_filename(fname)))
+                nvr.server.command('tabedit {}'.format(prepare_filename(fname)))
 
     if options.t:
         try:
-            nvim.server.command("tag {}".format(options.t))
-        except nvim.server.error as e:
+            nvr.server.command("tag {}".format(options.t))
+        except nvr.server.error as e:
             print(e)
             sys.exit(1)
 
     if options.q:
-        nvim.server.command("silent execute 'lcd' fnameescape('{}')".
+        nvr.server.command("silent execute 'lcd' fnameescape('{}')".
                 format(os.environ['PWD'].replace("'", "''")))
-        nvim.server.command('call setqflist([])')
+        nvr.server.command('call setqflist([])')
         with open(options.q, 'r') as f:
             for line in f.readlines():
-                nvim.server.command("caddexpr '{}'".
+                nvr.server.command("caddexpr '{}'".
                         format(line.rstrip().replace("'", "''").replace('|', '\|')))
-        nvim.server.command('silent lcd -')
-        nvim.server.command('cfirst')
+        nvr.server.command('silent lcd -')
+        nvr.server.command('cfirst')
 
     if options.c:
         for cmd in options.c:
-            nvim.server.command(cmd)
+            nvr.server.command(cmd)
 
     if 'nfiles' in locals():
         exitcode = 0
@@ -451,17 +451,17 @@ def main(argv=sys.argv, env=os.environ):
             if msg == 'BufDelete':
                 nfiles -= 1
                 if nfiles == 0:
-                    nvim.server.stop_loop()
+                    nvr.server.stop_loop()
             elif msg == 'Exit':
-                nvim.server.stop_loop()
+                nvr.server.stop_loop()
                 exitcode = args[0]
 
         def err_cb(error):
             print(error, file=sys.stderr)
-            nvim.server.stop_loop()
+            nvr.server.stop_loop()
             exitcode = 1
 
-        nvim.server.run_loop(None, notification_cb, None, err_cb)
+        nvr.server.run_loop(None, notification_cb, None, err_cb)
         sys.exit(exitcode)
 
 
