@@ -74,6 +74,9 @@ class Neovim():
             self._show_msg(address)
             self._msg_shown = True
 
+        return False
+
+    def start_new_process(self):
         pid = os.fork()
         if pid == 0:
             for i in range(10):
@@ -92,8 +95,6 @@ class Neovim():
                 print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
                 sys.exit(1)
 
-        return False
-
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
         for line in sys.stdin:
@@ -102,9 +103,6 @@ class Neovim():
         self.server.command('silent 1delete _ | set nomodified')
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
-        if not self.is_attached(silent):
-            return
-
         cmds, files = split_cmds_from_files(arguments)
 
         for fname in files:
@@ -291,6 +289,9 @@ def parse_args(argv):
     parser.add_argument('-t',
             metavar = '<tag>',
             help    = 'Jump to file and position of given tag.')
+    parser.add_argument('--nostart',
+            action  = 'store_true',
+            help    = 'If no process is found, do not start a new one.')
 
     return parser.parse_known_args(argv[1:])
 
@@ -365,11 +366,17 @@ def main(argv=sys.argv, env=os.environ):
     nvim = Neovim(address, options.s)
     nvim.attach()
 
-    if options.cc and nvim.is_attached():
+    if not nvim.is_attached():
+        if options.nostart:
+            sys.exit(1)
+        else:
+            nvim.start_new_process()
+
+    if options.cc:
         for cmd in options.cc:
             nvim.server.command(cmd)
 
-    if options.l and nvim.is_attached():
+    if options.l:
         nvim.server.command('wincmd p')
 
     try:
@@ -395,10 +402,10 @@ def main(argv=sys.argv, env=os.environ):
         # This must be the last remote option being checked.
         nvim.execute(options.remote_silent + arguments, 'edit', silent=True)
 
-    if options.remote_send and nvim.is_attached():
+    if options.remote_send:
         nvim.server.input(options.remote_send)
 
-    if options.remote_expr and nvim.is_attached():
+    if options.remote_expr:
         result = ''
         try:
             result = nvim.server.eval(options.remote_expr)
@@ -417,34 +424,34 @@ def main(argv=sys.argv, env=os.environ):
         else:
             print(result)
 
-    if options.o and nvim.is_attached():
+    if options.o:
         for fname in options.o:
             if fname == '-':
                 nvim.read_stdin_into_buffer('new')
             else:
                 nvim.server.command('split {}'.format(prepare_filename(fname)))
-    if options.O and nvim.is_attached():
+    if options.O:
         for fname in options.O:
             if fname == '-':
                 nvim.read_stdin_into_buffer('vnew')
             else:
                 nvim.server.command('vsplit {}'.format(prepare_filename(fname)))
 
-    if options.p and nvim.is_attached():
+    if options.p:
         for fname in options.p:
             if fname == '-':
                 nvim.read_stdin_into_buffer('tabnew')
             else:
                 nvim.server.command('tabedit {}'.format(prepare_filename(fname)))
 
-    if options.t and nvim.is_attached():
+    if options.t:
         try:
             nvim.server.command("tag {}".format(options.t))
         except nvim.server.error as e:
             print(e)
             sys.exit(1)
 
-    if options.q and nvim.is_attached():
+    if options.q:
         nvim.server.command("silent execute 'lcd' fnameescape('{}')".
                 format(os.environ['PWD'].replace("'", "''")))
         nvim.server.command('call setqflist([])')
@@ -455,7 +462,7 @@ def main(argv=sys.argv, env=os.environ):
         nvim.server.command('silent lcd -')
         nvim.server.command('cfirst')
 
-    if options.c and nvim.is_attached():
+    if options.c:
         for cmd in options.c:
             nvim.server.command(cmd)
 
