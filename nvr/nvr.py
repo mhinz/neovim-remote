@@ -347,6 +347,8 @@ def main(argv=sys.argv, env=os.environ):
 
     if options.cc:
         for cmd in options.cc:
+            if cmd == '-':
+                cmd = sys.stdin.read()
             nvr.server.command(cmd)
 
     if options.l:
@@ -382,6 +384,8 @@ def main(argv=sys.argv, env=os.environ):
 
     if options.remote_expr:
         result = ''
+        if options.remote_expr == '-':
+            options.remote_expr = sys.stdin.read()
         try:
             result = nvr.server.eval(options.remote_expr)
         except:
@@ -439,6 +443,8 @@ def main(argv=sys.argv, env=os.environ):
 
     if options.c:
         for cmd in options.c:
+            if cmd == '-':
+                cmd = sys.stdin.read()
             nvr.server.command(cmd)
 
     if 'nfiles' in locals():
