@@ -334,6 +334,7 @@ def main(argv=sys.argv, env=os.environ):
         address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or None
         if address == None:
             print("Windows workaround: could not find an address! Set environment variable 'NVIM_LISTEN_ADDRESS', or pass a server address when calling nvr: `nvr --servername \\some\\server\\address`.")
+            # possibility: what could be a good temp file location on windows? Once we decide on this, we could use the subprocess possibility described below to start an nvim process on windows using this temp server. 
             sys.exit(1)
     else:
         address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
