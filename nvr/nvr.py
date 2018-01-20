@@ -332,9 +332,11 @@ def main(argv=sys.argv, env=os.environ):
 
     if sys.platform == 'win32':
         address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or None
-        if address == None:
-            print("Windows workaround: could not find an address! Set environment variable 'NVIM_LISTEN_ADDRESS', or pass a server address when calling nvr: `nvr --servername \\some\\server\\address`.")
-            # possibility: what could be a good temp file location on windows? Once we decide on this, we could use the subprocess possibility described below to start an nvim process on windows using this temp server. 
+        if not address:
+            print("Windows workaround: could not find an address! Set "
+      "environment variable 'NVIM_LISTEN_ADDRESS', or pass "
+      "a server address when calling nvr: "
+      "`nvr --servername \\some\\server\\address`.")
             sys.exit(1)
     else:
         address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
@@ -344,10 +346,9 @@ def main(argv=sys.argv, env=os.environ):
 
     if not nvr.server:
         if sys.platform == 'win32':
-            print("Windows workaround: nvr on Windows can only attach to existing neovim processes! Could not attach to supplied server address: {}.".format(address))
+            print("nvr on Windows can only attach to existing neovim processes. "
+            "Could not attach to supplied server address: {}.".format(address))
             sys.exit(1)
-            # possibility: use user supplied address to start an nvim process as subprocess (see https://docs.python.org/3.6/library/subprocess.html)
-            # but I don't know how to start nvim on windows with such an address: https://vi.stackexchange.com/questions/14883/how-do-i-set-nvim-listen-address-on-startup-using-windows
         else:
             nvr.address = sanitize_address(address)
             silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
