@@ -35,6 +35,7 @@ import tempfile
 import textwrap
 import time
 import traceback
+import tempfile
 
 
 class Nvr():
@@ -64,15 +65,7 @@ class Nvr():
                     return True
                 time.sleep(0.2)
         else:
-            os.environ['NVIM_LISTEN_ADDRESS'] = self.address
-            try:
-                args = os.environ.get('NVR_CMD')
-                args = args.split(' ') if args else ['nvim']
-                os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
-                os.execvpe(args[0], args, os.environ)
-            except FileNotFoundError:
-                print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
-                sys.exit(1)
+            start_nvim_with_specified_server_address(self.address)
 
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
@@ -115,6 +108,23 @@ class Nvr():
 
         return len(files)
 
+def start_nvim_with_specified_server_address(address):
+    os.environ['NVIM_LISTEN_ADDRESS'] = address
+    try:
+        args = os.environ.get('NVR_CMD')
+        args = args.split(' ') if args else ['nvim']
+        
+        if sys.platform == 'win32':
+            subprocess.Popen([args[0], args, os.environ])
+        else:
+            os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
+            os.execvpe(args[0], args, os.environ)
+    except FileNotFoundError:
+        if sys.platform == 'win32':
+            print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
+        else:
+            print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
+        sys.exit(1)
 
 def sanitize_address(address):
     if get_address_type(address) == 'socket' and os.path.exists(address):
@@ -330,25 +340,27 @@ def main(argv=sys.argv, env=os.environ):
         print_sockaddrs()
         return
 
-    if sys.platform == 'win32':
-        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or None
-        if not address:
-            print("Windows workaround: could not find an address! Set "
-      "environment variable 'NVIM_LISTEN_ADDRESS', or pass "
-      "a server address when calling nvr: "
-      "`nvr --servername \\some\\server\\address`.")
-            sys.exit(1)
-    else:
-        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
+    address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or os.path.join(tempfile.gettempdir(), 'nvimsocket')
+    # if sys.platform == 'win32':
+        # address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or None
+        # if not address:
+            # print("Windows workaround: could not find an address! Set "
+      # "environment variable 'NVIM_LISTEN_ADDRESS', or pass "
+      # "a server address when calling nvr: "
+      # "`nvr --servername \\some\\server\\address`.")
+            # sys.exit(1)
+    # else:
+        # address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
 
     nvr = Nvr(address, options.s)
     nvr.attach()
 
     if not nvr.server:
         if sys.platform == 'win32':
-            print("nvr on Windows can only attach to existing neovim processes. "
-            "Could not attach to supplied server address: {}.".format(address))
-            sys.exit(1)
+            #print("nvr on Windows can only attach to existing neovim processes. "
+            #"Could not attach to supplied server address: {}.".format(address))
+            #sys.exit(1)
+            start_nvim_with_specified_server_address(address)
         else:
             nvr.address = sanitize_address(address)
             silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
