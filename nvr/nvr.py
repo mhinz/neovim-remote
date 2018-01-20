@@ -330,20 +330,32 @@ def main(argv=sys.argv, env=os.environ):
         print_sockaddrs()
         return
 
-    address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
+    if sys.platform == 'win32':
+        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or None
+        if address == None:
+            print("Windows workaround: could not find an address! Set environment variable 'NVIM_LISTEN_ADDRESS', or pass a server address when calling nvr: `nvr --servername \\some\\server\\address`.")
+            sys.exit(1)
+    else:
+        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
 
     nvr = Nvr(address, options.s)
     nvr.attach()
 
     if not nvr.server:
-        nvr.address = sanitize_address(address)
-        silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
-        if not silent:
-            show_message(address, nvr.address)
-        if options.nostart:
+        if sys.platform == 'win32':
+            print("Windows workaround: nvr on Windows can only attach to existing neovim processes! Could not attach to supplied server address: {}.".format(address))
             sys.exit(1)
+            # possibility: use user supplied address to start an nvim process as subprocess (see https://docs.python.org/3.6/library/subprocess.html)
+            # but I don't know how to start nvim on windows with such an address: https://vi.stackexchange.com/questions/14883/how-do-i-set-nvim-listen-address-on-startup-using-windows
         else:
-            nvr.start_new_process()
+            nvr.address = sanitize_address(address)
+            silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
+            if not silent:
+                show_message(address, nvr.address)
+            if options.nostart:
+                sys.exit(1)
+            else:
+                nvr.start_new_process()
 
     if options.cc:
         for cmd in options.cc:
