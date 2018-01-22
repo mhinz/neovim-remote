@@ -113,7 +113,7 @@ def start_nvim_with_specified_server_address(address):
     os.environ['NVIM_LISTEN_ADDRESS'] = address
     try:
         args = os.environ.get('NVR_CMD')
-        args = args.split(' ') if args else ['nvim-qt']
+        args = args.split(' ') if args else ['nvim']
         
         if sys.platform == 'win32':
             proc = subprocess.Popen([args[0], args, os.environ])
