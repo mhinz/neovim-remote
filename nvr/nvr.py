@@ -36,6 +36,7 @@ import textwrap
 import time
 import traceback
 import tempfile
+import random
 
 
 class Nvr():
@@ -112,10 +113,11 @@ def start_nvim_with_specified_server_address(address):
     os.environ['NVIM_LISTEN_ADDRESS'] = address
     try:
         args = os.environ.get('NVR_CMD')
-        args = args.split(' ') if args else ['nvim']
+        args = args.split(' ') if args else ['nvim-qt']
         
         if sys.platform == 'win32':
-            subprocess.Popen([args[0], args, os.environ])
+            proc = subprocess.Popen([args[0], args, os.environ])
+            time.sleep(1)
         else:
             os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
             os.execvpe(args[0], args, os.environ)
@@ -307,17 +309,27 @@ def split_cmds_from_files(args):
 def prepare_filename(fname):
     return os.path.abspath(fname).replace(" ", "\ ")
 
+    
+def get_sockaddrs_for_printing(proc):
+    sockaddrs = []
+    for conn in proc.connections('inet4'):
+            sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+            
+    if sys.platform != "win32":
+        for conn in proc.connections('unix'):
+            if conn.laddr:
+                sockaddrs.insert(0, conn.laddr)
+        sockaddrs += ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
+            
+                
+    return sockaddrs
+
 
 def print_sockaddrs():
     sockaddrs = []
 
     for proc in psutil.process_iter():
-        if proc.name() == 'nvim':
-            for conn in proc.connections('inet4'):
-                sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
-            for conn in proc.connections('unix'):
-                if conn.laddr:
-                    sockaddrs.insert(0, conn.laddr)
+        sockaddrs = get_sockaddrs_for_printing(proc)
 
     for addr in sorted(sockaddrs):
         print(addr)
@@ -331,36 +343,45 @@ def get_address_type(address):
         raise ValueError
     except ValueError:
         return 'socket'
-
+    
+def create_pipe_name():
+    existing_pipenames = [pipename for pipename in os.listdir('\\\\.\\pipe') ]
+    pipename = "\\\\.\\pipe\\nvr-{}".format(random.randint(0, 10000))
+    
+    for n in range(10):
+        if pipename not in existing_pipenames:
+            return pipename
+    
+    print("Could not figure out name for new neovim pipe. Too many existing pipes? Run `nvr --serverlist` to get a list of existing pipes.")
+    sys.exit(1)
+    
 
 def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
-
+    print(options)
+    print(arguments)
     if options.serverlist:
         print_sockaddrs()
         return
 
-    address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or os.path.join(tempfile.gettempdir(), 'nvimsocket')
-    # if sys.platform == 'win32':
-        # address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or None
-        # if not address:
-            # print("Windows workaround: could not find an address! Set "
-      # "environment variable 'NVIM_LISTEN_ADDRESS', or pass "
-      # "a server address when calling nvr: "
-      # "`nvr --servername \\some\\server\\address`.")
-            # sys.exit(1)
-    # else:
-        # address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
+    if sys.platform == 'win32':
+        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or create_pipe_name()
+    else:
+        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or os.path.join(tempfile.gettempdir(), 'nvimsocket')
 
     nvr = Nvr(address, options.s)
     nvr.attach()
 
     if not nvr.server:
         if sys.platform == 'win32':
-            #print("nvr on Windows can only attach to existing neovim processes. "
-            #"Could not attach to supplied server address: {}.".format(address))
-            #sys.exit(1)
             start_nvim_with_specified_server_address(address)
+            nvr.attach()
+            print(address)
+            print(nvr.server)
+            
+            if not nvr.server:
+                print("Could not attach to server at address: {}".format(address))
+                sys.exit(1)
         else:
             nvr.address = sanitize_address(address)
             silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
