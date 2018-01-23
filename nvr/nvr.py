@@ -26,6 +26,7 @@ import argparse
 import neovim
 import os
 import psutil
+import random
 import re
 import socket
 import stat
@@ -35,8 +36,6 @@ import tempfile
 import textwrap
 import time
 import traceback
-import tempfile
-import random
 
 
 class Nvr():
@@ -309,15 +308,17 @@ def split_cmds_from_files(args):
 def prepare_filename(fname):
     return os.path.abspath(fname).replace(" ", "\ ")
 
-    
+
+def get_pipenames_for_printing():
+    return ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
+
 def get_sockaddrs_for_printing(proc):
     sockaddrs = []
+    
     for conn in proc.connections('inet4'):
             sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
             
-    if sys.platform == "win32":
-        sockaddrs += ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
-    else:
+    if sys.platform != "win32":
         for conn in proc.connections('unix'):
             if conn.laddr:
                 sockaddrs.insert(0, conn.laddr)
@@ -329,7 +330,11 @@ def print_sockaddrs():
     sockaddrs = []
 
     for proc in psutil.process_iter():
-        sockaddrs = get_sockaddrs_for_printing(proc)
+        if "nvim" in proc.name:
+            sockaddrs = get_sockaddrs_for_printing(proc)
+    
+    if sys.platform == "win32":
+        sockaddrs += get_pipenames_for_printing()
 
     for addr in sorted(sockaddrs):
         print(addr)
@@ -352,7 +357,9 @@ def create_new_pipe_name():
         if pipename not in existing_pipenames:
             return pipename
     
-    print("Could not get name for new neovim pipe." "Too many existing pipes?" "Run `nvr --serverlist` to get a list of existing pipes.")
+    print("Could not get name for new neovim pipe."
+          "Too many existing pipes?" 
+          "Run `nvr --serverlist` to get a list of existing pipes.")
     sys.exit(1)
     
 
