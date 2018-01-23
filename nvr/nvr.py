@@ -315,7 +315,7 @@ def get_sockaddrs_for_printing(proc):
     for conn in proc.connections('inet4'):
             sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
             
-    if sys.platform != "win32":
+    if sys.platform == "win32":
         sockaddrs += ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
     else:
         for conn in proc.connections('unix'):
