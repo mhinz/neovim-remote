@@ -352,14 +352,13 @@ def create_pipe_name():
         if pipename not in existing_pipenames:
             return pipename
     
-    print("Could not figure out name for new neovim pipe. Too many existing pipes? Run `nvr --serverlist` to get a list of existing pipes.")
+    print("Could not get name for new neovim pipe." "Too many existing pipes?" "Run `nvr --serverlist` to get a list of existing pipes.")
     sys.exit(1)
     
 
 def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
-    print(options)
-    print(arguments)
+    
     if options.serverlist:
         print_sockaddrs()
         return
