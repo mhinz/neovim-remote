@@ -123,7 +123,7 @@ def start_nvim_with_specified_server_address(address):
             os.execvpe(args[0], args, os.environ)
     except FileNotFoundError:
         if sys.platform == 'win32':
-            print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
+            print("[!] Can't start new nvim process: '{}' is not in %PATH%.".format(args[0]))
         else:
             print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
         sys.exit(1)
@@ -316,12 +316,12 @@ def get_sockaddrs_for_printing(proc):
             sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
             
     if sys.platform != "win32":
+        sockaddrs += ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
+    else:
         for conn in proc.connections('unix'):
             if conn.laddr:
                 sockaddrs.insert(0, conn.laddr)
-        sockaddrs += ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
             
-                
     return sockaddrs
 
 
@@ -375,8 +375,6 @@ def main(argv=sys.argv, env=os.environ):
         if sys.platform == 'win32':
             start_nvim_with_specified_server_address(address)
             nvr.attach()
-            print(address)
-            print(nvr.server)
             
             if not nvr.server:
                 print("Could not attach to server at address: {}".format(address))
