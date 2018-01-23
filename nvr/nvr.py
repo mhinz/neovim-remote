@@ -344,7 +344,7 @@ def get_address_type(address):
     except ValueError:
         return 'socket'
     
-def create_pipe_name():
+def create_new_pipe_name():
     existing_pipenames = [pipename for pipename in os.listdir('\\\\.\\pipe') ]
     pipename = "\\\\.\\pipe\\nvr-{}".format(random.randint(0, 10000))
     
@@ -364,7 +364,7 @@ def main(argv=sys.argv, env=os.environ):
         return
 
     if sys.platform == 'win32':
-        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or create_pipe_name()
+        address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or create_new_pipe_name()
     else:
         address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or os.path.join(tempfile.gettempdir(), 'nvimsocket')
 
