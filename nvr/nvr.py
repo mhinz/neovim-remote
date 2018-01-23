@@ -310,7 +310,7 @@ def prepare_filename(fname):
 
 
 def get_pipenames_for_printing():
-    return ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe')]
+    return ["win32 pipe: {}".format(pipename) for pipename in os.listdir('\\\\.\\pipe') if 'nvim' in pipename]
 
 def get_sockaddrs_for_printing(proc):
     sockaddrs = []
