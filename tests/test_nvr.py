@@ -12,7 +12,7 @@ def test_open_and_write_file():
     if sys.platform == 'win32':
         env = {'NVIM_LISTEN_ADDRESS': nvr.create_new_pipe_name()}
     else:
-        env = {'NVIM_LISTEN_ADDRESS': '/tmp/pytest_nvimsock'}
+        env = {'NVIM_LISTEN_ADDRESS': os.path.join(tempfile.gettempdir(), "pytest_nvimsock")}
         
     env.update(os.environ)
 
