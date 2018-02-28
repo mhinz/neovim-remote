@@ -1,10 +1,15 @@
+[![Build status](https://travis-ci.org/mhinz/neovim-remote.svg?branch=master)](https://travis-ci.org/mhinz/neovim-remote)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
+
 # neovim-remote
 
-[![Build status](https://travis-ci.org/mhinz/neovim-remote.svg?branch=master)](https://travis-ci.org/mhinz/neovim-remote)
-[![Wheel?](https://img.shields.io/pypi/wheel/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
-[![PyPI version](https://img.shields.io/pypi/v/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
-[![License](https://img.shields.io/pypi/l/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
+This package provides an executable called **nvr** which solves these cases:
+
+- Controlling nvim processes from the shell. E.g. opening files in another
+  terminal window.
+- Opening files from within `:terminal` without starting a nested nvim process.
+
+---
 
 - [Installation](#installation)
 - [Theory](#theory)
@@ -13,11 +18,7 @@
 - [Demos](#demos)
 - [FAQ](#faq)
 
-This package provides an executable called **nvr** which solves these cases:
-
-- Controlling nvim processes from the shell. E.g. opening files in another
-  terminal window.
-- Opening files from within `:terminal` without starting a nested nvim process.
+---
 
 ## Installation
 
@@ -62,12 +63,12 @@ nvr --remote-expr 'bufname("")'
 README.md
 ```
 
-See `nvr -h` for all options.
 <details>
-<summary>nvr -h</summary>
+<summary>click here to see all nvr options</summary>
+
 ```
-❯ nvr -h
-usage: /Users/mhi/.pyenv/versions/3.6.4/bin/nvr [arguments]
+$ nvr -h
+usage: nvr [arguments]
 
 Remote control Neovim processes.
 
