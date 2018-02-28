@@ -99,44 +99,44 @@ Using nvr from within `:terminal`: ![Demo 2](https://github.com/mhinz/neovim-rem
 
 ## FAQ
 
-**How to open directories?**
+- **How to open directories?**
 
-`:e /tmp` opens a directory view via netrw. Netrw works by hooking into certain
-events, `BufEnter` in this case (see `:au FileExplorer` for all of them).
+    `:e /tmp` opens a directory view via netrw. Netrw works by hooking into certain
+    events, `BufEnter` in this case (see `:au FileExplorer` for all of them).
 
-Unfortunately Neovim's API doesn't trigger any autocmds on its own, so simply
-`nvr /tmp` won't work. Meanwhile you can work around it like this:
+    Unfortunately Neovim's API doesn't trigger any autocmds on its own, so simply
+    `nvr /tmp` won't work. Meanwhile you can work around it like this:
 
-    $ nvr /tmp -c 'doautocmd BufEnter'
+        $ nvr /tmp -c 'doautocmd BufEnter'
 
-**Reading from stdin?**
+- **Reading from stdin?**
 
-Yes! E.g. `echo "foo\nbar" | nvr -o -` and `cat file | nvr --remote -` work just
-as you would expect them to work.
+    Yes! E.g. `echo "foo\nbar" | nvr -o -` and `cat file | nvr --remote -` work just
+    as you would expect them to work.
 
-**Exit code?**
+- **Exit code?**
 
-If you use a [recent enough
-Neovim](https://github.com/neovim/neovim/commit/d2e8c76dc22460ddfde80477dd93aab3d5866506), nvr will use the same exit code as the linked nvim.
+    If you use a [recent enough
+    Neovim](https://github.com/neovim/neovim/commit/d2e8c76dc22460ddfde80477dd93aab3d5866506), nvr will use the same exit code as the linked nvim.
 
-E.g. `nvr --remote-wait <file>` and then `:cquit` in the linked nvim will make
-nvr return with 1.
+    E.g. `nvr --remote-wait <file>` and then `:cquit` in the linked nvim will make
+    nvr return with 1.
 
-**Talking to nvr from Neovim?**
+- **How to send a message to all waiting clients?**
 
-Imagine `nvr --remote-wait file`. The buffer that represents "file" in Neovim
-now has a local variable `b:nvr`. It's a list of channels for each connected nvr
-process.
+    If you open a buffer with any of the _wait_ options, that buffer will get a
+    variable `b:nvr`. The variable contains a list of channels wheres each
+    channel is a waiting nvr client.
 
-If we wanted to create a command that disconnects all nvr processes with exit
-code 1:
+    Currently nvr only understands the `Exit` message. You could use it to
+    disconnect all waiting nvr clients at once:
 
-```vim
-command! Cquit
-    \  if exists('b:nvr')
-    \|   for chanid in b:nvr
-    \|     silent! call rpcnotify(chanid, 'Exit', 1)
-    \|   endfor
-    \| endif
-```
+    ```vim
+    command! DisconnectClients
+        \  if exists('b:nvr')
+        \|   for client in b:nvr
+        \|     silent! call rpcnotify(client, 'Exit', 1)
+        \|   endfor
+        \| endif
+    ```
 
