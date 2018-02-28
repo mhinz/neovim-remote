@@ -1,7 +1,9 @@
 [![Build status](https://travis-ci.org/mhinz/neovim-remote.svg?branch=master)](https://travis-ci.org/mhinz/neovim-remote)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
 
-# neovim-remote
+<div align='center'>
+  <h1>neovim-remote</h1><br>
+</div>
 
 This package provides an executable called **nvr** which solves these cases:
 
