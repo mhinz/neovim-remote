@@ -6,8 +6,8 @@
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
 [![License](https://img.shields.io/pypi/l/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
 
-- [Use case](#use-case)
 - [Installation](#installation)
+- [Use case](#use-case)
 - [Usage](#usage)
 - [Demos](#demos)
 - [FAQ](#faq)
@@ -33,6 +33,13 @@ If the targeted address does not exist, **nvr** starts a new process by running
 "nvim". You can change the command by setting `$NVR_CMD`. _(This requires
 forking, so it won't work on Windows.)_
 
+## Installation
+
+    $ pip3 install neovim-remote
+
+If you encounter any issues, e.g. permission denied errors or you can't find the
+`nvr` executable, read [INSTALLATION.md](INSTALLATION.md).
+
 ## Use case
 
 Imagine Neovim is set as your default editor: `EDITOR=nvim`.
@@ -54,10 +61,6 @@ Alternatively, you can make git always using nvr. In a regular shell, nvr will
 create a new nvim process. In a terminal buffer, nvr will open a new buffer.
 
     $ git config --global core.editor 'nvr --remote-wait-silent'
-
-## Installation
-
-See [INSTALLATION.md](INSTALLATION.md)
 
 ## Usage
 

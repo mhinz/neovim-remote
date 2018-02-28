@@ -1,6 +1,6 @@
 # Installation
 
-#### The normal way
+## The normal way
 
     $ pip3 install neovim-remote
 
@@ -21,7 +21,7 @@ This will give you the correct location:
 
     $ python3 -c 'import site; print(site.USER_BASE)'
 
-#### From repo
+## From repo
 
 If you want to test your own changes, it makes sense to put your local repo into
 _develop mode_. That way your Python environment will use the repo directly and
@@ -33,7 +33,7 @@ you don't have to reinstall the package after each change:
 
 Now, `pip3 list` will show the path to the local repo after the package version.
 
-#### From zip
+## From zip
 
 Download the [zipped
 sources](https://github.com/mhinz/neovim-remote/archive/master.zip) and install
