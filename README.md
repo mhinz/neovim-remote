@@ -7,12 +7,11 @@
 [![License](https://img.shields.io/pypi/l/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
 
 - [Installation](#installation)
+- [Theory](#theory)
+- [First steps](#first-steps)
 - [Use case](#use-case)
-- [Usage](#usage)
 - [Demos](#demos)
 - [FAQ](#faq)
-
----
 
 This package provides an executable called **nvr** which solves these cases:
 
@@ -20,7 +19,14 @@ This package provides an executable called **nvr** which solves these cases:
   terminal window.
 - Opening files from within `:terminal` without starting a nested nvim process.
 
----
+## Installation
+
+    pip3 install neovim-remote
+
+If you encounter any issues, e.g. permission denied errors or you can't find the
+`nvr` executable, read [INSTALLATION.md](INSTALLATION.md).
+
+## Theory
 
 Nvim always starts a server. Get its address via `:echo $NVIM_LISTEN_ADDRESS` or
 `:echo v:servername`. Or specify an address at startup:
@@ -33,12 +39,108 @@ If the targeted address does not exist, **nvr** starts a new process by running
 "nvim". You can change the command by setting `$NVR_CMD`. _(This requires
 forking, so it won't work on Windows.)_
 
-## Installation
+## First steps
 
-    $ pip3 install neovim-remote
+Start a nvim process (which acts as a server) in one shell:
 
-If you encounter any issues, e.g. permission denied errors or you can't find the
-`nvr` executable, read [INSTALLATION.md](INSTALLATION.md).
+    NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
+
+And do this in another shell:
+
+```sh
+# nvr uses /tmp/nvimsocket by default, so we're good.
+
+# Open two files:
+nvr --remote file1 file2
+
+# Send keys to the current buffer:
+nvr --remote-send 'iabc<esc>'
+# Enter insert mode, insert 'abc', and go back to normal mode again.
+
+# Evaluate any VimL expression, e.g. get the current buffer:
+nvr --remote-expr 'bufname("")'
+README.md
+```
+
+See `nvr -h` for all options.
+<details>
+<summary>nvr -h</summary>
+```
+❯ nvr -h
+usage: /Users/mhi/.pyenv/versions/3.6.4/bin/nvr [arguments]
+
+Remote control Neovim processes.
+
+If no process is found, a new one will be started.
+
+    $ nvr --remote-send 'iabc<cr><esc>'
+    $ nvr --remote-expr 'map([1,2,3], "v:val + 1")'
+
+Any arguments not consumed by options will be fed to --remote-silent:
+
+    $ nvr --remote-silent file1 file2
+    $ nvr file1 file2
+
+All --remote options take optional commands.
+Exception: --remote-expr, --remote-send.
+
+    $ nvr +10 file
+    $ nvr +'echomsg "foo" | echomsg "bar"' file
+    $ nvr --remote-tab-wait +'set bufhidden=delete' file
+
+Open files in a new window from a terminal buffer:
+
+    $ nvr -cc split file1 file2
+
+Use nvr from git to edit commit messages:
+
+    $ git config --global core.editor 'nvr --remote-wait-silent'
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --remote [<file> [<file> ...]]
+                        Use :edit to open files. If no process is found, throw
+                        an error and start a new one.
+  --remote-wait [<file> [<file> ...]]
+                        Like --remote, but block until all buffers opened by
+                        this option get deleted or the process exits.
+  --remote-silent [<file> [<file> ...]]
+                        Like --remote, but throw no error if no process is
+                        found.
+  --remote-wait-silent [<file> [<file> ...]]
+                        Combines --remote-wait and --remote-silent.
+  --remote-tab [<file> [<file> ...]]
+                        Like --remote, but use :tabedit.
+  --remote-tab-wait [<file> [<file> ...]]
+                        Like --remote-wait, but use :tabedit.
+  --remote-tab-silent [<file> [<file> ...]]
+                        Like --remote-silent, but use :tabedit.
+  --remote-tab-wait-silent [<file> [<file> ...]]
+                        Like --remote-wait-silent, but use :tabedit.
+  --remote-send <keys>  Send key presses.
+  --remote-expr <expr>  Evaluate expression and print result in shell.
+  --servername <addr>   Set the address to be used. This overrides the default
+                        "/tmp/nvimsocket" and $NVIM_LISTEN_ADDRESS.
+  --serverlist          Print the TCPv4 and Unix domain socket addresses of
+                        all nvim processes.
+  -cc <cmd>             Execute a command before every other option.
+  -c <cmd>              Execute a command after every other option.
+  -l                    Change to previous window via ":wincmd p".
+  -o <file> [<file> ...]
+                        Open files via ":split".
+  -O <file> [<file> ...]
+                        Open files via ":vsplit".
+  -p <file> [<file> ...]
+                        Open files via ":tabedit".
+  -q <errorfile>        Read errorfile into quickfix list and display first
+                        error.
+  -s                    Silence "no server found" message.
+  -t <tag>              Jump to file and position of given tag.
+  --nostart             If no process is found, do not start a new one.
+
+Happy hacking!
+```
+</details>
 
 ## Use case
 
@@ -61,35 +163,6 @@ Alternatively, you can make git always using nvr. In a regular shell, nvr will
 create a new nvim process. In a terminal buffer, nvr will open a new buffer.
 
     $ git config --global core.editor 'nvr --remote-wait-silent'
-
-## Usage
-
-Start a nvim process (which acts as a server) in one shell:
-
-    $ NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
-
-And do this in another shell:
-
-```sh
-$ # Spares us from using --servername all the time:
-$ export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket
-$ # This is optional, since nvr assumes /tmp/nvimsocket by default.
-
-$ # Open two files:
-$ nvr --remote file1 file2
-
-$ # Send keys to the current buffer:
-$ nvr --remote-send 'iabc<esc>'
-$ # Enter insert mode, insert 'abc', and go back to normal mode again.
-
-$ # Evaluate any VimL expression, e.g. get all listed buffers:
-$ nvr --remote-expr "join(sort(map(filter(range(bufnr('$')), 'buflisted(v:val)'), 'bufname(v:val)')), "\""\n"\"")"
-.config/git/config
-vim/vimrc
-zsh/.zprofile
-```
-
-See `nvr -h` for all options.
 
 ## Demos
 
