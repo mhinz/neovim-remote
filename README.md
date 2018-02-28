@@ -6,33 +6,32 @@
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
 [![License](https://img.shields.io/pypi/l/neovim-remote.svg)](https://pypi.python.org/pypi/neovim-remote)
 
-- [Intro](#intro)
 - [Use case](#use-case)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Demos](#demos)
 - [FAQ](#faq)
 
-## Intro
+---
 
-**nvr** is a tool that helps controlling nvim processes.
+This package provides an executable called **nvr** which solves these cases:
 
-It does two things:
+- Controlling nvim processes from the shell. E.g. opening files in another
+  terminal window.
+- Opening files from within `:terminal` without starting a nested nvim process.
 
-1. adds back the `--remote` family of options (see `man vim`)
-2. helps controlling the current nvim from within `:terminal`
+---
 
-To target a specific nvim process, use either the `--servername` option or set
-the environment variable `$NVIM_LISTEN_ADDRESS`.
+Nvim always starts a server. Get its address via `:echo $NVIM_LISTEN_ADDRESS` or
+`:echo v:servername`. Or specify an address at startup:
+`NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim`.
 
-If the targeted address does not exist, nvr starts a new process on its own by
-running "nvim". You can change the command by setting `$NVR_CMD`.
+**nvr** will use `$NVIM_LISTEN_ADDRESS` or any address given to it via
+`--servername`.
 
-Since `$NVIM_LISTEN_ADDRESS` is implicitely set by each nvim process, you can
-call **nvr** from within Neovim (`:terminal`) without specifying `--servername`.
-
-*NOTE: This tool relies on the Unix forking model, and thus Windows is not
-supported.*
+If the targeted address does not exist, **nvr** starts a new process by running
+"nvim". You can change the command by setting `$NVR_CMD`. _(This requires
+forking, so it won't work on Windows.)_
 
 ## Use case
 
