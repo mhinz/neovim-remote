@@ -131,7 +131,7 @@ def sanitize_address(address):
 def parse_args(argv):
     form_class = argparse.RawDescriptionHelpFormatter
     usage      = '{} [arguments]'.format(argv[0])
-    epilog     = 'Happy hacking!'
+    epilog     = 'Development: https://github.com/mhinz/neovim-remote\n\nHappy hacking!'
     desc       = textwrap.dedent("""
         Remote control Neovim processes.
 
