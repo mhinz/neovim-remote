@@ -250,6 +250,9 @@ def parse_args(argv):
     parser.add_argument('--nostart',
             action  = 'store_true',
             help    = 'If no process is found, do not start a new one.')
+    parser.add_argument('--version',
+            action  = 'store_true',
+            help    = 'Show the nvr version.')
 
     return parser.parse_known_args(argv[1:])
 
@@ -325,6 +328,12 @@ def get_address_type(address):
 
 def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
+
+    if options.version:
+        import pkg_resources
+        version = pkg_resources.require('neovim-remote')[0].version
+        print('nvr {}'.format(version))
+        return
 
     if options.serverlist:
         print_sockaddrs()

@@ -13,7 +13,7 @@ setup(
     url              = 'https://github.com/mhinz/neovim-remote',
     description      = 'Control nvim processes using "nvr" commandline tool',
     long_description = long_description,
-    install_requires = ['neovim', 'psutil'],
+    install_requires = ['neovim', 'psutil', 'setuptools'],
     entry_points     = {
         'console_scripts': ['nvr = nvr.nvr:main']
     },
