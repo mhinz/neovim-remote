@@ -477,6 +477,7 @@ def main(argv=sys.argv, env=os.environ):
             exitcode = 1
 
         nvr.server.run_loop(None, notification_cb, None, err_cb)
+        nvr.server.close()
         sys.exit(exitcode)
 
 
