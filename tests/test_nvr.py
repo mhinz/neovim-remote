@@ -2,33 +2,45 @@
 
 import os
 import time
-import signal
 import subprocess
+import uuid
 import nvr
 
-env = {'NVIM_LISTEN_ADDRESS': '/tmp/pytest_nvimsock'}
-testfile = '/tmp/pytest_file'
+# Helper functions
 
+def run_nvim(env):
+    nvim = subprocess.Popen(['nvim', '-nu', 'NORC', '--headless'], env=env)
+    time.sleep(1)
+    return nvim
 
-class Nvim:
-    nvim = None
+def run_nvr(cmdlines, env):
+    for cmdline in cmdlines:
+        nvr.main(cmdline, env)
 
-    def start(self, env=env):
-        env.update(os.environ)
-        self.nvim = subprocess.Popen(['nvim', '-nu', 'NORC', '--headless'],
-                                close_fds=True, env=env)
-        time.sleep(1)
+def setup_env():
+    env = {'NVIM_LISTEN_ADDRESS': 'pytest_socket_{}'.format(uuid.uuid4())}
+    env.update(os.environ)
+    return env
 
-    def stop(self):
-        self.nvim.send_signal(signal.SIGTERM)
+# Tests
 
+def test_remote_send(capsys):
+    env = setup_env()
+    nvim = run_nvim(env)
+    cmdlines = [['nvr', '--nostart', '--remote-send', 'iabc<cr><esc>'],
+                ['nvr', '--nostart', '--remote-expr', 'getline(1)']]
+    run_nvr(cmdlines, env)
+    nvim.terminate()
+    out, err = capsys.readouterr()
+    assert out == 'abc\n'
 
-def test_open_and_write_file():
-    nvim = Nvim()
-    nvim.start()
-    argv = ['nvr', '-c', 'e /tmp/pytest_file | %d | exe "norm! iabc" | w']
-    nvr.main(argv, env)
-    nvim.stop()
-    with open('/tmp/pytest_file') as f:
-        assert 'abc\n' == f.read()
-    os.remove(testfile)
+# https://github.com/mhinz/neovim-remote/issues/77
+def test_escape_filenames_properly(capsys):
+    env = setup_env()
+    nvim = run_nvim(env)
+    cmdlines = [['nvr', '-s', '--nostart', '-o', 'a b|c'],
+                ['nvr', '-s', '--nostart', '--remote-expr', 'fnamemodify(bufname(""), ":t")']]
+    run_nvr(cmdlines, env)
+    nvim.terminate()
+    out, err = capsys.readouterr()
+    assert out == 'a b|c\n'
