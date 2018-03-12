@@ -13,7 +13,7 @@ testfile = '/tmp/pytest_file'
 class Nvim:
     nvim = None
 
-    def start(self, env={}):
+    def start(self, env=env):
         env.update(os.environ)
         self.nvim = subprocess.Popen(['nvim', '-nu', 'NORC', '--headless'],
                                 close_fds=True, env=env)
