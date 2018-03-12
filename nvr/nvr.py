@@ -31,10 +31,10 @@ import socket
 import stat
 import subprocess
 import sys
-import tempfile
 import textwrap
 import time
 import traceback
+import uuid
 
 
 class Nvr():
@@ -127,8 +127,7 @@ def sanitize_address(address):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(address)
         except:
-            with tempfile.NamedTemporaryFile(dir='/tmp', prefix='nvimsocket_') as f:
-                address = f.name
+            address = '/tmp/nvimsocket-{}'.format(uuid.uuid4())
 
     return address
 
