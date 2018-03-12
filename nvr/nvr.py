@@ -251,6 +251,11 @@ def parse_args(argv):
     parser.add_argument('-t',
             metavar = '<tag>',
             help    = 'Jump to file and position of given tag.')
+    parser.add_argument('--set-var', '-V',
+            metavar = ('<name>', '<value>'),
+            help    = 'Set neovim global variable <name> to <value> before proceeding',
+            nargs   = 2,
+            action  = 'append')
     parser.add_argument('--nostart',
             action  = 'store_true',
             help    = 'If no process is found, do not start a new one.')
@@ -353,6 +358,10 @@ def main(argv=sys.argv, env=os.environ):
             sys.exit(1)
         else:
             nvr.start_new_process()
+
+    if options.set_var:
+        for k, v in options.set_var:
+            nvr.server.vars[k] = v
 
     if options.cc:
         for cmd in options.cc:
