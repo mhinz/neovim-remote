@@ -81,6 +81,11 @@ class Nvr():
                     format(line.rstrip().replace("'", "''")))
         self.server.command('silent 1delete _ | set nomodified')
 
+    def fnameescaped_command(self, cmd, fname):
+        path = os.path.abspath(fname)
+        path = self.server.eval("fnameescape('{}')".format(path))
+        self.server.command('{} {}'.format(cmd, path))
+
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         cmds, files = split_cmds_from_files(arguments)
 
@@ -89,7 +94,7 @@ class Nvr():
                 self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
             else:
                 try:
-                    self.server.command('{} {}'.format(cmd, prepare_filename(fname)))
+                    self.fnameescaped_command(cmd, fname)
                 except neovim.api.nvim.NvimError as e:
                     if not re.search('E37', e.args[0].decode()):
                         traceback.print_exc()
@@ -297,10 +302,6 @@ def split_cmds_from_files(args):
     return [], []
 
 
-def prepare_filename(fname):
-    return os.path.abspath(fname).replace(" ", "\ ")
-
-
 def print_sockaddrs():
     sockaddrs = []
 
@@ -417,20 +418,20 @@ def main(argv=sys.argv, env=os.environ):
             if fname == '-':
                 nvr.read_stdin_into_buffer('new')
             else:
-                nvr.server.command('split {}'.format(prepare_filename(fname)))
+                nvr.fnameescaped_command('split', fname)
     if options.O:
         for fname in options.O:
             if fname == '-':
                 nvr.read_stdin_into_buffer('vnew')
             else:
-                nvr.server.command('vsplit {}'.format(prepare_filename(fname)))
+                nvr.fnameescaped_command('vsplit', fname)
 
     if options.p:
         for fname in options.p:
             if fname == '-':
                 nvr.read_stdin_into_buffer('tabnew')
             else:
-                nvr.server.command('tabedit {}'.format(prepare_filename(fname)))
+                nvr.fnameescaped_command('tabedit', fname)
 
     if options.t:
         try:
