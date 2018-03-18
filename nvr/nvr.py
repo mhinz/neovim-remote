@@ -82,8 +82,7 @@ class Nvr():
         self.server.command('silent 1delete _ | set nomodified')
 
     def fnameescaped_command(self, cmd, fname):
-        path = os.path.abspath(fname)
-        path = self.server.eval("fnameescape('{}')".format(path))
+        path = self.server.funcs.fnameescape(os.path.abspath(fname))
         self.server.command('{} {}'.format(cmd, path))
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
