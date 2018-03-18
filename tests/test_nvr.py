@@ -36,11 +36,34 @@ def test_remote_send(capsys):
 
 # https://github.com/mhinz/neovim-remote/issues/77
 def test_escape_filenames_properly(capsys):
+    filename = 'a b|c'
     env = setup_env()
     nvim = run_nvim(env)
-    cmdlines = [['nvr', '-s', '--nostart', '-o', 'a b|c'],
+    cmdlines = [['nvr', '-s', '--nostart', '-o', filename],
                 ['nvr', '-s', '--nostart', '--remote-expr', 'fnamemodify(bufname(""), ":t")']]
     run_nvr(cmdlines, env)
     nvim.terminate()
     out, err = capsys.readouterr()
-    assert out == 'a b|c\n'
+    assert filename == out.rstrip()
+
+def test_escape_single_quotes_in_filenames(capsys):
+    filename = "foo'bar'quux"
+    env = setup_env()
+    nvim = run_nvim(env)
+    cmdlines = [['nvr', '-s', '--nostart', '-o', filename],
+                ['nvr', '-s', '--nostart', '--remote-expr', 'fnamemodify(bufname(""), ":t")']]
+    run_nvr(cmdlines, env)
+    nvim.terminate()
+    out, err = capsys.readouterr()
+    assert filename == out.rstrip()
+
+def test_escape_double_quotes_in_filenames(capsys):
+    filename = 'foo"bar"quux'
+    env = setup_env()
+    nvim = run_nvim(env)
+    cmdlines = [['nvr', '-s', '--nostart', '-o', filename],
+                ['nvr', '-s', '--nostart', '--remote-expr', 'fnamemodify(bufname(""), ":t")']]
+    run_nvr(cmdlines, env)
+    nvim.terminate()
+    out, err = capsys.readouterr()
+    assert filename == out.rstrip()
