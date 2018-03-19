@@ -417,13 +417,18 @@ def main(argv=sys.argv, env=os.environ):
             print(result)
 
     if options.o:
+        cmd = 'edit' if nvr.started_new_process else 'split'
+        nvr.fnameescaped_command(cmd, options.o.pop(0))
         for fname in options.o:
             if fname == '-':
                 nvr.read_stdin_into_buffer('new')
             else:
                 nvr.fnameescaped_command('split', fname)
         nvr.server.command('wincmd =')
+
     if options.O:
+        cmd = 'edit' if nvr.started_new_process else 'vsplit'
+        nvr.fnameescaped_command(cmd, options.O.pop(0))
         for fname in options.O:
             if fname == '-':
                 nvr.read_stdin_into_buffer('vnew')
@@ -432,6 +437,8 @@ def main(argv=sys.argv, env=os.environ):
         nvr.server.command('wincmd =')
 
     if options.p:
+        cmd = 'edit' if nvr.started_new_process else 'tabedit'
+        nvr.fnameescaped_command(cmd, options.p.pop(0))
         for fname in options.p:
             if fname == '-':
                 nvr.read_stdin_into_buffer('tabnew')
