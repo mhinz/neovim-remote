@@ -39,9 +39,10 @@ import uuid
 
 class Nvr():
     def __init__(self, address, silent=False):
-        self.address    = address
-        self.server     = None
-        self.silent     = silent
+        self.address = address
+        self.server = None
+        self.silent = silent
+        self.started_new_process = False
         self._msg_shown = False
 
     def attach(self):
@@ -61,6 +62,7 @@ class Nvr():
             for i in range(10):
                 self.attach()
                 if self.server:
+                    self.started_new_process = True
                     return True
                 time.sleep(0.2)
         else:
@@ -225,6 +227,10 @@ def parse_args(argv):
             action  = 'append',
             metavar = '<cmd>',
             help    = 'Execute a command after every other option.')
+    parser.add_argument('-d',
+            nargs   = '+',
+            metavar = '<file>',
+            help    = 'Switch to diff mode. See `:h vimdiff` for more information.')
     parser.add_argument('-l',
             action  = 'store_true',
             help    = 'Change to previous window via ":wincmd p".')
@@ -429,6 +435,13 @@ def main(argv=sys.argv, env=os.environ):
                 nvr.read_stdin_into_buffer('tabnew')
             else:
                 nvr.fnameescaped_command('tabedit', fname)
+
+    if options.d:
+        cmd = 'edit' if nvr.started_new_process else 'tabedit'
+        nvr.fnameescaped_command(cmd, options.d.pop(0))
+        nvr.server.command('silent only | diffthis')
+        for fname in options.d:
+            nvr.fnameescaped_command('diffsplit', fname)
 
     if options.t:
         try:
