@@ -438,9 +438,9 @@ def main(argv=sys.argv, env=os.environ):
             sys.exit(1)
 
     if options.q:
-        nvr.server.command("silent execute 'lcd' fnameescape('{}')".
-                format(os.environ['PWD'].replace("'", "''")))
-        nvr.server.command('call setqflist([])')
+        path = nvr.server.funcs.fnameescape(os.environ['PWD'])
+        nvr.server.command('lcd {}'.format(path))
+        nvr.server.funcs.setqflist('[]')
         with open(options.q, 'r') as f:
             for line in f.readlines():
                 nvr.server.command("caddexpr '{}'".
