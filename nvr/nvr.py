@@ -422,12 +422,14 @@ def main(argv=sys.argv, env=os.environ):
                 nvr.read_stdin_into_buffer('new')
             else:
                 nvr.fnameescaped_command('split', fname)
+        nvr.server.command('wincmd =')
     if options.O:
         for fname in options.O:
             if fname == '-':
                 nvr.read_stdin_into_buffer('vnew')
             else:
                 nvr.fnameescaped_command('vsplit', fname)
+        nvr.server.command('wincmd =')
 
     if options.p:
         for fname in options.p:
@@ -442,6 +444,7 @@ def main(argv=sys.argv, env=os.environ):
         nvr.server.command('silent only | diffthis')
         for fname in options.d:
             nvr.fnameescaped_command('diffsplit', fname)
+        nvr.server.command('wincmd =')
 
     if options.t:
         try:
