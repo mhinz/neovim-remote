@@ -91,8 +91,8 @@ class Nvr():
     def diffthis(self):
         if self.diffmode:
             self.server.command('diffthis')
-        if not self.started_new_process:
-            self.wait_for_current_buffer()
+            if not self.started_new_process:
+                self.wait_for_current_buffer()
 
     def wait_for_current_buffer(self):
         bvars = self.server.current.buffer.vars
