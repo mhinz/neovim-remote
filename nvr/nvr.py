@@ -42,6 +42,7 @@ class Nvr():
         self.address = address
         self.server = None
         self.silent = silent
+        self.wait = 0
         self.started_new_process = False
         self.diffmode = False
         self._msg_shown = False
@@ -90,6 +91,8 @@ class Nvr():
     def diffthis(self):
         if self.diffmode:
             self.server.command('diffthis')
+        if not self.started_new_process:
+            self.wait_for_current_buffer()
 
     def wait_for_current_buffer(self):
         bvars = self.server.current.buffer.vars
@@ -105,6 +108,8 @@ class Nvr():
                 bvars['nvr'] = [chanid] + bvars['nvr']
         else:
             bvars['nvr'] = [chanid]
+
+        self.wait += 1
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         cmds, files = split_cmds_from_files(arguments)
@@ -385,19 +390,19 @@ def main(argv=sys.argv, env=os.environ):
     if options.remote is not None:
         nvr.execute(options.remote + arguments, 'edit')
     elif options.remote_wait is not None:
-        nfiles = nvr.execute(options.remote_wait + arguments, 'edit', wait=True)
+        nvr.execute(options.remote_wait + arguments, 'edit', wait=True)
     elif options.remote_silent is not None:
         nvr.execute(options.remote_silent + arguments, 'edit', silent=True)
     elif options.remote_wait_silent is not None:
-        nfiles = nvr.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
+        nvr.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
     elif options.remote_tab is not None:
         nvr.execute(options.remote_tab + arguments, 'tabedit')
     elif options.remote_tab_wait is not None:
-        nfiles = nvr.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
+        nvr.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
     elif options.remote_tab_silent is not None:
         nvr.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
     elif options.remote_tab_wait_silent is not None:
-        nfiles = nvr.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
+        nvr.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
     elif arguments:
         if options.d:
             # Emulate `vim -d`.
@@ -487,16 +492,17 @@ def main(argv=sys.argv, env=os.environ):
                 cmd = sys.stdin.read()
             nvr.server.command(cmd)
 
-    if 'nfiles' in locals():
+    wait_for_n_buffers = nvr.wait
+    if wait_for_n_buffers > 0:
         exitcode = 0
 
         def notification_cb(msg, args):
-            nonlocal nfiles
+            nonlocal wait_for_n_buffers
             nonlocal exitcode
 
             if msg == 'BufDelete':
-                nfiles -= 1
-                if nfiles == 0:
+                wait_for_n_buffers -= 1
+                if wait_for_n_buffers == 0:
                     nvr.server.stop_loop()
             elif msg == 'Exit':
                 nvr.server.stop_loop()
