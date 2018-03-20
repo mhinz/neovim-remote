@@ -91,6 +91,21 @@ class Nvr():
         if self.diffmode:
             self.server.command('diffthis')
 
+    def wait_for_current_buffer(self):
+        bvars = self.server.current.buffer.vars
+        chanid = self.server.channel_id
+
+        self.server.command('augroup nvr')
+        self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(chanid))
+        self.server.command('autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({}, "Exit", v:exiting) | endif'.format(chanid))
+        self.server.command('augroup END')
+
+        if 'nvr' in bvars:
+            if chanid not in bvars['nvr']:
+                bvars['nvr'] = [chanid] + bvars['nvr']
+        else:
+            bvars['nvr'] = [chanid]
+
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         cmds, files = split_cmds_from_files(arguments)
 
@@ -106,19 +121,7 @@ class Nvr():
                         sys.exit(1)
 
             if wait:
-                bvars = self.server.current.buffer.vars
-                chanid = self.server.channel_id
-
-                self.server.command('augroup nvr')
-                self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(chanid))
-                self.server.command('autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({}, "Exit", v:exiting) | endif'.format(chanid))
-                self.server.command('augroup END')
-
-                if 'nvr' in bvars:
-                    if chanid not in bvars['nvr']:
-                        bvars['nvr'] = [chanid] + bvars['nvr']
-                else:
-                    bvars['nvr'] = [chanid]
+                self.wait_for_current_buffer()
 
         for cmd in cmds:
             self.server.command(cmd if cmd else '$')
