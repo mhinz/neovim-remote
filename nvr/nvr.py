@@ -43,6 +43,7 @@ class Nvr():
         self.server = None
         self.silent = silent
         self.started_new_process = False
+        self.diffmode = False
         self._msg_shown = False
 
     def attach(self):
@@ -85,6 +86,10 @@ class Nvr():
     def fnameescaped_command(self, cmd, fname):
         path = self.server.funcs.fnameescape(os.path.abspath(fname))
         self.server.command('{} {}'.format(cmd, path))
+
+    def diffthis(self):
+        if self.diffmode:
+            self.server.command('diffthis')
 
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         cmds, files = split_cmds_from_files(arguments)
@@ -228,9 +233,8 @@ def parse_args(argv):
             metavar = '<cmd>',
             help    = 'Execute a command after every other option.')
     parser.add_argument('-d',
-            nargs   = '+',
-            metavar = '<file>',
-            help    = 'Switch to diff mode. See `:h vimdiff` for more information.')
+            action  = 'store_true',
+            help    = 'Diff mode. Use :diffthis on all to be opened buffers.')
     parser.add_argument('-l',
             action  = 'store_true',
             help    = 'Change to previous window via ":wincmd p".')
@@ -358,6 +362,9 @@ def main(argv=sys.argv, env=os.environ):
         else:
             nvr.start_new_process()
 
+    if options.d:
+        nvr.diffmode = True
+
     if options.cc:
         for cmd in options.cc:
             if cmd == '-':
@@ -389,8 +396,12 @@ def main(argv=sys.argv, env=os.environ):
     elif options.remote_tab_wait_silent is not None:
         nfiles = nvr.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
     elif arguments:
-        # Act like --remote-silent.
-        nvr.execute(arguments, 'edit', silent=True)
+        if options.d:
+            # Emulate `vim -d`.
+            options.O = arguments
+        else:
+            # Act like --remote-silent by default.
+            nvr.execute(arguments, 'edit', silent=True)
 
     if options.remote_send:
         nvr.server.input(options.remote_send)
@@ -419,21 +430,25 @@ def main(argv=sys.argv, env=os.environ):
     if options.o:
         cmd = 'edit' if nvr.started_new_process else 'split'
         nvr.fnameescaped_command(cmd, options.o.pop(0))
+        nvr.diffthis()
         for fname in options.o:
             if fname == '-':
                 nvr.read_stdin_into_buffer('new')
             else:
                 nvr.fnameescaped_command('split', fname)
+            nvr.diffthis()
         nvr.server.command('wincmd =')
 
     if options.O:
         cmd = 'edit' if nvr.started_new_process else 'vsplit'
         nvr.fnameescaped_command(cmd, options.O.pop(0))
+        nvr.diffthis()
         for fname in options.O:
             if fname == '-':
                 nvr.read_stdin_into_buffer('vnew')
             else:
                 nvr.fnameescaped_command('vsplit', fname)
+            nvr.diffthis()
         nvr.server.command('wincmd =')
 
     if options.p:
@@ -444,14 +459,6 @@ def main(argv=sys.argv, env=os.environ):
                 nvr.read_stdin_into_buffer('tabnew')
             else:
                 nvr.fnameescaped_command('tabedit', fname)
-
-    if options.d:
-        cmd = 'edit' if nvr.started_new_process else 'tabedit'
-        nvr.fnameescaped_command(cmd, options.d.pop(0))
-        nvr.server.command('silent only | diffthis')
-        for fname in options.d:
-            nvr.fnameescaped_command('diffsplit', fname)
-        nvr.server.command('wincmd =')
 
     if options.t:
         try:
