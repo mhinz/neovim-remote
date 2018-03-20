@@ -145,7 +145,31 @@ Happy hacking!
 ```
 </details>
 
-## Typcial use cases
+## Typical use cases
+
+- **Use nvr as git mergetool.**
+
+    If you want to use nvr for `git difftool` and `git mergetool`, put this in
+    your gitconfig:
+
+    ```
+    [diff]
+        tool = nvr
+    [difftool "nvr"]
+        cmd = nvr -s -d $LOCAL $REMOTE
+    [merge]
+        tool = nvr
+    [mergetool "nvr"]
+        cmd = nvr -s -d $LOCAL $BASE $REMOTE $MERGED -c 'wincmd J | wincmd ='
+    ```
+
+    `nvr -d` is a shortcut for `nvr -d -O` and acts like `vim -d`, thus it uses
+    `:vsplit` to open the buffers. If you want them to be opened via `:split`
+    instead, use `nvr -d -o`.
+
+    When used as mergetool and all four buffers got opened, the cursor is in the
+    window containing the $MERGED buffer. We move it to the bottom via `:wincmd
+    J` and then equalize the size of all windows via `:wincmd =`.
 
 - **Open files from within `:terminal` without starting a nested nvim.**
 
