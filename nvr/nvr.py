@@ -436,7 +436,12 @@ def main(argv=sys.argv, env=os.environ):
             print(result)
 
     if options.o:
-        cmd = 'edit' if nvr.started_new_process else 'split'
+        if nvr.started_new_process:
+            cmd = 'edit'
+        elif options.d:
+            cmd = 'tabedit'
+        else:
+            cmd = 'split'
         nvr.fnameescaped_command(cmd, options.o.pop(0))
         nvr.diffthis()
         for fname in options.o:
@@ -448,7 +453,12 @@ def main(argv=sys.argv, env=os.environ):
         nvr.server.command('wincmd =')
 
     if options.O:
-        cmd = 'edit' if nvr.started_new_process else 'vsplit'
+        if nvr.started_new_process:
+            cmd = 'edit'
+        elif options.d:
+            cmd = 'tabedit'
+        else:
+            cmd = 'vsplit'
         nvr.fnameescaped_command(cmd, options.O.pop(0))
         nvr.diffthis()
         for fname in options.O:
