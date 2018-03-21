@@ -128,6 +128,7 @@ optional arguments:
                         all nvim processes.
   -cc <cmd>             Execute a command before every other option.
   -c <cmd>              Execute a command after every other option.
+  -d                    Diff mode. Use :diffthis on all to be opened buffers.
   -l                    Change to previous window via ":wincmd p".
   -o <file> [<file> ...]
                         Open files via ":split".
@@ -140,6 +141,9 @@ optional arguments:
   -s                    Silence "no server found" message.
   -t <tag>              Jump to file and position of given tag.
   --nostart             If no process is found, do not start a new one.
+  --version             Show the nvr version.
+
+Development: https://github.com/mhinz/neovim-remote
 
 Happy hacking!
 ```
