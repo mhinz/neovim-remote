@@ -22,3 +22,11 @@ script:
 notifications:
   email:
     on_success: never
+
+deploy:
+  on:
+    tags: true
+  provider: pypi
+  user: mhinz
+  password:
+    secure: "MngOQJaKlbiW2utrRyJ6Dk/9gUCNpiwxl0rV9v2Ke0ZPvr6WVzO35ykvDVTxBaw68lmZ7h+5CcRebts4Ru4hdZI6y4MSqhM2TOEst8z8Dr3wznmpN8XVki2jLhOBf4FFNC0uaHaQ5/uRfbNpn5p/EQ4mXtfQuL/Zq8noizTG0PE6PUHC+8DpazwvXUBKD7hnNolFxGSFC+7ahZZCgbhcLLQt7CAH72OD8zsYGHxSZSk/Vssom34df0Lqgzy5KLdIvCEg6vPD6LpqR4ATGwuE5T5wKdgQYA7h/DrSb87uaVFRzXwSCbELnjPTPIouu7haTAXS5PaBLZWQUJ45DhKrwdHvqud3ECOA5NgZSiBS8YPDXfDFNKx2jBI5Gytol+mnpl+gK16pv3aP1UbVPn/+OYj/ypGMuWIX3v48OGirT4T+xNdVykI35IJK7jJ943xMBS97MJNofMcIx8Bhi91unndDQSoJ222dpjPkn1D4IFhN2OR1lois1JwoV3ZfPx0K9YXRpQGqLSHy9lN1uKQREczQB2A23sr3N8611tgE0eb7cMkX4jgwZsyCkar4E6UcjYylZ+OMquIq4D7/9uZQtx7fR4TmKMEGiDKI3eI28k/sbKbIvB2H6ra++4VPZ0HQwUibpgzUs3I4HGOMQWVAJ8QvrTTcP9lZ9d+JHpi+h9M="
