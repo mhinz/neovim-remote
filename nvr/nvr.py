@@ -489,10 +489,15 @@ def main(argv=sys.argv, env=os.environ):
         path = nvr.server.funcs.fnameescape(os.environ['PWD'])
         nvr.server.command('lcd {}'.format(path))
         nvr.server.funcs.setqflist('[]')
-        with open(options.q, 'r') as f:
-            for line in f.readlines():
+        if options.q == '-':
+            for line in sys.stdin:
                 nvr.server.command("caddexpr '{}'".
                         format(line.rstrip().replace("'", "''").replace('|', '\|')))
+        else:
+            with open(options.q, 'r') as f:
+                for line in f.readlines():
+                    nvr.server.command("caddexpr '{}'".
+                            format(line.rstrip().replace("'", "''").replace('|', '\|')))
         nvr.server.command('silent lcd -')
         nvr.server.command('cfirst')
 
