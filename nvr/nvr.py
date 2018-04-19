@@ -184,39 +184,31 @@ def parse_args(argv):
             epilog          = epilog,
             description     = desc)
 
+    parser.add_argument('--wait',
+            action  = 'store_true',
+            help    = 'Instruct neovim-remote to wait')
+    parser.add_argument('--silent',
+            action  = 'store_true',
+            help    = 'Throw no error if no process is found')
+    parser.add_argument('--tab',
+            const   = ':tabedit',
+            action  = 'store_const',
+            dest    = 'edit_cmd',
+            help    = 'Executes in a new tab')
+    parser.add_argument('--split',
+            const   = ':split',
+            action  = 'store_const',
+            dest    = 'edit_cmd',
+            help    = 'Executes in a new split')
+    parser.add_argument('--vertical',
+            const   = ':vsplit',
+            action  = 'store_const',
+            dest    = 'edit_cmd',
+            help    = 'Executes in a new vertical split')
     parser.add_argument('--remote',
             nargs   = '*',
             metavar = '<file>',
             help    = 'Use :edit to open files. If no process is found, throw an error and start a new one.')
-    parser.add_argument('--remote-wait',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Like --remote, but block until all buffers opened by this option get deleted or the process exits.')
-    parser.add_argument('--remote-silent',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Like --remote, but throw no error if no process is found.')
-    parser.add_argument('--remote-wait-silent',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Combines --remote-wait and --remote-silent.')
-
-    parser.add_argument('--remote-tab',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Like --remote, but use :tabedit.')
-    parser.add_argument('--remote-tab-wait',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Like --remote-wait, but use :tabedit.')
-    parser.add_argument('--remote-tab-silent',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Like --remote-silent, but use :tabedit.')
-    parser.add_argument('--remote-tab-wait-silent',
-            nargs   = '*',
-            metavar = '<file>',
-            help    = 'Like --remote-wait-silent, but use :tabedit.')
 
     parser.add_argument('--remote-send',
             metavar = '<keys>',
@@ -273,6 +265,36 @@ def parse_args(argv):
     parser.add_argument('--version',
             action  = 'store_true',
             help    = 'Show the nvr version.')
+
+    # Deprecate those in favor of composed ones
+    parser.add_argument('--remote-wait',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Like --remote, but block until all buffers opened by this option get deleted or the process exits.')
+    parser.add_argument('--remote-silent',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Like --remote, but throw no error if no process is found.')
+    parser.add_argument('--remote-wait-silent',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Combines --remote-wait and --remote-silent.')
+    parser.add_argument('--remote-tab',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Like --remote, but use :tabedit.')
+    parser.add_argument('--remote-tab-wait',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Like --remote-wait, but use :tabedit.')
+    parser.add_argument('--remote-tab-silent',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Like --remote-silent, but use :tabedit.')
+    parser.add_argument('--remote-tab-wait-silent',
+            nargs   = '*',
+            metavar = '<file>',
+            help    = 'Like --remote-wait-silent, but use :tabedit.')
 
     return parser.parse_known_args(argv[1:])
 
@@ -387,29 +409,43 @@ def main(argv=sys.argv, env=os.environ):
     except ValueError:
         pass
 
+    wait = options.wait or bool(
+        options.remote_wait or options.remote_wait_silent or
+        options.remote_tab_wait or options.remote_tab_wait_silent
+    )
+    silent = options.silent or bool(
+        options.remote_silent or options.remote_wait_silent or
+        options.remote_tab_silent or options.remote_tab_wait_silent
+    )
+
+    args = (
+        options.remote or
+
+        options.remote_wait or options.remote_wait_silent or
+        options.remote_silent or
+
+        options.remote_tab_wait or options.remote_tab_wait_silent or
+        options.remote_tab_silent or []
+    ) + arguments
+
+
+    if bool(options.remote_tab_wait or options.remote_tab_wait_silent or
+            options.remote_tab_silent):
+        options.edit_cmd = 'tabedit'
+
     if options.remote is not None:
-        nvr.execute(options.remote + arguments, 'edit')
-    elif options.remote_wait is not None:
-        nvr.execute(options.remote_wait + arguments, 'edit', wait=True)
-    elif options.remote_silent is not None:
-        nvr.execute(options.remote_silent + arguments, 'edit', silent=True)
-    elif options.remote_wait_silent is not None:
-        nvr.execute(options.remote_wait_silent + arguments, 'edit', silent=True, wait=True)
-    elif options.remote_tab is not None:
-        nvr.execute(options.remote_tab + arguments, 'tabedit')
-    elif options.remote_tab_wait is not None:
-        nvr.execute(options.remote_tab_wait + arguments, 'tabedit', wait=True)
-    elif options.remote_tab_silent is not None:
-        nvr.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
-    elif options.remote_tab_wait_silent is not None:
-        nvr.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
+        nvr.execute(
+            options.remote + arguments,
+            options.edit_cmd or 'edit',
+            wait=wait, silent=silent
+        )
     elif arguments:
         if options.d:
             # Emulate `vim -d`.
             options.O = arguments
         else:
             # Act like --remote-silent by default.
-            nvr.execute(arguments, 'edit', silent=True)
+            nvr.execute(arguments, 'edit', silent=True, wait=wait)
 
     if options.remote_send:
         nvr.server.input(options.remote_send)
