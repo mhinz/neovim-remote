@@ -118,6 +118,8 @@ class Nvr():
             if fname == '-':
                 self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
             else:
+                if self.started_new_process:
+                    cmd = 'edit'
                 try:
                     self.fnameescaped_command(cmd, fname)
                 except neovim.api.nvim.NvimError as e:
