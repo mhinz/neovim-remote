@@ -44,6 +44,7 @@ class Nvr():
         self.silent = silent
         self.wait = 0
         self.started_new_process = False
+        self.handled_first_buffer = False
         self.diffmode = False
         self._msg_shown = False
 
@@ -118,10 +119,12 @@ class Nvr():
             if fname == '-':
                 self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
             else:
-                if self.started_new_process:
-                    cmd = 'edit'
                 try:
-                    self.fnameescaped_command(cmd, fname)
+                    if self.started_new_process and not self.handled_first_buffer:
+                        self.fnameescaped_command('edit', fname)
+                        self.handled_first_buffer = True
+                    else:
+                        self.fnameescaped_command(cmd, fname)
                 except neovim.api.nvim.NvimError as e:
                     if not re.search('E37', e.args[0].decode()):
                         traceback.print_exc()
