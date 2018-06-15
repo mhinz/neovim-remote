@@ -85,8 +85,10 @@ class Nvr():
             self.server.funcs.append('$', line.rstrip())
         self.server.command('silent 1delete _ | set nomodified')
 
-    def fnameescaped_command(self, cmd, fname):
-        path = self.server.funcs.fnameescape(fname)
+    def fnameescaped_command(self, cmd, path):
+        if not is_netrw_protocol(path):
+            path = os.path.abspath(path)
+        path = self.server.funcs.fnameescape(path)
         self.server.command('{} {}'.format(cmd, path))
 
     def diffthis(self):
@@ -137,6 +139,21 @@ class Nvr():
             self.server.command(cmd if cmd else '$')
 
         return len(files)
+
+
+def is_netrw_protocol(path):
+    protocols = [
+            re.compile('^davs?://*'),
+            re.compile('^file://*'),
+            re.compile('^ftp://*'),
+            re.compile('^https?://*'),
+            re.compile('^rcp://*'),
+            re.compile('^rsync://*'),
+            re.compile('^scp://*'),
+            re.compile('^sftp://*'),
+            ]
+
+    return True if any(prot.match(path) for prot in protocols) else False
 
 
 def sanitize_address(address):
