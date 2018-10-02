@@ -541,6 +541,7 @@ def main(argv=sys.argv, env=os.environ):
                 wait_for_n_buffers -= 1
                 if wait_for_n_buffers == 0:
                     nvr.server.stop_loop()
+                    exitcode = 0 if len(args) == 0 else args[0]
             elif msg == 'Exit':
                 nvr.server.stop_loop()
                 exitcode = args[0]
