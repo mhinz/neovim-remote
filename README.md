@@ -213,8 +213,9 @@ Happy hacking!
     That way, you get a new window for entering the commit message instead of a
     nested nvim process.
 
-    Alternatively, you can make git always using nvr. In a regular shell, nvr will
-    create a new nvim process. In a terminal buffer, nvr will open a new buffer.
+    Alternatively, you can make git always using nvr. In a regular shell, nvr
+    will create a new nvim process. In a terminal buffer, nvr will open a new
+    buffer (use `:w | bd` to commit).
 
         $ git config --global core.editor 'nvr --remote-wait-silent'
 
