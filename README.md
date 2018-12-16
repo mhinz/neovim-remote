@@ -218,6 +218,8 @@ Happy hacking!
 
         $ git config --global core.editor 'nvr --remote-wait-silent'
 
+    To commit the message you have to use `:w | bd`.
+
 - **Use nvr in plugins.**
 
     Some plugins rely on the `--remote` family of options from Vim. Nvim had to
