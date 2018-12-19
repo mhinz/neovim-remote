@@ -391,6 +391,7 @@ def main(argv=sys.argv, env=os.environ):
             sys.exit(1)
         else:
             nvr.start_new_process()
+            nvr.server.command('set shortmess-=F')
 
     if options.d:
         nvr.diffmode = True
