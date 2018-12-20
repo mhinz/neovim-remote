@@ -89,7 +89,10 @@ class Nvr():
         if not is_netrw_protocol(path):
             path = os.path.abspath(path)
         path = self.server.funcs.fnameescape(path)
+        shortmess = self.server.options['shortmess']
+        self.server.options['shortmess'] = shortmess.replace('F', '')
         self.server.command('{} {}'.format(cmd, path))
+        self.server.options['shortmess'] = shortmess
 
     def diffthis(self):
         if self.diffmode:
@@ -391,7 +394,6 @@ def main(argv=sys.argv, env=os.environ):
             sys.exit(1)
         else:
             nvr.start_new_process()
-            nvr.server.command('set shortmess-=F')
 
     if options.d:
         nvr.diffmode = True
