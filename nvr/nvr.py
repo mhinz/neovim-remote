@@ -556,6 +556,8 @@ def main(argv=sys.argv, env=os.environ):
         nvr.server.close()
         sys.exit(exitcode)
 
+    nvr.server.close()
+
 
 if __name__ == '__main__':
     main()
