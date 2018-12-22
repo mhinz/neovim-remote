@@ -151,31 +151,7 @@ Happy hacking!
 
 ## Typical use cases
 
-- **Use nvr as git mergetool.**
-
-    If you want to use nvr for `git difftool` and `git mergetool`, put this in
-    your gitconfig:
-
-    ```
-    [diff]
-        tool = nvr
-    [difftool "nvr"]
-        cmd = nvr -s -d $LOCAL $REMOTE
-    [merge]
-        tool = nvr
-    [mergetool "nvr"]
-        cmd = nvr -s -d $LOCAL $BASE $REMOTE $MERGED -c 'wincmd J | wincmd ='
-    ```
-
-    `nvr -d` is a shortcut for `nvr -d -O` and acts like `vim -d`, thus it uses
-    `:vsplit` to open the buffers. If you want them to be opened via `:split`
-    instead, use `nvr -d -o`.
-
-    When used as mergetool and all four buffers got opened, the cursor is in the
-    window containing the $MERGED buffer. We move it to the bottom via `:wincmd
-    J` and then equalize the size of all windows via `:wincmd =`.
-
-- **Open files from within `:terminal` without starting a nested nvim.**
+- **Open files from within `:terminal` without starting a nested nvim process.**
 
     Easy-peasy! Just `nvr file`.
 
@@ -185,13 +161,23 @@ Happy hacking!
     I often work with two windows next to each other. If one contains the
     terminal, I can use `nvr -l foo` to open the file in the other window.
 
-- **Open files always in the same nvim no matter which terminal you're in.**
+- **Open files always in the same nvim process no matter which terminal you're in.**
 
     If you just run `nvr -s`, a new nvim process will start and set its address
     to `/tmp/nvimsocket` automatically.
 
     Now, no matter in which terminal you are, `nvr file` will always work on
     that nvim process. That is akin to `emacsclient` from Emacs.
+
+- **Use nvr in plugins.**
+
+    Some plugins rely on the `--remote` family of options from Vim. Nvim had to
+    remove those when they switched to outsource a lot of manual code to libuv.
+    These options are [planned to be added back](https://github.com/neovim/neovim/issues/1750), though.
+
+    In these cases nvr can be used as a drop-in replacement. E.g.
+    [vimtex](https://github.com/lervag/vimtex) can be configured to use nvr to
+    jump to a certain file and line: [read](https://github.com/lervag/vimtex/blob/80b96c13fe9edc5261e9be104fe15cf3bdc3173d/doc/vimtex.txt#L1702-L1708).
 
 - **Use nvr as temporary editor.**
 
@@ -219,15 +205,29 @@ Happy hacking!
 
         $ git config --global core.editor 'nvr --remote-wait-silent'
 
-- **Use nvr in plugins.**
+- **Use nvr as git mergetool.**
 
-    Some plugins rely on the `--remote` family of options from Vim. Nvim had to
-    remove those when they switched to outsource a lot of manual code to libuv.
-    These options are [planned to be added back](https://github.com/neovim/neovim/issues/1750), though.
+    If you want to use nvr for `git difftool` and `git mergetool`, put this in
+    your gitconfig:
 
-    In these cases nvr can be used as a drop-in replacement. E.g.
-    [vimtex](https://github.com/lervag/vimtex) can be configured to use nvr to
-    jump to a certain file and line: [read](https://github.com/lervag/vimtex/blob/80b96c13fe9edc5261e9be104fe15cf3bdc3173d/doc/vimtex.txt#L1702-L1708).
+    ```
+    [diff]
+        tool = nvr
+    [difftool "nvr"]
+        cmd = nvr -s -d $LOCAL $REMOTE
+    [merge]
+        tool = nvr
+    [mergetool "nvr"]
+        cmd = nvr -s -d $LOCAL $BASE $REMOTE $MERGED -c 'wincmd J | wincmd ='
+    ```
+
+    `nvr -d` is a shortcut for `nvr -d -O` and acts like `vim -d`, thus it uses
+    `:vsplit` to open the buffers. If you want them to be opened via `:split`
+    instead, use `nvr -d -o`.
+
+    When used as mergetool and all four buffers got opened, the cursor is in the
+    window containing the $MERGED buffer. We move it to the bottom via `:wincmd
+    J` and then equalize the size of all windows via `:wincmd =`.
 
 ## Demos
 
