@@ -29,6 +29,7 @@ jobs:
       script: true
       deploy:
         provider: pypi
+        distributions: "sdist bdist_wheel"
         on:
           all_branches: true
         user: mhinz
