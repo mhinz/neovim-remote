@@ -227,6 +227,11 @@ Happy hacking!
     window containing the $MERGED buffer. We move it to the bottom via `:wincmd
     J` and then equalize the size of all windows via `:wincmd =`.
 
+- **Use nvr for scripting.**
+
+    You might draw some inspiration from [this Reddit
+    thread](https://www.reddit.com/r/neovim/comments/aex45u/integrating_nvr_and_tmux_to_use_a_single_tmux_per).
+
 ## Demos
 
 _(Click on the GIFs to watch them full-size.)_
