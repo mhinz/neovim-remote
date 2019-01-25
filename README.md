@@ -195,9 +195,16 @@ Happy hacking!
     endif
     ```
 
-    That way, you get a new window for entering the commit message instead of a
+    That way, you get a new window for inserting the commit message instead of a
     nested nvim process. But git still waits for nvr to finish, so make sure to
-    delete the buffer after entering and saving the commit message: `:w | bd`.
+    delete the buffer after saving the commit message: `:w | bd`.
+
+    If you don't like using `:w | bd` and prefer the good old `:wq` (or `:x`),
+    put the following in your vimrc:
+
+    ```vim
+    autocmd FileType gitcommit set bufhidden=delete
+    ```
 
     To use nvr from a regular shell as well:
 
