@@ -60,6 +60,8 @@ class Nvr():
             pass
 
     def start_new_process(self):
+        args = os.environ.get('NVR_CMD')
+        args = args.split(' ') if args else ['nvim']
         pid = os.fork()
         if pid == 0:
             for i in range(10):
@@ -68,11 +70,12 @@ class Nvr():
                     self.started_new_process = True
                     return True
                 time.sleep(0.2)
+            print('[!] Unable to attach to the new nvim process. Is `{}` working?'
+                    .format(" ".join(args)))
+            sys.exit(1)
         else:
             os.environ['NVIM_LISTEN_ADDRESS'] = self.address
             try:
-                args = os.environ.get('NVR_CMD')
-                args = args.split(' ') if args else ['nvim']
                 os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
                 os.execvpe(args[0], args, os.environ)
             except FileNotFoundError:
