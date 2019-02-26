@@ -28,8 +28,6 @@ import os
 import psutil
 import re
 import socket
-import stat
-import subprocess
 import sys
 import textwrap
 import time
