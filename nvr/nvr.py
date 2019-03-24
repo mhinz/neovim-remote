@@ -318,6 +318,10 @@ def show_message(old_address, new_address):
 
                 Use `:echo v:servername` to verify the address.
 
+                Security: When using Unix domain sockets on a multi-user system,
+                the socket should have proper permissions so that it is only
+                accessible by your user.
+
             Client:
 
                 Expose $NVIM_LISTEN_ADDRESS to the environment before
