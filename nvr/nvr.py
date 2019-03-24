@@ -397,8 +397,10 @@ def main(argv=sys.argv, env=os.environ):
             show_message(address, nvr.address)
         if options.nostart:
             sys.exit(1)
-        else:
-            nvr.start_new_process()
+        nvr.start_new_process()
+
+    if not nvr.server:
+        raise RuntimeError('This should never happen. Please raise an issue at https://github.com/mhinz/neovim-remote/issues')
 
     if options.d:
         nvr.diffmode = True
