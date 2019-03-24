@@ -551,6 +551,7 @@ def main(argv=sys.argv, env=os.environ):
                 exitcode = args[0]
 
         def err_cb(error):
+            nonlocal exitcode
             print(error, file=sys.stderr)
             nvr.server.stop_loop()
             exitcode = 1
