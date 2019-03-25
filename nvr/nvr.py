@@ -525,12 +525,12 @@ def main(argv=sys.argv, env=os.environ):
         if options.q == '-':
             for line in sys.stdin:
                 nvr.server.command("caddexpr '{}'".
-                        format(line.rstrip().replace("'", "''").replace('|', '\|')))
+                        format(line.rstrip().replace("'", "''").replace('|', r'\|')))
         else:
             with open(options.q, 'r') as f:
                 for line in f.readlines():
                     nvr.server.command("caddexpr '{}'".
-                            format(line.rstrip().replace("'", "''").replace('|', '\|')))
+                            format(line.rstrip().replace("'", "''").replace('|', r'\|')))
         nvr.server.command('silent lcd -')
         nvr.server.command('cfirst')
 
