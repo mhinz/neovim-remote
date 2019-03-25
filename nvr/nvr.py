@@ -162,11 +162,12 @@ def is_netrw_protocol(path):
 
 def sanitize_address(address):
     if get_address_type(address) == 'socket' and os.path.exists(address):
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
-            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(address)
         except:
             address = '/tmp/nvimsocket-{}'.format(uuid.uuid4())
+        sock.close()
 
     return address
 
