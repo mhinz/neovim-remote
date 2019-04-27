@@ -288,6 +288,11 @@ def parse_args(argv):
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
+    parser.add_argument('-r',
+            metavar = '[a-z0-9]',
+            nargs   = '?',
+            const   = ' ',  # empty strings are not allowed, fix this manually in main
+            help    = 'Read stdin into a named register, or into the unnamed register when no argument is supplied.')
     parser.add_argument('-s',
             action  = 'store_true',
             help    = 'Silence "no server found" message.')
@@ -539,6 +544,15 @@ def main(argv=sys.argv, env=os.environ):
             if cmd == '-':
                 cmd = sys.stdin.read()
             nvr.server.command(cmd)
+
+    if options.r:
+        try:
+            if options.r == ' ':
+                options.r = ''
+            contents = sys.stdin.read()
+            nvr.server.funcs.setreg(options.r, contents, 'l')
+        except UnicodeDecodeError:
+            raise RuntimeError("Cannot parse stdin into a register, make sure it contains valid UTF-8 encoded input.")
 
     wait_for_n_buffers = nvr.wait
     if wait_for_n_buffers > 0:
