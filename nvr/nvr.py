@@ -259,6 +259,17 @@ def parse_args(argv):
             action  = 'store_true',
             help    = 'Print the TCPv4 and Unix domain socket addresses of all nvim processes.')
 
+    parser.add_argument('--getreg',
+            metavar = '[a-z0-9]',
+            nargs   = '?',
+            const   = ' ',  # empty strings are not allowed, fix this manually in main
+            help    = 'Write named register to stdout, will default to the unnamed register when no argument is supplied.')
+    parser.add_argument('--setreg',
+            metavar = '[a-z0-9]',
+            nargs   = '?',
+            const   = ' ',  # empty strings are not allowed, fix this manually in main
+            help    = 'Read stdin into a named register, or into the unnamed register when no argument is supplied.')
+
     parser.add_argument('-cc',
             action  = 'append',
             metavar = '<cmd>',
@@ -288,11 +299,6 @@ def parse_args(argv):
     parser.add_argument('-q',
             metavar = '<errorfile>',
             help    = 'Read errorfile into quickfix list and display first error.')
-    parser.add_argument('-r',
-            metavar = '[a-z0-9]',
-            nargs   = '?',
-            const   = ' ',  # empty strings are not allowed, fix this manually in main
-            help    = 'Read stdin into a named register, or into the unnamed register when no argument is supplied.')
     parser.add_argument('-s',
             action  = 'store_true',
             help    = 'Silence "no server found" message.')
@@ -545,12 +551,18 @@ def main(argv=sys.argv, env=os.environ):
                 cmd = sys.stdin.read()
             nvr.server.command(cmd)
 
-    if options.r:
+    if options.getreg:
+        if options.getreg == ' ':
+            options.getreg = ''
+        content = nvr.server.funcs.getreg(options.getreg)
+        print(content, end='')
+
+    if options.setreg:
         try:
-            if options.r == ' ':
-                options.r = ''
+            if options.setreg == ' ':
+                options.setreg = ''
             contents = sys.stdin.read()
-            nvr.server.funcs.setreg(options.r, contents, 'l')
+            nvr.server.funcs.setreg(options.setreg, contents, 'l')
         except UnicodeDecodeError:
             raise RuntimeError("Cannot parse stdin into a register, make sure it contains valid UTF-8 encoded input.")
 
