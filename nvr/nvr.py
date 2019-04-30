@@ -27,12 +27,10 @@ import pynvim
 import os
 import psutil
 import re
-import socket
 import sys
 import textwrap
 import time
 import traceback
-import uuid
 
 
 class Nvr():
@@ -57,9 +55,17 @@ class Nvr():
             # Ignore invalid addresses.
             pass
 
-    def start_new_process(self):
+    def start_new_process(self, silent):
+        if not silent:
+            print(textwrap.dedent('''\
+                [*] Starting new nvim process using $NVR_CMD or 'nvim'.
+
+                    Use --nostart to avoid starting a new process.
+            '''))
+
         args = os.environ.get('NVR_CMD')
         args = args.split(' ') if args else ['nvim']
+
         pid = os.fork()
         if pid == 0:
             for i in range(10):
@@ -158,18 +164,6 @@ def is_netrw_protocol(path):
             ]
 
     return True if any(prot.match(path) for prot in protocols) else False
-
-
-def sanitize_address(address):
-    if get_address_type(address) == 'socket' and os.path.exists(address):
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        try:
-            sock.connect(address)
-        except:
-            address = '/tmp/nvimsocket-{}'.format(uuid.uuid4())
-        sock.close()
-
-    return address
 
 
 def parse_args(argv):
@@ -304,8 +298,8 @@ def parse_args(argv):
     return parser.parse_known_args(argv[1:])
 
 
-def show_message(old_address, new_address):
-    print(textwrap.dedent("""
+def show_message(address):
+    print(textwrap.dedent('''
         [!] Can't connect to: {}
 
             The server (nvim) and client (nvr) have to use the same address.
@@ -333,12 +327,8 @@ def show_message(old_address, new_address):
                 $ nvr --servername {} file1 file2
                 $ nvr --servername 127.0.0.1:6789 file1 file2
 
-            nvr is now starting a server on its own by running $NVR_CMD or 'nvim'.
-
             Use -s to suppress this message.
-
-        [*] Starting new nvim process with address {}
-        """.format(old_address, old_address, old_address, old_address, new_address)))
+        '''.format(address, address, address, address)))
 
 
 def split_cmds_from_files(args):
@@ -392,13 +382,12 @@ def main(argv=sys.argv, env=os.environ):
     nvr.attach()
 
     if not nvr.server:
-        nvr.address = sanitize_address(address)
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
         if not silent:
-            show_message(address, nvr.address)
+            show_message(address)
         if options.nostart:
             sys.exit(1)
-        nvr.start_new_process()
+        nvr.start_new_process(silent)
 
     if not nvr.server:
         raise RuntimeError('This should never happen. Please raise an issue at https://github.com/mhinz/neovim-remote/issues')
