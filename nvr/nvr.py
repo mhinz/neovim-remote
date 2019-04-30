@@ -42,7 +42,6 @@ class Nvr():
         self.started_new_process = False
         self.handled_first_buffer = False
         self.diffmode = False
-        self._msg_shown = False
 
     def attach(self):
         try:
