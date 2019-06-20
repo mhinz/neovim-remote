@@ -25,14 +25,11 @@ THE SOFTWARE.
 import argparse
 import pynvim
 import os
-import psutil
 import re
 import socket
 import sys
 import textwrap
-import time
-import traceback
-import uuid
+from psutil import psutil_process_iter
 
 
 class Nvr():
@@ -44,7 +41,6 @@ class Nvr():
         self.started_new_process = False
         self.handled_first_buffer = False
         self.diffmode = False
-        self._msg_shown = False
 
     def attach(self):
         try:
@@ -67,7 +63,8 @@ class Nvr():
                 if self.server:
                     self.started_new_process = True
                     return True
-                time.sleep(0.2)
+                from time import sleep
+                sleep(0.2)
             print('[!] Unable to attach to the new nvim process. Is `{}` working?'
                     .format(" ".join(args)))
             sys.exit(1)
@@ -110,10 +107,10 @@ class Nvr():
         self.server.command('autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({}, "Exit", v:exiting) | endif'.format(chanid))
         self.server.command('augroup END')
 
-        if 'nvr' in bvars:
+        try:
             if chanid not in bvars['nvr']:
-                bvars['nvr'] = [chanid] + bvars['nvr']
-        else:
+                bvars['nvr'].insert(0, chanid)
+        except KeyError:
             bvars['nvr'] = [chanid]
 
         self.wait += 1
@@ -133,7 +130,8 @@ class Nvr():
                         self.fnameescaped_command(cmd, fname)
                 except pynvim.api.nvim.NvimError as e:
                     if not re.search('E37', e.args[0].decode()):
-                        traceback.print_exc()
+                        from traceback import print_exc
+                        print_exc()
                         sys.exit(1)
 
             if wait:
@@ -166,7 +164,8 @@ def sanitize_address(address):
         try:
             sock.connect(address)
         except:
-            address = '/tmp/nvimsocket-{}'.format(uuid.uuid4())
+            from uuid import uuid4
+            address = '/tmp/nvimsocket-{}'.format(uuid4())
         sock.close()
 
     return address
@@ -347,20 +346,22 @@ def split_cmds_from_files(args):
             return [x[1:] for x in reversed(args[:i])], list(reversed(args[i:]))
     return [], []
 
-
 def print_sockaddrs():
+    for sockaddr in sorted(get_sockaddrs()):
+        print(sockaddr)
+
+def get_sockaddrs():
     sockaddrs = []
 
-    for proc in psutil.process_iter():
+    for proc in psutil_process_iter():
         if proc.name() == 'nvim':
             for conn in proc.connections('inet4'):
-                sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+                sockaddrs.append(':'.join(map(str, conn.laddr)))
             for conn in proc.connections('unix'):
                 if conn.laddr:
-                    sockaddrs.insert(0, conn.laddr)
+                    sockaddrs.append(conn.laddr)
 
-    for addr in sorted(sockaddrs):
-        print(addr)
+    return sockaddrs
 
 
 def get_address_type(address):
@@ -368,7 +369,7 @@ def get_address_type(address):
         ip, port = address.split(':', 1)
         if port.isdigit():
             return 'tcp'
-        raise ValueError
+        return 'socket'
     except ValueError:
         return 'socket'
 
@@ -550,9 +551,9 @@ def main(argv=sys.argv, env=os.environ):
 
             if msg == 'BufDelete':
                 wait_for_n_buffers -= 1
-                if wait_for_n_buffers == 0:
+                if not wait_for_n_buffers:
                     nvr.server.stop_loop()
-                    exitcode = 0 if len(args) == 0 else args[0]
+                    exitcode = 0 if not args else args[0]
             elif msg == 'Exit':
                 nvr.server.stop_loop()
                 exitcode = args[0]
