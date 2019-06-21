@@ -29,7 +29,7 @@ import re
 import socket
 import sys
 import textwrap
-from psutil import psutil_process_iter
+from psutil import process_iter as psutil_process_iter
 
 
 class Nvr():
