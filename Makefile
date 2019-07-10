@@ -9,8 +9,9 @@ install: version_synced
 test:
 	pytest -v tests
 
-upload: clean version_synced
-	python3 setup.py sdist bdist_wheel upload
+upload: clean
+	python3 setup.py sdist bdist_wheel
+	twine upload --verbose dist/*
 
 clean:
 	rm -rf build dist neovim_remote.egg-info
