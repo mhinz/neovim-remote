@@ -508,7 +508,7 @@ def main(argv=sys.argv, env=os.environ):
     if options.q:
         path = nvr.server.funcs.fnameescape(os.environ['PWD'])
         nvr.server.command('lcd {}'.format(path))
-        nvr.server.funcs.setqflist('[]')
+        nvr.server.funcs.setqflist([])
         if options.q == '-':
             for line in sys.stdin:
                 nvr.server.command("caddexpr '{}'".
