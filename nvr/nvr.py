@@ -128,7 +128,7 @@ class Nvr():
 
         for fname in files:
             if fname == '-':
-                self.read_stdin_into_buffer('enew' if cmd == 'edit' else cmd)
+                self.read_stdin_into_buffer(stdin_cmd(cmd))
             else:
                 try:
                     if self.started_new_process and not self.handled_first_buffer:
@@ -140,6 +140,7 @@ class Nvr():
                     if not re.search('E37', e.args[0].decode()):
                         traceback.print_exc()
                         sys.exit(1)
+            self.diffthis()
 
             if wait:
                 self.wait_for_current_buffer()
@@ -148,6 +149,15 @@ class Nvr():
             self.server.command(cmd if cmd else '$')
 
         return len(files)
+
+
+def stdin_cmd(cmd):
+    return {
+            'edit': 'enew',
+            'split': 'new',
+            'vsplit': 'vnew',
+            'tabedit': 'tabnew',
+            }[cmd]
 
 
 def is_netrw_protocol(path):
@@ -331,10 +341,14 @@ def show_message(address):
 
 
 def split_cmds_from_files(args):
-    for i, arg in enumerate(args):
-        if arg[0] != '+':
-            return [x[1:] for x in reversed(args[:i])], list(reversed(args[i:]))
-    return [], []
+    cmds = []
+    files = []
+    for arg in args:
+        if arg[0] == '+':
+            cmds.append(arg[1:])
+        else:
+            files.append(arg)
+    return cmds, files
 
 
 def print_sockaddrs():
@@ -456,47 +470,19 @@ def main(argv=sys.argv, env=os.environ):
             print(result)
 
     if options.o:
-        if nvr.started_new_process:
-            cmd = 'edit'
-        elif options.d:
-            cmd = 'tabedit'
-        else:
-            cmd = 'split'
-        nvr.fnameescaped_command(cmd, options.o.pop(0))
-        nvr.diffthis()
-        for fname in options.o:
-            if fname == '-':
-                nvr.read_stdin_into_buffer('new')
-            else:
-                nvr.fnameescaped_command('split', fname)
-            nvr.diffthis()
+        if options.d:
+            nvr.server.command('tabnew')
+        nvr.execute(options.o, 'split', silent=True, wait=False)
         nvr.server.command('wincmd =')
 
     if options.O:
-        if nvr.started_new_process:
-            cmd = 'edit'
-        elif options.d:
-            cmd = 'tabedit'
-        else:
-            cmd = 'vsplit'
-        nvr.fnameescaped_command(cmd, options.O.pop(0))
-        nvr.diffthis()
-        for fname in options.O:
-            if fname == '-':
-                nvr.read_stdin_into_buffer('vnew')
-            else:
-                nvr.fnameescaped_command('vsplit', fname)
-            nvr.diffthis()
+        if options.d:
+            nvr.server.command('tabnew')
+        nvr.execute(options.O, 'vsplit', silent=True, wait=False)
         nvr.server.command('wincmd =')
 
     if options.p:
-        cmd = 'edit' if nvr.started_new_process else 'tabedit'
-        nvr.fnameescaped_command(cmd, options.p.pop(0))
-        for fname in options.p:
-            if fname == '-':
-                nvr.read_stdin_into_buffer('tabnew')
-            else:
-                nvr.fnameescaped_command('tabedit', fname)
+        nvr.execute(options.p, 'tabedit', silent=True, wait=False)
 
     if options.t:
         try:
