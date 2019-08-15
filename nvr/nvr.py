@@ -343,11 +343,15 @@ def show_message(address):
 def split_cmds_from_files(args):
     cmds = []
     files = []
-    for arg in args:
-        if arg[0] == '+':
-            cmds.append(arg[1:])
+    for _ in range(len(args)):
+        if args[0][0] == '+':
+            cmds.append(args.pop(0))
+        elif args[0] == '--':
+            args.pop(0)
+            files += args
+            break
         else:
-            files.append(arg)
+            files.append(args.pop(0))
     return cmds, files
 
 
@@ -416,11 +420,6 @@ def main(argv=sys.argv, env=os.environ):
     if options.l:
         nvr.server.command('wincmd p')
 
-    try:
-        arguments.remove('--')
-    except ValueError:
-        pass
-
     if options.remote is not None:
         nvr.execute(options.remote + arguments, 'edit')
     elif options.remote_wait is not None:
@@ -437,13 +436,9 @@ def main(argv=sys.argv, env=os.environ):
         nvr.execute(options.remote_tab_silent + arguments, 'tabedit', silent=True)
     elif options.remote_tab_wait_silent is not None:
         nvr.execute(options.remote_tab_wait_silent + arguments, 'tabedit', silent=True, wait=True)
-    elif arguments:
-        if options.d:
-            # Emulate `vim -d`.
-            options.O = arguments
-        else:
-            # Act like --remote-silent by default.
-            nvr.execute(arguments, 'edit', silent=True)
+    elif arguments and options.d:
+        # Emulate `vim -d`.
+        options.O = arguments
 
     if options.remote_send:
         nvr.server.input(options.remote_send)
@@ -470,19 +465,20 @@ def main(argv=sys.argv, env=os.environ):
             print(result)
 
     if options.o:
-        if options.d:
+        if options.d and not nvr.started_new_process:
             nvr.server.command('tabnew')
-        nvr.execute(options.o, 'split', silent=True, wait=False)
+        nvr.execute(options.o + arguments, 'split', silent=True, wait=False)
         nvr.server.command('wincmd =')
-
-    if options.O:
-        if options.d:
+    elif options.O:
+        if options.d and not nvr.started_new_process:
             nvr.server.command('tabnew')
-        nvr.execute(options.O, 'vsplit', silent=True, wait=False)
+        nvr.execute(options.O + arguments, 'vsplit', silent=True, wait=False)
         nvr.server.command('wincmd =')
-
-    if options.p:
-        nvr.execute(options.p, 'tabedit', silent=True, wait=False)
+    elif options.p:
+        nvr.execute(options.p + arguments, 'tabedit', silent=True, wait=False)
+    else:
+        # Act like --remote-silent by default.
+        nvr.execute(arguments, 'edit', silent=True)
 
     if options.t:
         try:
