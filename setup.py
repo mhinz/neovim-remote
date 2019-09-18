@@ -20,7 +20,7 @@ setup(
         'console_scripts': ['nvr = nvr.nvr:main']
     },
     packages         = ['nvr'],
-    version          = '2.2.0',
+    version          = '2.2.1',
     license          = 'MIT',
     keywords         = 'neovim nvim nvr remote helper',
     classifiers      = [
