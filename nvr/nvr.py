@@ -345,7 +345,7 @@ def split_cmds_from_files(args):
     files = []
     for _ in range(len(args)):
         if args[0][0] == '+':
-            cmds.append(args.pop(0))
+            cmds.append(args.pop(0)[1:])
         elif args[0] == '--':
             args.pop(0)
             files += args
