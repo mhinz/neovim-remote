@@ -290,3 +290,9 @@ Using nvr from within `:terminal`: ![Demo 2](https://github.com/mhinz/neovim-rem
         \| endif
     ```
 
+- **Can I have auto-completion for bash?**
+
+    If you want basic auto-completion for bash, you can source [this
+    script](contrib/completion.bash) in your .bashrc.
+
+    This also completes server names with the `--servername` option.
