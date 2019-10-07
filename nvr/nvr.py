@@ -360,11 +360,14 @@ def print_sockaddrs():
 
     for proc in psutil.process_iter():
         if proc.name() == 'nvim':
-            for conn in proc.connections('inet4'):
-                sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
-            for conn in proc.connections('unix'):
-                if conn.laddr:
-                    sockaddrs.insert(0, conn.laddr)
+            try:
+                for conn in proc.connections('inet4'):
+                    sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+                for conn in proc.connections('unix'):
+                    if conn.laddr:
+                        sockaddrs.insert(0, conn.laddr)
+            except psutil.AccessDenied:
+                sockaddrs.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
 
     for addr in sorted(sockaddrs):
         print(addr)
