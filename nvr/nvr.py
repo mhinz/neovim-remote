@@ -273,6 +273,11 @@ def parse_args(argv):
     parser.add_argument('-d',
             action  = 'store_true',
             help    = 'Diff mode. Use :diffthis on all to be opened buffers.')
+    parser.add_argument('-f',
+            action  = 'append',
+            nargs   = '+',
+            metavar = ('<func>', '<arg>'),
+            help    = 'Call a function.')
     parser.add_argument('-l',
             action  = 'store_true',
             help    = 'Change to previous window via ":wincmd p".')
@@ -511,6 +516,14 @@ def main(argv=sys.argv, env=os.environ):
             if cmd == '-':
                 cmd = sys.stdin.read()
             nvr.server.command(cmd)
+
+    if options.f:
+        for func in options.f:
+            func_name = func[0]
+            func_args = func[1:]
+
+            output = nvr.server.funcs.__getattr__(func_name)(*func_args)
+            print(output, end='')
 
     wait_for_n_buffers = nvr.wait
     if wait_for_n_buffers > 0:
