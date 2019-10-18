@@ -276,6 +276,9 @@ def parse_args(argv):
     parser.add_argument('-l',
             action  = 'store_true',
             help    = 'Change to previous window via ":wincmd p".')
+    parser.add_argument('-n',
+            action  = 'store_true',
+            help    = 'Do not include a trailing newline when printing the output from --remote-expr')
     parser.add_argument('-o',
             nargs   = '+',
             metavar = '<file>',
@@ -465,7 +468,10 @@ def main(argv=sys.argv, env=os.environ):
         elif type(result) is dict:
             print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
         else:
-            print(result)
+            end = '\n'
+            if options.n:
+                end = ''
+            print(result, end=end)
 
     if options.o:
         if options.d and not nvr.started_new_process:

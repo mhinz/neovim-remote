@@ -67,3 +67,21 @@ def test_escape_double_quotes_in_filenames(capsys):
     nvim.terminate()
     out, err = capsys.readouterr()
     assert filename == out.rstrip()
+
+def test_newline_printed_by_default(capsys):
+    env = setup_env()
+    nvim = run_nvim(env)
+    cmd = ['nvr', '--nostart', '--remote-expr', '"hello"']
+    run_nvr([cmd], env)
+    nvim.terminate()
+    out, err = capsys.readouterr()
+    assert out == 'hello\n'
+
+def test_newline_not_printed_when_disabled(capsys):
+    env = setup_env()
+    nvim = run_nvim(env)
+    cmd = ['nvr', '--nostart', '-n', '--remote-expr', '"hello"']
+    run_nvr([cmd], env)
+    nvim.terminate()
+    out, err = capsys.readouterr()
+    assert out == 'hello'
