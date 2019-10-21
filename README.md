@@ -203,7 +203,7 @@ Happy hacking!
     put the following in your vimrc:
 
     ```vim
-    autocmd FileType gitcommit set bufhidden=delete
+    autocmd FileType gitcommit,gitrebase,gitconfig set bufhidden=delete
     ```
 
     To use nvr from a regular shell as well:
