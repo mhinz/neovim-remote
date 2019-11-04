@@ -465,7 +465,9 @@ def main(argv=sys.argv, env=os.environ):
         elif type(result) is dict:
             print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
         else:
-            print(result)
+            if not result.endswith(os.linesep):
+                result += os.linesep
+            print(result, end='', flush=True)
 
     if options.o:
         if options.d and not nvr.started_new_process:
