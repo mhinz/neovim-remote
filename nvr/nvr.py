@@ -442,6 +442,7 @@ def main(argv=sys.argv, env=os.environ):
     elif arguments and options.d:
         # Emulate `vim -d`.
         options.O = arguments
+        arguments = []
 
     if options.remote_send:
         nvr.server.input(options.remote_send)
