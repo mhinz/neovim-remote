@@ -472,14 +472,20 @@ def main(argv=sys.argv, env=os.environ):
             print(result, end='', flush=True)
 
     if options.o:
-        if options.d and not nvr.started_new_process:
-            nvr.server.command('tabnew')
-        nvr.execute(options.o + arguments, 'split', silent=True, wait=False)
+        args = options.o + arguments
+        if nvr.diffmode and not nvr.started_new_process:
+            nvr.fnameescaped_command('tabedit', args[0])
+            nvr.execute(args[1:], 'split', silent=True, wait=False)
+        else:
+            nvr.execute(args, 'split', silent=True, wait=False)
         nvr.server.command('wincmd =')
     elif options.O:
-        if options.d and not nvr.started_new_process:
-            nvr.server.command('tabnew')
-        nvr.execute(options.O + arguments, 'vsplit', silent=True, wait=False)
+        args = options.O + arguments
+        if nvr.diffmode and not nvr.started_new_process:
+            nvr.fnameescaped_command('tabedit', args[0])
+            nvr.execute(args[1:], 'vsplit', silent=True, wait=False)
+        else:
+            nvr.execute(args, 'vsplit', silent=True, wait=False)
         nvr.server.command('wincmd =')
     elif options.p:
         nvr.execute(options.p + arguments, 'tabedit', silent=True, wait=False)
