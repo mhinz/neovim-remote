@@ -388,7 +388,7 @@ def main(argv=sys.argv, env=os.environ):
 
     if options.version:
         # version-marker
-        print('nvr 2.2.2')
+        print('nvr 2.2.3')
         return
 
     if options.serverlist:
