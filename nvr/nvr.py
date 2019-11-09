@@ -465,6 +465,7 @@ def main(argv=sys.argv, env=os.environ):
         elif type(result) is dict:
             print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
         else:
+            result = str(result)
             if not result.endswith(os.linesep):
                 result += os.linesep
             print(result, end='', flush=True)
