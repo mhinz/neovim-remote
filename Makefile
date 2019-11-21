@@ -1,9 +1,6 @@
 default: install
 
-version_synced:
-	[[ $$(grep -A1 '# version-marker' nvr/nvr.py | tail -n1 | grep -o '[0-9\.]\+') = $$(grep version setup.py | grep -o '[0-9\.]\+') ]]
-
-install: version_synced
+install:
 	python3 setup.py install
 
 test:

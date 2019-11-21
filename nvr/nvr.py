@@ -387,8 +387,9 @@ def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
 
     if options.version:
-        # version-marker
-        print('nvr 2.2.3')
+        import pkg_resources
+        version = pkg_resources.require('neovim-remote')[0].version
+        print('nvr {}'.format(version))
         return
 
     if options.serverlist:
