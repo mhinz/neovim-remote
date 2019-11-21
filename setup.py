@@ -15,7 +15,7 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     python_requires  = '>=3.4',
-    install_requires = ['pynvim', 'psutil', 'setuptools'],
+    install_requires = ['neovim', 'psutil', 'setuptools'],
     entry_points     = {
         'console_scripts': ['nvr = nvr.nvr:main']
     },
