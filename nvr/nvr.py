@@ -363,6 +363,8 @@ def print_sockaddrs():
             try:
                 for conn in proc.connections('inet4'):
                     sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+                for conn in proc.connections('inet6'):
+                    sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
                 for conn in proc.connections('unix'):
                     if conn.laddr:
                         sockaddrs.insert(0, conn.laddr)
