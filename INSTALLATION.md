@@ -21,6 +21,12 @@ This will give you the correct location:
 
     $ python3 -c 'import site; print(site.USER_BASE)'
 
+If `nvr` is not in your path and you installed Python with `asdf`, you might need
+to reshim:
+
+    $ pip3 install neovim-remote
+    $ asdf reshim python
+
 ## From repo
 
 If you want to test your own changes, it makes sense to put your local repo into
