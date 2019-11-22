@@ -45,11 +45,11 @@ class Nvr():
 
     def attach(self):
         try:
-            if get_address_type(self.address) == 'tcp':
-                ip, port = self.address.split(':', 1)
-                self.server = pynvim.attach('tcp', address=ip, port=int(port))
+            socktype, address, port = parse_address(self.address)
+            if socktype == 'tcp':
+                self.server = pynvim.attach('tcp', address=address, port=int(port))
             else:
-                self.server = pynvim.attach('socket', path=self.address)
+                self.server = pynvim.attach('socket', path=address)
         except OSError:
             # Ignore invalid addresses.
             pass
@@ -373,14 +373,14 @@ def print_sockaddrs():
         print(addr)
 
 
-def get_address_type(address):
+def parse_address(address):
     try:
-        ip, port = address.split(':', 1)
+        host, port = address.rsplit(':', 1)
         if port.isdigit():
-            return 'tcp'
+            return 'tcp', host, port
         raise ValueError
     except ValueError:
-        return 'socket'
+        return 'socket', address, None
 
 
 def main(argv=sys.argv, env=os.environ):
