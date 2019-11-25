@@ -23,7 +23,7 @@ THE SOFTWARE.
 """
 
 import argparse
-import pynvim
+import neovim
 import os
 import psutil
 import re
@@ -47,9 +47,9 @@ class Nvr():
         try:
             socktype, address, port = parse_address(self.address)
             if socktype == 'tcp':
-                self.server = pynvim.attach('tcp', address=address, port=int(port))
+                self.server = neovim.attach('tcp', address=address, port=int(port))
             else:
-                self.server = pynvim.attach('socket', path=address)
+                self.server = neovim.attach('socket', path=address)
         except OSError:
             # Ignore invalid addresses.
             pass
@@ -136,7 +136,7 @@ class Nvr():
                         self.handled_first_buffer = True
                     else:
                         self.fnameescaped_command(cmd, fname)
-                except pynvim.api.nvim.NvimError as e:
+                except neovim.api.nvim.NvimError as e:
                     if not re.search('E37', e.args[0].decode()):
                         traceback.print_exc()
                         sys.exit(1)
