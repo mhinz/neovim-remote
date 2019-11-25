@@ -358,8 +358,8 @@ def split_cmds_from_files(args):
 def print_sockaddrs():
     sockaddrs = []
 
-    for proc in psutil.process_iter():
-        if proc.name() == 'nvim':
+    for proc in psutil.process_iter(attrs=['name']):
+        if proc.info['name'] == 'nvim':
             try:
                 for conn in proc.connections('inet4'):
                     sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
