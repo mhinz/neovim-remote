@@ -355,23 +355,23 @@ def split_cmds_from_files(args):
     return cmds, files
 
 
-def print_sockaddrs():
-    sockaddrs = []
+def print_addresses():
+    addresses = []
 
     for proc in psutil.process_iter(attrs=['name']):
         if proc.info['name'] == 'nvim':
             try:
                 for conn in proc.connections('inet4'):
-                    sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+                    addresses.insert(0, ':'.join(map(str, conn.laddr)))
                 for conn in proc.connections('inet6'):
-                    sockaddrs.insert(0, ':'.join(map(str, conn.laddr)))
+                    addresses.insert(0, ':'.join(map(str, conn.laddr)))
                 for conn in proc.connections('unix'):
                     if conn.laddr:
-                        sockaddrs.insert(0, conn.laddr)
+                        addresses.insert(0, conn.laddr)
             except psutil.AccessDenied:
-                sockaddrs.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
+                addresses.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
 
-    for addr in sorted(sockaddrs):
+    for addr in sorted(addresses):
         print(addr)
 
 
@@ -395,7 +395,7 @@ def main(argv=sys.argv, env=os.environ):
         return
 
     if options.serverlist:
-        print_sockaddrs()
+        print_addresses()
         return
 
     address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
