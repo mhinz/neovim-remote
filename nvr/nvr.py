@@ -355,6 +355,17 @@ def split_cmds_from_files(args):
     return cmds, files
 
 
+def print_versions():
+    import pkg_resources
+    print('nvr {}'.format(pkg_resources.require('neovim-remote')[0].version))
+    try:
+        print('pynvim {}'.format(pkg_resources.require('pynvim')[0].version))
+    except pkg_resources.DistributionNotFound:
+        print('neovim {}'.format(pkg_resources.require('neovim')[0].version))
+    print('psutil {}'.format(pkg_resources.require('psutil')[0].version))
+    print('Python {}'.format(sys.version.split('\n')[0]))
+
+
 def print_addresses():
     addresses = []
     errors = []
@@ -392,9 +403,7 @@ def main(argv=sys.argv, env=os.environ):
     options, arguments = parse_args(argv)
 
     if options.version:
-        import pkg_resources
-        version = pkg_resources.require('neovim-remote')[0].version
-        print('nvr {}'.format(version))
+        print_versions()
         return
 
     if options.serverlist:
