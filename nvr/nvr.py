@@ -357,6 +357,7 @@ def split_cmds_from_files(args):
 
 def print_addresses():
     addresses = []
+    errors = []
 
     for proc in psutil.process_iter(attrs=['name']):
         if proc.info['name'] == 'nvim':
@@ -369,10 +370,12 @@ def print_addresses():
                     if conn.laddr:
                         addresses.insert(0, conn.laddr)
             except psutil.AccessDenied:
-                addresses.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
+                errors.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
 
     for addr in sorted(addresses):
         print(addr)
+    for error in sorted(errors):
+        print(error, file=sys.stderr)
 
 
 def parse_address(address):
