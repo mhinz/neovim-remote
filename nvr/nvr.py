@@ -54,7 +54,7 @@ class Nvr():
             # Ignore invalid addresses.
             pass
 
-    def start_new_process(self, silent):
+    def start_new_process(self, retry_times, silent):
         if not silent:
             print(textwrap.dedent('''\
                 [*] Starting new nvim process using $NVR_CMD or 'nvim'.
@@ -67,7 +67,7 @@ class Nvr():
 
         pid = os.fork()
         if pid == 0:
-            for i in range(10):
+            for i in range(retry_times):
                 self.attach()
                 if self.server:
                     self.started_new_process = True
@@ -297,6 +297,11 @@ def parse_args(argv):
     parser.add_argument('-t',
             metavar = '<tag>',
             help    = 'Jump to file and position of given tag.')
+    parser.add_argument('--attach-retry',
+            type    = int,
+            default = 10,
+            metavar = '<N>',
+            help    = 'When starting a new process, try attaching to it every 0.2s for N times. Defaults to 10.')
     parser.add_argument('--nostart',
             action  = 'store_true',
             help    = 'If no process is found, do not start a new one.')
@@ -421,7 +426,7 @@ def main(argv=sys.argv, env=os.environ):
             show_message(address)
         if options.nostart:
             sys.exit(1)
-        nvr.start_new_process(silent)
+        nvr.start_new_process(options.attach_retry, silent)
 
     if not nvr.server:
         raise RuntimeError('This should never happen. Please raise an issue at https://github.com/mhinz/neovim-remote/issues')
