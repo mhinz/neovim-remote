@@ -15,12 +15,12 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     python_requires  = '>=3.5',
-    install_requires = ['neovim', 'psutil', 'setuptools'],
+    install_requires = ['pynvim', 'psutil', 'setuptools'],
     entry_points     = {
         'console_scripts': ['nvr = nvr.nvr:main']
     },
     packages         = ['nvr'],
-    version          = '2.3.4',
+    version          = '2.4.0',
     license          = 'MIT',
     keywords         = 'neovim nvim nvr remote helper',
     classifiers      = [

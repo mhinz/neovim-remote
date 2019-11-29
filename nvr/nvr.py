@@ -23,15 +23,15 @@ THE SOFTWARE.
 """
 
 import argparse
-import neovim
 import os
-import psutil
 import re
 import sys
 import textwrap
 import time
 import traceback
 
+import psutil
+import pynvim
 
 class Nvr():
     def __init__(self, address, silent=False):
@@ -47,9 +47,9 @@ class Nvr():
         try:
             socktype, address, port = parse_address(self.address)
             if socktype == 'tcp':
-                self.server = neovim.attach('tcp', address=address, port=int(port))
+                self.server = pynvim.attach('tcp', address=address, port=int(port))
             else:
-                self.server = neovim.attach('socket', path=address)
+                self.server = pynvim.attach('socket', path=address)
         except OSError:
             # Ignore invalid addresses.
             pass
@@ -136,7 +136,7 @@ class Nvr():
                         self.handled_first_buffer = True
                     else:
                         self.fnameescaped_command(cmd, fname)
-                except neovim.api.nvim.NvimError as e:
+                except pynvim.api.nvim.NvimError as e:
                     if not re.search('E37', e.args[0].decode()):
                         traceback.print_exc()
                         sys.exit(1)
@@ -358,10 +358,7 @@ def split_cmds_from_files(args):
 def print_versions():
     import pkg_resources
     print('nvr {}'.format(pkg_resources.require('neovim-remote')[0].version))
-    try:
-        print('pynvim {}'.format(pkg_resources.require('pynvim')[0].version))
-    except pkg_resources.DistributionNotFound:
-        print('neovim {}'.format(pkg_resources.require('neovim')[0].version))
+    print('pynvim {}'.format(pkg_resources.require('pynvim')[0].version))
     print('psutil {}'.format(pkg_resources.require('psutil')[0].version))
     print('Python {}'.format(sys.version.split('\n')[0]))
 
