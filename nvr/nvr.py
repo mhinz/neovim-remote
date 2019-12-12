@@ -368,15 +368,16 @@ def print_addresses():
     errors = []
 
     for proc in psutil.process_iter(attrs=['name']):
-        if proc.info['name'] == 'nvim':
+        if proc.info['name'] in ['nvim', 'nvim.exe']:
             try:
                 for conn in proc.connections('inet4'):
                     addresses.insert(0, ':'.join(map(str, conn.laddr)))
                 for conn in proc.connections('inet6'):
                     addresses.insert(0, ':'.join(map(str, conn.laddr)))
-                for conn in proc.connections('unix'):
-                    if conn.laddr:
-                        addresses.insert(0, conn.laddr)
+                if os.name == 'posix':
+                    for conn in proc.connections('unix'):
+                        if conn.laddr:
+                            addresses.insert(0, conn.laddr)
             except psutil.AccessDenied:
                 errors.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
 
