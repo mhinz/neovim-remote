@@ -17,7 +17,8 @@ setup(
     python_requires  = '>=3.5',
     install_requires = ['pynvim', 'psutil', 'setuptools'],
     entry_points     = {
-        'console_scripts': ['nvr = nvr.nvr:main']
+        'console_scripts': ['nvr = nvr.nvr:main'],
+        'gui_scripts': ['gnvr = nvr.nvr:main']
     },
     packages         = ['nvr'],
     version          = '2.4.0',
