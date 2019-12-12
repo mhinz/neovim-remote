@@ -184,8 +184,8 @@ def parse_args(argv):
 
         If no process is found, a new one will be started.
 
-            $ nvr --remote-send 'iabc<cr><esc>'
-            $ nvr --remote-expr 'map([1,2,3], \"v:val + 1\")'
+            $ nvr --remote-send "iabc<cr><esc>"
+            $ nvr --remote-expr "map([1,2,3], \'v:val + 1\')"
 
         Any arguments not consumed by options will be fed to --remote-silent:
 
@@ -196,8 +196,8 @@ def parse_args(argv):
         Exception: --remote-expr, --remote-send.
 
             $ nvr +10 file
-            $ nvr +'echomsg "foo" | echomsg "bar"' file
-            $ nvr --remote-tab-wait +'set bufhidden=delete' file
+            $ nvr +"echomsg 'foo' | echomsg 'bar'" file
+            $ nvr --remote-tab-wait +"set bufhidden=delete" file
 
         Open files in a new window from a terminal buffer:
 
@@ -205,7 +205,7 @@ def parse_args(argv):
 
         Use nvr from git to edit commit messages:
 
-            $ git config --global core.editor 'nvr --remote-wait-silent'
+            $ git config --global core.editor "nvr --remote-wait-silent"
     """)
 
     parser = argparse.ArgumentParser(
@@ -570,4 +570,3 @@ def main(argv=sys.argv, env=os.environ):
 
 if __name__ == '__main__':
     main()
-

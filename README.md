@@ -57,11 +57,11 @@ And do this in another shell:
 nvr --remote file1 file2
 
 # Send keys to the current buffer:
-nvr --remote-send 'iabc<esc>'
-# Enter insert mode, insert 'abc', and go back to normal mode again.
+nvr --remote-send "iabc<esc>"
+# Enter insert mode, insert "abc", and go back to normal mode again.
 
 # Evaluate any VimL expression, e.g. get the current buffer:
-nvr --remote-expr 'bufname("")'
+nvr --remote-expr "bufname("")"
 README.md
 ```
 
@@ -76,8 +76,8 @@ Remote control Neovim processes.
 
 If no process is found, a new one will be started.
 
-    $ nvr --remote-send 'iabc<cr><esc>'
-    $ nvr --remote-expr 'map([1,2,3], "v:val + 1")'
+    $ nvr --remote-send "iabc<cr><esc>"
+    $ nvr --remote-expr "map([1,2,3], 'v:val + 1')"
 
 Any arguments not consumed by options will be fed to --remote-silent:
 
@@ -88,8 +88,8 @@ All --remote options take optional commands.
 Exception: --remote-expr, --remote-send.
 
     $ nvr +10 file
-    $ nvr +'echomsg "foo" | echomsg "bar"' file
-    $ nvr --remote-tab-wait +'set bufhidden=delete' file
+    $ nvr +"echomsg 'foo' | echomsg 'bar'" file
+    $ nvr --remote-tab-wait +"set bufhidden=delete" file
 
 Open files in a new window from a terminal buffer:
 
@@ -97,7 +97,7 @@ Open files in a new window from a terminal buffer:
 
 Use nvr from git to edit commit messages:
 
-    $ git config --global core.editor 'nvr --remote-wait-silent'
+    $ git config --global core.editor "nvr --remote-wait-silent"
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -186,12 +186,12 @@ Happy hacking!
     Running `git commit` in a regular shell starts a nvim process. But in a
     terminal buffer (`:terminal`), a new nvim process starts as well. Now you
     have one nvim nested within another.
-    
+
     If you do not want this, put this in your vimrc:
 
     ```vim
-    if has('nvim')
-      let $GIT_EDITOR = 'nvr -cc split --remote-wait'
+    if has("nvim")
+      let $GIT_EDITOR = "nvr -cc split --remote-wait"
     endif
     ```
 
@@ -208,7 +208,7 @@ Happy hacking!
 
     To use nvr from a regular shell as well:
 
-        $ git config --global core.editor 'nvr --remote-wait-silent'
+        $ git config --global core.editor "nvr --remote-wait-silent"
 
 - **Use nvr as git mergetool.**
 
@@ -223,7 +223,7 @@ Happy hacking!
     [merge]
         tool = nvr
     [mergetool "nvr"]
-        cmd = nvr -s -d $LOCAL $BASE $REMOTE $MERGED -c 'wincmd J | wincmd ='
+        cmd = nvr -s -d $LOCAL $BASE $REMOTE $MERGED -c "wincmd J | wincmd ="
     ```
 
     `nvr -d` is a shortcut for `nvr -d -O` and acts like `vim -d`, thus it uses
@@ -257,7 +257,7 @@ Using nvr from within `:terminal`: ![Demo 2](https://github.com/mhinz/neovim-rem
     Unfortunately Neovim's API doesn't trigger any autocmds on its own, so simply
     `nvr /tmp` won't work. Meanwhile you can work around it like this:
 
-        $ nvr /tmp -c 'doautocmd BufEnter'
+        $ nvr /tmp -c "doautocmd BufEnter"
 
 - **Reading from stdin?**
 
