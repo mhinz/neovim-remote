@@ -25,6 +25,7 @@ THE SOFTWARE.
 import argparse
 import os
 import re
+import subprocess
 import sys
 import textwrap
 import time
@@ -65,8 +66,15 @@ class Nvr():
         args = os.environ.get('NVR_CMD')
         args = args.split(' ') if args else ['nvim']
 
-        pid = os.fork()
-        if pid == 0:
+        os.environ['NVIM_LISTEN_ADDRESS'] = self.address
+
+        try:
+            pid = subprocess.Popen(args).pid
+        except FileNotFoundError:
+            print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
+            sys.exit(1)
+
+        if pid:
             for i in range(10):
                 self.attach()
                 if self.server:
@@ -76,14 +84,6 @@ class Nvr():
             print('[!] Unable to attach to the new nvim process. Is `{}` working?'
                     .format(" ".join(args)))
             sys.exit(1)
-        else:
-            os.environ['NVIM_LISTEN_ADDRESS'] = self.address
-            try:
-                os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
-                os.execvpe(args[0], args, os.environ)
-            except FileNotFoundError:
-                print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
-                sys.exit(1)
 
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
