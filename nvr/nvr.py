@@ -38,6 +38,7 @@ class Nvr():
     def __init__(self, address, silent=False):
         self.address = address
         self.server = None
+        self.proc = None
         self.silent = silent
         self.wait = 0
         self.started_new_process = False
@@ -69,12 +70,12 @@ class Nvr():
         os.environ['NVIM_LISTEN_ADDRESS'] = self.address
 
         try:
-            pid = subprocess.Popen(args).pid
+            self.proc = subprocess.Popen(args)
         except FileNotFoundError:
             print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
             sys.exit(1)
 
-        if pid:
+        if self.proc.pid:
             for i in range(10):
                 self.attach()
                 if self.server:
@@ -567,6 +568,8 @@ def main(argv=sys.argv, env=os.environ):
 
     nvr.server.close()
 
+    if nvr.started_new_process:
+        nvr.proc.wait()
 
 if __name__ == '__main__':
     main()
