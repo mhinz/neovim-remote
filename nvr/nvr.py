@@ -23,6 +23,7 @@ THE SOFTWARE.
 """
 
 import argparse
+import multiprocessing
 import os
 import re
 import sys
@@ -54,7 +55,18 @@ class Nvr():
             # Ignore invalid addresses.
             pass
 
-    def start_new_process(self, silent):
+    def try_attach(self, args, nvr, options, arguments):
+            for i in range(10):
+                self.attach()
+                if self.server:
+                    self.started_new_process = True
+                    return main2(nvr, options, arguments)
+                time.sleep(0.2)
+            print('[!] Unable to attach to the new nvim process. Is `{}` working?'
+                    .format(" ".join(args)))
+            sys.exit(1)
+
+    def execute_new_nvim_process(self, silent, nvr, options, arguments):
         if not silent:
             print(textwrap.dedent('''\
                 [*] Starting new nvim process using $NVR_CMD or 'nvim'.
@@ -65,25 +77,14 @@ class Nvr():
         args = os.environ.get('NVR_CMD')
         args = args.split(' ') if args else ['nvim']
 
-        pid = os.fork()
-        if pid == 0:
-            for i in range(10):
-                self.attach()
-                if self.server:
-                    self.started_new_process = True
-                    return True
-                time.sleep(0.2)
-            print('[!] Unable to attach to the new nvim process. Is `{}` working?'
-                    .format(" ".join(args)))
+        multiprocessing.Process(target=self.try_attach, args=(args, nvr, options, arguments)).start()
+
+        os.environ['NVIM_LISTEN_ADDRESS'] = self.address
+        try:
+            os.execvpe(args[0], args, os.environ)
+        except FileNotFoundError:
+            print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
             sys.exit(1)
-        else:
-            os.environ['NVIM_LISTEN_ADDRESS'] = self.address
-            try:
-                os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
-                os.execvpe(args[0], args, os.environ)
-            except FileNotFoundError:
-                print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
-                sys.exit(1)
 
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
@@ -418,11 +419,12 @@ def main(argv=sys.argv, env=os.environ):
             show_message(address)
         if options.nostart:
             sys.exit(1)
-        nvr.start_new_process(silent)
+        nvr.execute_new_nvim_process(silent, nvr, options, arguments)
 
-    if not nvr.server:
-        raise RuntimeError('This should never happen. Please raise an issue at https://github.com/mhinz/neovim-remote/issues')
+    main2(nvr, options, arguments)
 
+
+def main2(nvr, options, arguments):
     if options.d:
         nvr.diffmode = True
 
