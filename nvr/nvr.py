@@ -418,7 +418,9 @@ def main(argv=sys.argv, env=os.environ):
 
     if not nvr.server:
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
-        if not silent:
+        # Make noise only if user sets wrong servername or NVIM_LISTEN_ADDRESS
+        useraddr = options.servername or env.get('NVIM_LISTEN_ADDRESS')
+        if not silent and useraddr:
             show_message(address)
         if options.nostart:
             sys.exit(1)
