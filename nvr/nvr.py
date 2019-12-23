@@ -244,7 +244,7 @@ def parse_args(argv):
 
     parser.add_argument('--servername',
             metavar = '<addr>',
-            help    = 'Set the address to be used. This overrides the default "/tmp/nvimsocket" and $NVIM_LISTEN_ADDRESS.')
+            help    = 'Set the address to be used. This overrides the default serservername and $NVIM_LISTEN_ADDRESS.')
     parser.add_argument('--serverlist',
             action  = 'store_true',
             help    = 'Print the TCPv4 and Unix domain socket addresses of all nvim processes.')
@@ -294,7 +294,7 @@ def parse_args(argv):
     return parser.parse_known_args(argv[1:])
 
 
-def show_message(address):
+def show_message(useraddr, defaddr):
     print(textwrap.dedent('''
         [!] Can't connect to: {}
 
@@ -317,14 +317,13 @@ def show_message(address):
 
                 Expose $NVIM_LISTEN_ADDRESS to the environment before
                 using nvr or use its --servername option. If neither
-                is given, nvr assumes \"/tmp/nvimsocket\".
+                is given, nvr assumes {}.
 
                 $ NVIM_LISTEN_ADDRESS={} nvr file1 file2
                 $ nvr --servername {} file1 file2
-                $ nvr --servername 127.0.0.1:6789 file1 file2
 
             Use -s to suppress this message.
-        '''.format(address, address, address, address)))
+        '''.format(useraddr, defaddr, defaddr, defaddr, defaddr)))
 
 
 def split_cmds_from_files(args):
@@ -395,27 +394,27 @@ def main(argv=sys.argv, env=os.environ):
         print_addresses()
         return
 
-    address = options.servername or env.get('NVIM_LISTEN_ADDRESS')
-    if not address:
-        # Since before build 17063 windows doesn't support unix socket, we need another way
-        address = '127.0.0.1:6789' if os.name == 'nt' else '/tmp/nvimsocket'
+    useraddr = options.servername or env.get('NVIM_LISTEN_ADDRESS')
+    # Since before build 17063 windows doesn't support unix socket, we need another way
+    defaddr = '127.0.0.1:6789' if os.name == 'nt' else '/tmp/nvimsocket'
+
+    address = useraddr or defaddr
 
     nvr = Nvr(address, options.s)
     nvr.attach()
 
     if not nvr.server:
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
-        useraddr = options.servername or env.get('NVIM_LISTEN_ADDRESS')
         if options.nostart:
             # Make noise only if user sets wrong servername or NVIM_LISTEN_ADDRESS
             if useraddr and not silent:
-                show_message(address)
+                show_message(useraddr, defaddr)
             sys.exit(1)
         nvr.start_new_process(silent)
         # Try again
         if not nvr.server:
             if useraddr and not silent:
-                show_message(address)
+                show_message(useraddr, defaddr)
             sys.exit(1)
 
     if not nvr.server:
