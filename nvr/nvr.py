@@ -62,28 +62,15 @@ class Nvr():
                     Use --nostart to avoid starting a new process.
             '''))
 
-        args = os.environ.get('NVR_CMD')
-        args = args.split(' ') if args else ['nvim']
+        args = os.environ.get('NVR_CMD') or 'nvim'
+        multiprocessing.Process(target=self.exec_nvr_cmd, args=(args,)).start()
 
-        pid = os.fork()
-        if pid == 0:
-            for i in range(10):
-                self.attach()
-                if self.server:
-                    self.started_new_process = True
-                    return True
-                time.sleep(0.2)
-            print('[!] Unable to attach to the new nvim process. Is `{}` working?'
-                    .format(" ".join(args)))
-            sys.exit(1)
-        else:
-            os.environ['NVIM_LISTEN_ADDRESS'] = self.address
-            try:
-                os.dup2(sys.stdout.fileno(), sys.stdin.fileno())
-                os.execvpe(args[0], args, os.environ)
-            except FileNotFoundError:
-                print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
-                sys.exit(1)
+        for i in range(10):
+            self.attach()
+            if self.server:
+                self.started_new_process = True
+                return True
+            time.sleep(0.2)
 
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
@@ -418,13 +405,18 @@ def main(argv=sys.argv, env=os.environ):
 
     if not nvr.server:
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
-        # Make noise only if user sets wrong servername or NVIM_LISTEN_ADDRESS
         useraddr = options.servername or env.get('NVIM_LISTEN_ADDRESS')
-        if not silent and useraddr:
-            show_message(address)
         if options.nostart:
+            # Make noise only if user sets wrong servername or NVIM_LISTEN_ADDRESS
+            if useraddr and not silent:
+                show_message(address)
             sys.exit(1)
         nvr.start_new_process(silent)
+        # Try again
+        if not nvr.server:
+            if useraddr and not silent:
+                show_message(address)
+            sys.exit(1)
 
     if not nvr.server:
         raise RuntimeError('This should never happen. Please raise an issue at https://github.com/mhinz/neovim-remote/issues')
