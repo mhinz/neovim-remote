@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 # bash command completion for neovim remote.
 # Source that file in your bashrc to use it.
 
@@ -40,13 +40,17 @@ _nvr_opts_completions()
             COMPREPLY=( $(compgen -W "${srvlist}" -- "$cur") )
             return 0
             ;;
+        -[oOpq])
+            # These options require at least one argument.
+            COMPREPLY=( $(compgen -A file -- "$cur") )
+            return 0
+            ;;
     esac
     if [[ "$cur" =~ ^- ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
-        return 0
+    else
+        COMPREPLY=( $(compgen -A file -- "$cur") )
     fi
-
-    COMPREPLY=()
     return 0
 }
 
