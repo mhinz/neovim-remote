@@ -262,6 +262,9 @@ def parse_args(argv):
     parser.add_argument('--serverlist',
             action  = 'store_true',
             help    = 'Print the TCPv4 and Unix domain socket addresses of all nvim processes.')
+    parser.add_argument('--serverdetect',
+            action  = 'store_true',
+            help    = 'If no process is found for either "/tmp/nvimsocket" or $NVIM_LISTEN_ADDRESS, detect neovim process and set it. If detected address cannot be used, "/tmp/nvimsocket" or $NVIM_LISTEN_ADDRESS is set')
 
     parser.add_argument('-cc',
             action  = 'append',
@@ -364,6 +367,33 @@ def print_versions():
     print('Python {}'.format(sys.version.split('\n')[0]))
 
 
+def detect_address():
+    addresses = []
+    unix_address = ""
+
+    for proc in psutil.process_iter(attrs=['name']):
+        if proc.info['name'] == 'nvim':
+            try:
+                for conn in proc.connections('inet4'):
+                    addresses.insert(0, ':'.join(map(str, conn.laddr)))
+                for conn in proc.connections('inet6'):
+                    addresses.insert(0, ':'.join(map(str, conn.laddr)))
+                for conn in proc.connections('unix'):
+                    if conn.laddr:
+                        unix_address = conn.laddr
+                        addresses.insert(0, conn.laddr)
+            except psutil.AccessDenied:
+                pass
+
+    if len(addresses) == 0:
+        return ""
+
+    if unix_address != "":
+        return unix_address
+
+    return addresses[len(addresses) - 1]
+
+
 def print_addresses():
     addresses = []
     errors = []
@@ -413,12 +443,17 @@ def main(argv=sys.argv, env=os.environ):
     nvr = Nvr(address, options.s)
     nvr.attach()
 
+    if options.serverdetect and not nvr.server:
+        nvr = Nvr(detect_address(), options.s)
+        nvr.attach()
+
     if not nvr.server:
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
         if not silent:
             show_message(address)
         if options.nostart:
             sys.exit(1)
+        nvr = Nvr(address, options.s)
         nvr.execute_new_nvim_process(silent, nvr, options, arguments)
 
     main2(nvr, options, arguments)
