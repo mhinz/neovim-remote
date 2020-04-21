@@ -33,7 +33,10 @@ If you encounter any issues, e.g. permission denied errors or you can't find the
 
 Nvim always starts a server. Get its address via `:echo $NVIM_LISTEN_ADDRESS` or
 `:echo v:servername`. Or specify an address at startup:
-`NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim`.
+`NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim`. Make sure the address which you 
+specified doesn't already exist as a file or socket. Nvim will not be able to
+use the address if this is the case.
+
 
 **nvr** will use `$NVIM_LISTEN_ADDRESS` or any address given to it via
 `--servername`.
