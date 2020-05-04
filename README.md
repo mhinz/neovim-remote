@@ -290,9 +290,10 @@ Using nvr from within `:terminal`: ![Demo 2](https://github.com/mhinz/neovim-rem
         \| endif
     ```
 
-- **Can I have auto-completion for bash?**
+- **Can I have auto-completion for bash/fish?**
 
     If you want basic auto-completion for bash, you can source [this
     script](contrib/completion.bash) in your .bashrc.
 
-    This also completes server names with the `--servername` option.
+    If you want auto-completion for fish, you can add [this
+    file](contrib/completion.fish) to your fish completions dir.
