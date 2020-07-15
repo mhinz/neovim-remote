@@ -418,13 +418,18 @@ def main(argv=sys.argv, env=os.environ):
 
     if not nvr.server:
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
-        # Make noise only if user sets wrong servername or NVIM_LISTEN_ADDRESS
         useraddr = options.servername or env.get('NVIM_LISTEN_ADDRESS')
-        if not silent and useraddr:
-            show_message(address)
         if options.nostart:
+            # Make noise only if user sets wrong servername or NVIM_LISTEN_ADDRESS
+            if useraddr and not silent:
+                show_message(address)
             sys.exit(1)
         nvr.start_new_process(silent)
+        # Try again
+        if not nvr.server:
+            if useraddr and not silent:
+                show_message(address)
+            sys.exit(1)
 
     if not nvr.server:
         raise RuntimeError('This should never happen. Please raise an issue at https://github.com/mhinz/neovim-remote/issues')
