@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from pathlib import Path
 import argparse
 import multiprocessing
 import os
@@ -414,6 +415,14 @@ def main(argv=sys.argv, env=os.environ):
     nvr.attach()
 
     if not nvr.server:
+        if Path(nvr.address).exists():
+            print(textwrap.dedent(f'''
+                Error: Socket file exists, but we failed to attach. Delete the
+                socket at "{nvr.address}" or change socket path with
+                --servername or $NVIM_LISTEN_ADDRESS
+            '''), file=sys.stderr)
+            return
+
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
         if not silent:
             show_message(address)
