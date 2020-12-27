@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "nvr"
+version = "2.4.0"
+description = "Control nvim processes using \"nvr\" commandline tool"
+license = "MIT"
+keywords = ["neovim", "nvim", "nvr", "remote", "helper"]
+classifiers = [
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8"
+]
+homepage = "https://github.com/mhinz/neovim-remote"
+authors = ["Marco Hinz <mh.codebro@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.5"
+psutil = "*"
+pynvim = "*"
+setuptools = "*"
+
+[tool.poetry.scripts]
+nvr = "nvr.nvr:main"

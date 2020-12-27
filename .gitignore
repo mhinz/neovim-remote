@@ -1,2 +1,5 @@
 .idea/
 neovim_remote.egg-info/
+
+dist/
+__pycache__/
