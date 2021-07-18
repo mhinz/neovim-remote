@@ -89,7 +89,7 @@ class Nvr():
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
         for line in sys.stdin:
-            self.server.funcs.append('$', line.rstrip())
+            self.server.funcs.append('$', line[:-1])
         self.server.command('silent 1delete _ | set nomodified')
 
     def fnameescaped_command(self, cmd, path):
