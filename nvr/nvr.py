@@ -378,9 +378,14 @@ def print_addresses():
                     addresses.insert(0, ':'.join(map(str, conn.laddr)))
                 for conn in proc.connections('inet6'):
                     addresses.insert(0, ':'.join(map(str, conn.laddr)))
-                for conn in proc.connections('unix'):
-                    if conn.laddr:
-                        addresses.insert(0, conn.laddr)
+                try:
+                    for conn in proc.connections('unix'):
+                        if conn.laddr:
+                            addresses.insert(0, conn.laddr)
+                except FileNotFoundError:
+                    # Windows does not support Unix domain sockets and WSL1
+                    # does not implement /proc/net/unix
+                    pass
             except psutil.AccessDenied:
                 errors.insert(0, f'Access denied for nvim ({proc.pid})')
 
