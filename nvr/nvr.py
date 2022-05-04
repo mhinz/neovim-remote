@@ -422,6 +422,15 @@ def main(argv=sys.argv, env=os.environ):
     nvr.attach()
 
     if not nvr.server:
+        if os.path.exists(nvr.address):
+            print(textwrap.dedent(f'''
+                    [!] A file {nvr.address} exists, but we failed to attach to it.
+
+                        Is it a Unix domain socket? Either remove that file and try
+                        again or choose another address with --servername.
+                    '''))
+            return
+
         silent = options.remote_silent or options.remote_wait_silent or options.remote_tab_silent or options.remote_tab_wait_silent or options.s
         if not silent:
             show_message(address)
