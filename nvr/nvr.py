@@ -505,7 +505,7 @@ def main2(nvr, options, arguments):
     if options.o:
         args = options.o + arguments
         if nvr.diffmode and not nvr.started_new_process:
-            nvr.fnameescaped_command('tabedit', args[0])
+            nvr.execute(args[:1], 'tabedit', silent=True, wait=False)
             nvr.execute(args[1:], 'split', silent=True, wait=False)
         else:
             nvr.execute(args, 'split', silent=True, wait=False)
@@ -513,7 +513,7 @@ def main2(nvr, options, arguments):
     elif options.O:
         args = options.O + arguments
         if nvr.diffmode and not nvr.started_new_process:
-            nvr.fnameescaped_command('tabedit', args[0])
+            nvr.execute(args[:1], 'tabedit', silent=True, wait=False)
             nvr.execute(args[1:], 'vsplit', silent=True, wait=False)
         else:
             nvr.execute(args, 'vsplit', silent=True, wait=False)
