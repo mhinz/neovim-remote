@@ -408,7 +408,7 @@ def main(argv=sys.argv, env=os.environ):
         print_addresses()
         return
 
-    address = options.servername or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
+    address = options.servername or env.get('NVIM') or env.get('NVIM_LISTEN_ADDRESS') or '/tmp/nvimsocket'
 
     nvr = Nvr(address, options.s)
     nvr.attach()

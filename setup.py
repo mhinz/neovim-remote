@@ -14,13 +14,13 @@ setup(
     description      = 'Control nvim processes using "nvr" commandline tool',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
-    python_requires  = '>=3.5',
+    python_requires  = '>=3.7',
     install_requires = ['pynvim', 'psutil', 'setuptools'],
     entry_points     = {
         'console_scripts': ['nvr = nvr.nvr:main']
     },
     packages         = ['nvr'],
-    version          = '2.4.0',
+    version          = '2.4.1',
     license          = 'MIT',
     keywords         = 'neovim nvim nvr remote helper',
     classifiers      = [
@@ -30,10 +30,6 @@ setup(
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
     ],
 )
 
