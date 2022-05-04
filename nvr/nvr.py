@@ -62,8 +62,7 @@ class Nvr():
                     self.started_new_process = True
                     return main2(nvr, options, arguments)
                 time.sleep(0.2)
-            print('[!] Unable to attach to the new nvim process. Is `{}` working?'
-                    .format(" ".join(args)))
+            print(f'[!] Unable to attach to the new nvim process. Is `{" ".join(args)}` working?')
             sys.exit(1)
 
     def execute_new_nvim_process(self, silent, nvr, options, arguments):
@@ -83,7 +82,7 @@ class Nvr():
         try:
             os.execvpe(args[0], args, os.environ)
         except FileNotFoundError:
-            print("[!] Can't start new nvim process: '{}' is not in $PATH.".format(args[0]))
+            print(f'[!] Can\'t start new nvim process: `{args[0]}` is not in $PATH.')
             sys.exit(1)
 
     def read_stdin_into_buffer(self, cmd):
@@ -98,7 +97,7 @@ class Nvr():
         path = self.server.funcs.fnameescape(path)
         shortmess = self.server.options['shortmess']
         self.server.options['shortmess'] = shortmess.replace('F', '')
-        self.server.command('{} {}'.format(cmd, path))
+        self.server.command(f'{cmd} {path}')
         self.server.options['shortmess'] = shortmess
 
     def diffthis(self):
@@ -112,8 +111,8 @@ class Nvr():
         chanid = self.server.channel_id
 
         self.server.command('augroup nvr')
-        self.server.command('autocmd BufDelete <buffer> silent! call rpcnotify({}, "BufDelete")'.format(chanid))
-        self.server.command('autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({}, "Exit", v:exiting) | endif'.format(chanid))
+        self.server.command(f'autocmd BufDelete <buffer> silent! call rpcnotify({chanid}, "BufDelete")')
+        self.server.command(f'autocmd VimLeave * if exists("v:exiting") && v:exiting > 0 | silent! call rpcnotify({chanid}, "Exit", v:exiting) | endif')
         self.server.command('augroup END')
 
         if 'nvr' in bvars:
@@ -178,7 +177,7 @@ def is_netrw_protocol(path):
 
 def parse_args(argv):
     form_class = argparse.RawDescriptionHelpFormatter
-    usage      = '{} [arguments]'.format(argv[0])
+    usage      = argv[0] + ' [arguments]'
     epilog     = 'Development: https://github.com/mhinz/neovim-remote\n\nHappy hacking!'
     desc       = textwrap.dedent("""
         Remote control Neovim processes.
@@ -362,10 +361,10 @@ def split_cmds_from_files(args):
 
 def print_versions():
     import pkg_resources
-    print('nvr {}'.format(pkg_resources.require('neovim-remote')[0].version))
-    print('pynvim {}'.format(pkg_resources.require('pynvim')[0].version))
-    print('psutil {}'.format(pkg_resources.require('psutil')[0].version))
-    print('Python {}'.format(sys.version.split('\n')[0]))
+    print('nvr ' + pkg_resources.require("neovim-remote")[0].version)
+    print('pynvim ' + pkg_resources.require('pynvim')[0].version)
+    print('psutil ' + pkg_resources.require('psutil')[0].version)
+    print('Python ' + sys.version.split('\n')[0])
 
 
 def print_addresses():
@@ -383,7 +382,7 @@ def print_addresses():
                     if conn.laddr:
                         addresses.insert(0, conn.laddr)
             except psutil.AccessDenied:
-                errors.insert(0, 'Access denied for nvim ({})'.format(proc.pid))
+                errors.insert(0, f'Access denied for nvim ({proc.pid})')
 
     for addr in sorted(addresses):
         print(addr)
@@ -472,11 +471,11 @@ def main2(nvr, options, arguments):
         try:
             result = nvr.server.eval(options.remote_expr)
         except:
-            print(textwrap.dedent("""
-                No valid expression: {}
+            print(textwrap.dedent(f"""
+                No valid expression: {options.remote_expr}
                 Test it in Neovim: :echo eval('...')
                 If you want to execute a command, use -c or -cc instead.
-            """).format(options.remote_expr))
+            """))
         if type(result) is bytes:
             print(result.decode())
         elif type(result) is list:
@@ -513,14 +512,14 @@ def main2(nvr, options, arguments):
 
     if options.t:
         try:
-            nvr.server.command("tag {}".format(options.t))
+            nvr.server.command('tag ' + options.t)
         except nvr.server.error as e:
             print(e)
             sys.exit(1)
 
     if options.q:
         path = nvr.server.funcs.fnameescape(os.environ['PWD'])
-        nvr.server.command('lcd {}'.format(path))
+        nvr.server.command('lcd ' + path)
         nvr.server.funcs.setqflist([])
         if options.q == '-':
             for line in sys.stdin:
