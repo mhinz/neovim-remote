@@ -31,12 +31,12 @@ If you encounter any issues, e.g. permission denied errors or you can't find the
 
 ## Theory
 
-Nvim always starts a server. Get its address via `:echo $NVIM_LISTEN_ADDRESS` or
-`:echo v:servername`. Or specify an address at startup:
-`NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim`.
+**Nvim** always starts a server. Get its address with `:echo v:servername`. Or
+specify an address at startup: `nvim --listen /tmp/nvimsocket`.
 
-**nvr** will use `$NVIM_LISTEN_ADDRESS` or any address given to it via
-`--servername`.
+**nvr** (the client) will use any address given to it via `--servername`,
+`$NVIM_LISTEN_ADDRESS` (obsolete in nvim but still supported in nvr), or
+defaults to `/tmp/nvimsocket`.
 
 If the targeted address does not exist, **nvr** starts a new process by running
 "nvim". You can change the command by setting `$NVR_CMD`. _(This requires
@@ -46,7 +46,7 @@ forking, so it won't work on Windows.)_
 
 Start a nvim process (which acts as a server) in one shell:
 
-    NVIM_LISTEN_ADDRESS=/tmp/nvimsocket nvim
+    nvim --listen /tmp/nvimsocket
 
 And do this in another shell:
 
@@ -155,18 +155,19 @@ Happy hacking!
 
     Easy-peasy! Just `nvr file`.
 
-    This works without any prior setup, because `$NVIM_LISTEN_ADDRESS` is always
-    set within Nvim. And `nvr` will default to that address.
+    This works without any prior setup, because `$NVIM` is always set for all
+    children of the nvim process, including `:terminal`, and `nvr` will default
+    to that address.
 
     I often work with two windows next to each other. If one contains the
     terminal, I can use `nvr -l foo` to open the file in the other window.
 
 - **Open files always in the same nvim process no matter which terminal you're in.**
 
-    If you just run `nvr -s`, a new nvim process will start and set its address
-    to `/tmp/nvimsocket` automatically.
+    Just `nvr -s` starts a new nvim process with the server address set to
+    `/tmp/nvimsocket`.
 
-    Now, no matter in which terminal you are, `nvr file` will always work on
+    Now, no matter which terminal you are in, `nvr file` will always work on
     that nvim process. That is akin to `emacsclient` from Emacs.
 
 - **Use nvr in plugins.**

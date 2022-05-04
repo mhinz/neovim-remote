@@ -309,36 +309,40 @@ def parse_args(argv):
 
 
 def show_message(address):
-    print(textwrap.dedent('''
-        [!] Can't connect to: {}
+    print(textwrap.dedent(f'''
+        [!] Can't connect to: {address}
 
             The server (nvim) and client (nvr) have to use the same address.
 
             Server:
 
-                Expose $NVIM_LISTEN_ADDRESS to the environment before
-                starting nvim:
+                Specify the server address when starting nvim:
 
-                $ NVIM_LISTEN_ADDRESS={} nvim
+                $ nvim --listen {address}
 
                 Use `:echo v:servername` to verify the address.
 
-                Security: When using Unix domain sockets on a multi-user system,
-                the socket should have proper permissions so that it is only
-                accessible by your user.
+                Alternatively, run nvr without arguments. It defaults to
+                starting a new nvim process with the server name set to
+                "/tmp/nvimsocket".
+
+                Security: When using an Unix domain socket, that socket should
+                have proper permissions so that it is only accessible by your
+                user.
 
             Client:
 
-                Expose $NVIM_LISTEN_ADDRESS to the environment before
-                using nvr or use its --servername option. If neither
-                is given, nvr assumes \"/tmp/nvimsocket\".
+                Expose $NVIM_LISTEN_ADDRESS (obsolete in nvim but still
+                supported by nvr) to the environment before using nvr or use
+                its --servername option. If neither is given, nvr assumes
+                \"/tmp/nvimsocket\".
 
-                $ NVIM_LISTEN_ADDRESS={} nvr file1 file2
-                $ nvr --servername {} file1 file2
+                $ NVIM_LISTEN_ADDRESS={address} nvr file1 file2
+                $ nvr --servername {address} file1 file2
                 $ nvr --servername 127.0.0.1:6789 file1 file2
 
             Use -s to suppress this message.
-        '''.format(address, address, address, address)))
+        '''))
 
 
 def split_cmds_from_files(args):
