@@ -73,16 +73,14 @@ class Nvr():
                     Use --nostart to avoid starting a new process.
             '''))
 
-        args = os.environ.get('NVR_CMD')
-        args = args.split(' ') if args else ['nvim']
+        arg0 = os.environ.get('NVR_CMD') or 'nvim'
 
-        multiprocessing.Process(target=self.try_attach, args=(args, nvr, options, arguments)).start()
+        multiprocessing.Process(target=self.try_attach, args=([arg0], nvr, options, arguments)).start()
 
-        os.environ['NVIM_LISTEN_ADDRESS'] = self.address
         try:
-            os.execvpe(args[0], args, os.environ)
+            os.execvpe(arg0, [arg0, '--listen', self.address], os.environ)
         except FileNotFoundError:
-            print(f'[!] Can\'t start new nvim process: `{args[0]}` is not in $PATH.')
+            print(f'[!] Can\'t start new nvim process: `{arg0}` is not in $PATH.')
             sys.exit(1)
 
     def read_stdin_into_buffer(self, cmd):
