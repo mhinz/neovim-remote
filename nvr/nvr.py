@@ -56,14 +56,14 @@ class Nvr():
             pass
 
     def try_attach(self, args, nvr, options, arguments):
-            for i in range(10):
-                self.attach()
-                if self.server:
-                    self.started_new_process = True
-                    return main2(nvr, options, arguments)
-                time.sleep(0.2)
-            print(f'[!] Unable to attach to the new nvim process. Is `{" ".join(args)}` working?')
-            sys.exit(1)
+        for i in range(10):
+            self.attach()
+            if self.server:
+                self.started_new_process = True
+                return proceed_after_attach(nvr, options, arguments)
+            time.sleep(0.2)
+        print(f'[!] Unable to attach to the new nvim process. Is `{" ".join(args)}` working?')
+        sys.exit(1)
 
     def execute_new_nvim_process(self, silent, nvr, options, arguments):
         if not silent:
@@ -436,10 +436,10 @@ def main(argv=sys.argv, env=os.environ):
             sys.exit(1)
         nvr.execute_new_nvim_process(silent, nvr, options, arguments)
 
-    main2(nvr, options, arguments)
+    proceed_after_attach(nvr, options, arguments)
 
 
-def main2(nvr, options, arguments):
+def proceed_after_attach(nvr, options, arguments):
     if options.d:
         nvr.diffmode = True
 
