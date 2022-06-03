@@ -126,6 +126,11 @@ class Nvr():
     def execute(self, arguments, cmd='edit', silent=False, wait=False):
         cmds, files = split_cmds_from_files(arguments)
 
+        # if we are in terminal mode, leave it first, so TermLeave events are
+        # triggered
+        if (self.server.command_output('echo mode()') == 't'):
+            self.server.feedkeys(self.server.replace_termcodes('<c-\><c-n>', True, False, True), "n")
+
         for fname in files:
             if fname == '-':
                 self.read_stdin_into_buffer(stdin_cmd(cmd))
@@ -479,6 +484,7 @@ def proceed_after_attach(nvr, options, arguments):
         arguments = []
 
     if options.remote_send:
+        # might replace this with feedkeys to allow for remap / noremap cmds
         nvr.server.input(options.remote_send)
 
     if options.remote_expr:
