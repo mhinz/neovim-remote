@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import argparse
 import multiprocessing
+import subprocess
 import os
 import re
 import sys
@@ -77,13 +78,20 @@ class Nvr():
         args = args.split(' ') if args else ['nvim']
         args.extend(['--listen', self.address])
 
+        if options.start_separate_process:
+            # If we're starting a separate process then
+            # let it start before we try to attach to it
+            subprocess.Popen(args, env=os.environ)
+
         multiprocessing.Process(target=self.try_attach, args=(args[0], nvr, options, arguments)).start()
 
-        try:
-            os.execvpe(args[0], args, os.environ)
-        except FileNotFoundError:
-            print(f'[!] Can\'t start new nvim process: `{args[0]}` is not in $PATH.')
-            sys.exit(1)
+        if not options.start_separate_process:
+            try:
+                os.execvpe(args[0], args, os.environ)
+            except FileNotFoundError:
+                print(f'[!] Can\'t start new nvim process: `{args[0]}` is not in $PATH.')
+                sys.exit(1)
+        sys.exit(0)
 
     def read_stdin_into_buffer(self, cmd):
         self.server.command(cmd)
@@ -300,6 +308,9 @@ def parse_args(argv):
     parser.add_argument('--nostart',
             action  = 'store_true',
             help    = 'If no process is found, do not start a new one.')
+    parser.add_argument('--start-separate-process',
+            action  = 'store_true',
+            help    = 'Start a separate process instead of replacing the current one.')
     parser.add_argument('--version',
             action  = 'store_true',
             help    = 'Show the nvr version.')
@@ -588,4 +599,3 @@ def proceed_after_attach(nvr, options, arguments):
 
 if __name__ == '__main__':
     main()
-
