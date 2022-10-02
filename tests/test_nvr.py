@@ -18,7 +18,7 @@ def run_nvr(cmdlines, env):
         nvr.main(cmdline, env)
 
 def setup_env():
-    env = {'NVIM_LISTEN_ADDRESS': 'pytest_socket_{}'.format(uuid.uuid4())}
+    env = {'NVIM_LISTEN_ADDRESS': './pytest_socket_{}'.format(uuid.uuid4())}
     env.update(os.environ)
     return env
 
