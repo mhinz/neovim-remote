@@ -29,7 +29,6 @@ import re
 import sys
 import textwrap
 import time
-import traceback
 
 import psutil
 import pynvim
@@ -62,7 +61,7 @@ class Nvr():
                 self.started_new_process = True
                 return proceed_after_attach(nvr, options, arguments)
             time.sleep(0.2)
-        print(f'[!] Unable to attach to the new nvim process. Is `{" ".join(args)}` working?')
+        print(f'[!] Unable to attach to the new nvim process. Is `{" ".join(args)}` working?', file=sys.stderr)
         sys.exit(1)
 
     def execute_new_nvim_process(self, silent, nvr, options, arguments):
@@ -82,7 +81,7 @@ class Nvr():
         try:
             os.execvpe(args[0], args, os.environ)
         except FileNotFoundError:
-            print(f'[!] Can\'t start new nvim process: `{args[0]}` is not in $PATH.')
+            print(f'[!] Can\'t start new nvim process: `{args[0]}` is not in $PATH.', file=sys.stderr)
             sys.exit(1)
 
     def read_stdin_into_buffer(self, cmd):
@@ -137,8 +136,11 @@ class Nvr():
                     else:
                         self.fnameescaped_command(cmd, fname)
                 except pynvim.api.nvim.NvimError as e:
-                    if not re.search('E37', e.args[0].decode()):
-                        traceback.print_exc()
+                    message = e.args[0]
+                    if isinstance(message, bytes):
+                        message = message.decode()
+                    if not re.search('E37', message):
+                        print(message, file=sys.stderr)
                         sys.exit(1)
             self.diffthis()
 
@@ -487,18 +489,18 @@ def proceed_after_attach(nvr, options, arguments):
             options.remote_expr = sys.stdin.read()
         try:
             result = nvr.server.eval(options.remote_expr)
-        except:
+        except Exception:
             print(textwrap.dedent(f"""
                 No valid expression: {options.remote_expr}
                 Test it in Neovim: :echo eval('...')
                 If you want to execute a command, use -c or -cc instead.
             """))
-        if type(result) is bytes:
+        if isinstance(result, bytes):
             print(result.decode())
-        elif type(result) is list:
-            print(list(map(lambda x: x.decode() if type(x) is bytes else x, result)))
-        elif type(result) is dict:
-            print({ (k.decode() if type(k) is bytes else k): v for (k,v) in result.items() })
+        elif isinstance(result, list):
+            print(list(map(lambda x: x.decode() if isinstance(x, bytes) else x, result)))
+        elif isinstance(result, dict):
+            print({ (k.decode() if isinstance(k, bytes) else k): v for (k,v) in result.items() })
         else:
             result = str(result)
             if not result.endswith(os.linesep):
@@ -531,7 +533,7 @@ def proceed_after_attach(nvr, options, arguments):
         try:
             nvr.server.command('tag ' + options.t)
         except nvr.server.error as e:
-            print(e)
+            print(e, file=sys.stderr)
             sys.exit(1)
 
     if options.q:
